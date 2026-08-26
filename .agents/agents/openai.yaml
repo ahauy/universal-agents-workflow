@@ -1,0 +1,134 @@
+# Multi-Harness Agent Metadata Catalog
+# Compatible with OpenAI Codex, Claude Code, and Antigravity multi-agent systems.
+
+version: "1.0"
+agents:
+  business-analyst:
+    interface:
+      display_name: "Lead Business Analyst"
+      short_description: "Conducts 8-stage BA elicitation, interactive interview, domain modeling, and baseline sign-off"
+      default_model: "claude-opus-4.6"
+    policy:
+      allow_implicit_invocation: true
+      read_only: false
+    source: "./business-analyst.md"
+
+  system-architect:
+    interface:
+      display_name: "Senior System Architect"
+      short_description: "Produces engineering specs, architectural plans, data models, API contracts, and task graphs"
+      default_model: "claude-sonnet-4.6"
+    policy:
+      allow_implicit_invocation: true
+      read_only: false
+    source: "./system-architect.md"
+
+  code-explorer:
+    interface:
+      display_name: "Code Explorer"
+      short_description: "Analyzes existing codebase execution paths, layers, and dependencies before implementation"
+      default_model: "gemini-3.7-flash"
+    policy:
+      allow_implicit_invocation: true
+      read_only: true
+    source: "./code-explorer.md"
+
+  backend-developer:
+    interface:
+      display_name: "Senior Backend Developer"
+      short_description: "Implements polyglot server-side logic, API endpoints, schema migrations, and TDD unit tests"
+      default_model: "gemini-3.7-flash"
+    policy:
+      allow_implicit_invocation: true
+      read_only: false
+    source: "./backend-developer.md"
+
+  frontend-developer:
+    interface:
+      display_name: "Senior Frontend Developer"
+      short_description: "Implements accessible UI components, design token fidelity, 4 UX states, and component tests"
+      default_model: "gemini-3.7-flash"
+    policy:
+      allow_implicit_invocation: true
+      read_only: false
+    source: "./frontend-developer.md"
+
+  slice-implementer:
+    interface:
+      display_name: "Vertical Slice Implementer"
+      short_description: "Implements decomposed tasks across data, logic, API, and UI in isolated vertical slices"
+      default_model: "gemini-3.7-flash"
+    policy:
+      allow_implicit_invocation: true
+      read_only: false
+    source: "./slice-implementer.md"
+
+  build-resolver:
+    interface:
+      display_name: "Build & Compiler Resolver"
+      short_description: "Diagnoses and surgically fixes compiler errors, type mismatches, and dependency issues"
+      default_model: "gemini-3.7-flash"
+    policy:
+      allow_implicit_invocation: true
+      read_only: false
+    source: "./build-resolver.md"
+
+  e2e-runner:
+    interface:
+      display_name: "E2E Test Runner"
+      short_description: "Executes and maintains Playwright browser test suites for critical user journeys"
+      default_model: "gemini-3.7-flash"
+    policy:
+      allow_implicit_invocation: true
+      read_only: false
+    source: "./e2e-runner.md"
+
+  code-reviewer:
+    interface:
+      display_name: "Adversarial Code Reviewer"
+      short_description: "Executes dual-pass code review: Pass A (Standards & Security) and Pass B (Spec Fidelity)"
+      default_model: "claude-sonnet-4.6"
+    policy:
+      allow_implicit_invocation: true
+      read_only: true
+    source: "./code-reviewer.md"
+
+  ui-ux-reviewer:
+    interface:
+      display_name: "Adversarial UI/UX Reviewer"
+      short_description: "Reviews UI for Anti-AI-Slop, 4 UX states completeness, WCAG AA accessibility, and motion"
+      default_model: "gemini-3.7-flash"
+    policy:
+      allow_implicit_invocation: true
+      read_only: true
+    source: "./ui-ux-reviewer.md"
+
+  tech-doc-architect:
+    interface:
+      display_name: "Technical Documentation Architect"
+      short_description: "Compiles Diataxis technical documentation, feature READMEs, and architecture records"
+      default_model: "gemini-3.7-flash"
+    policy:
+      allow_implicit_invocation: true
+      read_only: false
+    source: "./tech-doc-architect.md"
+
+  user-guide-creator:
+    interface:
+      display_name: "User Guide Creator"
+      short_description: "Generates end-user visual guides with real browser screenshots and red callout badges"
+      default_model: "gemini-3.7-flash"
+    policy:
+      allow_implicit_invocation: true
+      read_only: false
+    source: "./user-guide-creator.md"
+
+  agent-evaluator:
+    interface:
+      display_name: "Agent Quality Evaluator"
+      short_description: "Assesses agent deliverables on a 5-axis quality scorecard and codifies rule refinements"
+      default_model: "claude-sonnet-4.6"
+    policy:
+      allow_implicit_invocation: true
+      read_only: true
+    source: "./agent-evaluator.md"

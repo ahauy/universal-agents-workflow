@@ -1,0 +1,15 @@
+# depguard configuration for golangci-lint
+# Enforces module boundaries and deep modules in Go codebases.
+# In Go, private implementation details live in `internal/` packages.
+# Code outside the parent directory of `internal/` cannot import them.
+
+rules:
+  main:
+    list-mode: lax
+    files:
+      - "$all"
+    allow:
+      - "$gostd"
+    deny:
+      - pkg: ".*/internal/.*"
+        desc: "Deep Module Seams: Do not import internal packages across module boundaries."
