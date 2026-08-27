@@ -30,13 +30,29 @@ Trong phát triển phần mềm với AI, các lập trình viên thường đ�
 
 ### Phương Án 1: Tích Hợp Vào Dự Án Đang Có (Brownfield - Khuyên dùng)
 
-Chỉ cần chạy 1 dòng lệnh duy nhất từ thư mục `Universal-Agents-Workflow`:
+Bạn có 2 cách cực kỳ linh hoạt để tích hợp bộ khung vào dự án đang làm:
+
+#### ⚡ Cách 1: Chạy trực tiếp trong dự án của bạn (Không cần clone repo trước)
+
+Mở terminal ngay tại thư mục dự án bạn đang làm và chạy một dòng duy nhất:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh)"
+```
+
+> Script sẽ tự động kéo các thành phần cần thiết từ GitHub về thư mục tạm, tích hợp sạch sẽ vào dự án hiện tại của bạn rồi tự động dọn dẹp thư mục tạm.
+
+#### 💻 Cách 2: Chạy từ thư mục đã clone `Universal-Agents-Workflow`
+
+Nếu bạn đã có sẵn thư mục `Universal-Agents-Workflow` trên máy:
 
 ```bash
 ./install.sh /duong-dan/toi/du-an-cua-ban
 ```
 
-Script sẽ tự động sao chép bộ khung và hiển thị menu chọn **Chế độ Quản lý Git**:
+---
+
+Cả 2 cách trên đều hiển thị menu tương tác để bạn chọn **Chế độ Quản lý Git**:
 
 ```text
 ? Chọn chế độ quản lý Git cho Universal Agents Workflow trong dự án đích:
@@ -47,9 +63,11 @@ Script sẽ tự động sao chép bộ khung và hiển thị menu chọn **Ch�
 ```
 
 > [!TIP]
-> **Tự động hóa hoàn toàn (Non-interactive cho CI/CD hoặc Script)**:
+> **Tự động hóa hoàn toàn (Non-interactive cho CI/CD hoặc chạy nhanh)**:
 >
 > ```bash
+> /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh)" -- --mode=local -y
+> # Hoặc nếu chạy từ local:
 > ./install.sh --target=/duong-dan/du-an --mode=local -y
 > ```
 

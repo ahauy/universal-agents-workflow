@@ -24,8 +24,26 @@ RED="\033[0;31m"
 CYAN="\033[0;36m"
 NC="\033[0m" # No Color
 
-# Determine script source directory
-SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Determine script source directory (safely handle piped execution with set -u)
+SOURCE_DIR=""
+if [ -n "${BASH_SOURCE[0]:-}" ]; then
+  SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || echo "")"
+fi
+TMP_DIR=""
+CLEANUP_TMP=false
+
+# Helper for interactive prompt reading (supports pipe from curl via /dev/tty)
+prompt_read() {
+  local prompt_text="$1"
+  local __resultvar="$2"
+  local input_val=""
+  if [ -c /dev/tty ]; then
+    read -r -p "$prompt_text" input_val < /dev/tty
+  else
+    read -r -p "$prompt_text" input_val
+  fi
+  eval "$__resultvar=\"$input_val\""
+}
 
 TARGET_DIR=""
 MODE=""
@@ -62,9 +80,10 @@ Universal Agents Workflow - Installer
 
 Usage:
   ./install.sh [TARGET_DIR] [OPTIONS]
+  curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh | bash
 
 Options:
-  --target <path>       Target project directory to install into
+  --target <path>       Target project directory to install into (defaults to current dir)
   --mode <mode>         Git management mode:
                           team    : Track all files in Git (Share with team)
                           local   : Add all workflow files to target .gitignore
@@ -74,6 +93,10 @@ Options:
   -h, --help            Show this help message
 
 Examples:
+  # Run directly inside your project:
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh)"
+
+  # Run from cloned repository:
   ./install.sh ../my-existing-project
   ./install.sh --target=../my-project --mode=local -y
 EOF
@@ -88,6 +111,17 @@ EOF
   esac
 done
 
+# If executed remotely via curl/pipe (no local .agents directory found)
+if [ -z "$SOURCE_DIR" ] || [ ! -d "$SOURCE_DIR/.agents" ]; then
+  echo -e "${BOLD}${CYAN}🌐 Phát hiện cài đặt trực tiếp từ xa (Remote One-Liner)...${NC}"
+  echo -e "📥 Đang tải bộ khung Universal Agents Workflow từ GitHub..."
+  TMP_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t 'uaw-install')"
+  git clone --depth=1 https://github.com/ahauy/universal-agents-workflow.git "$TMP_DIR" >/dev/null 2>&1
+  SOURCE_DIR="$TMP_DIR"
+  CLEANUP_TMP=true
+  trap 'if [ "$CLEANUP_TMP" = true ] && [ -d "$TMP_DIR" ]; then rm -rf "$TMP_DIR"; fi' EXIT
+fi
+
 echo -e "${BOLD}${BLUE}╔═══════════════════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${BOLD}${BLUE}║       🌐 Universal Agents Workflow — Project Integrator                   ║${NC}"
 echo -e "${BOLD}${BLUE}╚═══════════════════════════════════════════════════════════════════════════╝${NC}"
@@ -97,15 +131,16 @@ echo -e "${BOLD}${BLUE}╚══════════════════
 # ------------------------------------------------------------------------------
 if [ -z "$TARGET_DIR" ]; then
   if [ "$NON_INTERACTIVE" = true ]; then
-    echo -e "${RED}❌ Error: --target is required in non-interactive mode.${NC}"
-    exit 1
-  fi
-  echo -e "\n${BOLD}Vui lòng nhập đường dẫn thư mục dự án cần tích hợp:${NC}"
-  read -r -p "👉 Đường dẫn dự án (nhấn Enter để dùng thư mục hiện tại): " USER_INPUT_DIR
-  if [ -z "$USER_INPUT_DIR" ]; then
     TARGET_DIR="$(pwd)"
   else
-    TARGET_DIR="$USER_INPUT_DIR"
+    echo -e "\n${BOLD}Vui lòng chọn thư mục dự án cần tích hợp:${NC}"
+    USER_INPUT_DIR=""
+    prompt_read "👉 Đường dẫn dự án (nhấn Enter để dùng thư mục hiện tại: $(pwd)): " USER_INPUT_DIR
+    if [ -z "$USER_INPUT_DIR" ]; then
+      TARGET_DIR="$(pwd)"
+    else
+      TARGET_DIR="$USER_INPUT_DIR"
+    fi
   fi
 fi
 
@@ -117,7 +152,7 @@ if [ ! -d "$TARGET_DIR" ]; then
   exit 1
 fi
 
-if [ "$TARGET_DIR" = "$SOURCE_DIR" ]; then
+if [ "$CLEANUP_TMP" = false ] && [ "$TARGET_DIR" = "$SOURCE_DIR" ]; then
   echo -e "${YELLOW}⚠️ Thư mục đích chính là thư mục gốc của Universal-Agents-Workflow.${NC}"
   echo -e "Bộ khung đã có sẵn tại đây. Nếu bạn muốn cài vào dự án khác, hãy truyền đường dẫn dự án đó."
   exit 0
@@ -131,7 +166,7 @@ echo -e "🎯 ${CYAN}Dự án đích:${NC}    ${TARGET_DIR}"
 # ------------------------------------------------------------------------------
 if [ -z "$MODE" ]; then
   if [ "$NON_INTERACTIVE" = true ]; then
-    MODE="team" # Default for non-interactive if unspecified
+    MODE="local" # Default for non-interactive if unspecified
   else
     echo -e "\n${BOLD}Chọn chế độ quản lý Git cho Universal Agents Workflow trong dự án đích:${NC}"
     echo -e "  ${BOLD}1) 🌐 Team Mode (Shared)${NC}"
@@ -148,11 +183,12 @@ if [ -z "$MODE" ]; then
     echo -e ""
     echo -e "  ${BOLD}4) ⚖️ Hybrid Mode (Specs on Git, Engine Ignored)${NC}"
     echo -e "     - Giữ lại tài liệu nghiệp vụ (${CYAN}CONTEXT.md${NC}, ${CYAN}adr/${NC}, ${CYAN}.specify/${NC}) trên Git."
-    echo -e "     - Giấu toàn bộ bộ máy AI (${CYAN}.agents/${NC}, ${CYAN}optional-stack-skills/${NC}, AI rules)."
+    echo -e "     - Giấu toàn bộ bộ máy AI (${CYAN}.agents/${NC}, AI rules)."
     echo -e ""
     
     while true; do
-      read -r -p "👉 Lựa chọn của bạn [1/2/3/4] (mặc định: 2): " CHOICE
+      CHOICE=""
+      prompt_read "👉 Lựa chọn của bạn [1/2/3/4] (mặc định: 2): " CHOICE
       case "${CHOICE:-2}" in
         1|team)
           MODE="team"
@@ -283,7 +319,8 @@ if [ ${#MATCHED_SKILLS[@]} -gt 0 ]; then
   
   DO_INJECT=true
   if [ "$NON_INTERACTIVE" != true ]; then
-    read -r -p "👉 Bạn có muốn tự động nạp các kỹ năng trên vào .agents/skills/? [Y/n]: " INJECT_CHOICE
+    INJECT_CHOICE=""
+    prompt_read "👉 Bạn có muốn tự động nạp các kỹ năng trên vào .agents/skills/? [Y/n]: " INJECT_CHOICE
     case "${INJECT_CHOICE:-y}" in
       n|N) DO_INJECT=false ;;
       *) DO_INJECT=true ;;
