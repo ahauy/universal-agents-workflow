@@ -137,8 +137,9 @@ graph LR
 
 1. **Gõ lệnh trực tiếp vào khung chat (Khuyên dùng)**:
    - Gõ `/skill-setup` $\rightarrow$ Quét Tech Stack và kích hoạt bộ kỹ năng tương thích.
-   - Gõ `/command-git-push` $\rightarrow$ Tự động kiểm tra chất lượng, chia Modular Commits và push an toàn.
+   - Gõ `/generate-backlog` $\rightarrow$ Phỏng vấn nghiệp vụ 6 câu và tự sinh Roadmap chuẩn v1.1 từ ý tưởng thô.
    - Gõ `/command-continue-project` $\rightarrow$ Tự động quét Roadmap và làm tiếp User Story kế tiếp.
+   - Gõ `/command-git-push` $\rightarrow$ Tự động kiểm tra chất lượng, chia Modular Commits và push an toàn.
    - Gõ `/route` $\rightarrow$ Hỏi Agent xem trong tình huống hiện tại nên đi bước nào tiếp theo.
    - Gõ `/wait-what` $\rightarrow$ Yêu cầu Agent giải thích lại thuật ngữ bằng ngôn ngữ đời thường.
 2. **Kích hoạt tự nhiên (Model-Invoked - Không cần nhớ lệnh)**:
@@ -164,7 +165,8 @@ graph TD
     Classify -->|Sửa lỗi / Việc nhỏ < 30 dòng| FT["⚡ Fast-Track TDD (Surgical Fix)<br/>Bỏ qua BA, chỉ viết test & sửa thẳng"]
     Classify -->|Tính năng vừa / Bounded| Light["📝 Bounded Flow<br/>Hỏi nhanh 2-3 câu -> Spec ngắn -> TDD"]
 
-    Env -->|🚀 Dự án cá nhân / Greenfield| Roadmap["File docs/PRODUCT_BACKLOG_ROADMAP.md"]
+    Env -->|🚀 Dự án cá nhân / Greenfield| Backlog["💡 /generate-backlog<br/>Phỏng vấn 6 câu -> Tự sinh Roadmap v1.1"]
+    Backlog --> Roadmap["File docs/PRODUCT_BACKLOG_ROADMAP.md"]
     Roadmap --> Auto["🤖 Chạy lệnh /continue (/command-continue-project)<br/>Tự động quét [ ] -> Làm trọn vẹn -> Tích [x]"]
 ```
 
@@ -186,31 +188,33 @@ Trong môi trường công ty, bạn **không cần và không nên** tạo file
 
 ### 🚀 Kịch Bản 2: Dự Án Cá Nhân (Xây dựng từ đầu theo Roadmap)
 
-Khi xây dựng sản phẩm cá nhân hoặc MVP từ đầu, bạn làm chủ toàn bộ sản phẩm và có file lộ trình rõ ràng.
+Khi xây dựng sản phẩm cá nhân hoặc MVP từ đầu, bạn làm chủ toàn bộ sản phẩm và có quy trình tự động hóa khép kín từ ý tưởng đến mã nguồn:
 
-1. **Chuẩn bị Roadmap**: Tạo file `docs/PRODUCT_BACKLOG_ROADMAP.md` với danh sách checklist:
-   ```markdown
-   # Product Roadmap
+1. **Khởi tạo Roadmap từ ý tưởng thô**: Gõ lệnh `/generate-backlog` (hoặc `/create-roadmap`):
 
-   - [x] US-001: Đăng ký tài khoản qua Email/Password
-   - [ ] US-002: Đăng nhập và tạo JWT Token
-   - [ ] US-003: Quên mật khẩu và gửi OTP qua Email
+   ```bash
+   /generate-backlog "Ứng dụng flashcard học từ vựng SRS có AI chấm phát âm"
    ```
+   - AI thực hiện phỏng vấn nhanh 6 câu qua 2 đợt (Platform, Auth, Content, Scale, Scope).
+   - Tự động sinh file `docs/PRODUCT_BACKLOG_ROADMAP.md` chuẩn schema v1.1 với YAML frontmatter tech-stack, danh mục Won't-Have (scope fence), chuỗi phụ thuộc (`Depends-on`), và độ phức tạp (`Effort: S/M/L/XL`).
+
 2. **Kích hoạt tự động hóa toàn diện**: Gõ lệnh `/command-continue-project` (hoặc `/continue`, `/next`).
 3. **AI tự động vận hành trọn gói**:
-   - Quét roadmap tìm User Story `[ ]` đầu tiên chưa làm.
+   - Quét roadmap, nạp `$TECH_CONTEXT`, kiểm tra Dependency Gate để bảo đảm không làm tính năng bị khóa.
+   - Tự động định tuyến (Auto-routing): Story nhỏ chạy Fast-Track, Story vừa chạy Bounded BA, Story lớn kích hoạt `wayfinder`.
    - Chạy đầy đủ vòng đời: Phỏng vấn nghiệp vụ $\rightarrow$ Đặc tả SpecKit $\rightarrow$ TDD Implementation $\rightarrow$ Khởi chạy Playwright chụp ảnh màn hình thật lưu vào `docs/user-guides/`.
-   - Tự động đánh dấu `[x]` vào User Story vừa hoàn tất và tạo commit chuẩn.
+   - Tự động đánh dấu `[x]` vào User Story vừa hoàn tất và thông báo kết quả.
+4. **Đẩy mã nguồn an toàn**: Gõ lệnh `/command-git-push` (hoặc `/push`) để tự động tách modular commits (Spec $\rightarrow$ Backend $\rightarrow$ Frontend $\rightarrow$ Docs) và đẩy lên remote.
 
 ---
 
-| Tiêu Chí           | 🏢 Doanh Nghiệp (Task Lẻ)                                           | 🚀 Dự Án Cá Nhân (Roadmap)                                                       |
-| :----------------- | :------------------------------------------------------------------ | :------------------------------------------------------------------------------- |
-| **Nguồn yêu cầu**  | Ticket từ Jira / Linear / Redmine / Asana.                          | File `docs/PRODUCT_BACKLOG_ROADMAP.md`.                                          |
-| **Cách kích hoạt** | Paste nội dung Ticket vào chat kèm mã task.                         | Gõ `/command-continue-project` (hoặc `/continue`).                               |
-| **Thủ tục**        | Tối giản, ưu tiên **Fast-Track** để giải quyết nhanh.               | Đầy đủ từ A đến Z (BA $\rightarrow$ Spec $\rightarrow$ TDD $\rightarrow$ Guide). |
-| **Chế độ Git**     | Dùng **`local`** hoặc **`stealth`** (giấu sạch file AI).            | Dùng **`team`** (theo dõi cả roadmap & spec trên Git).                           |
-| **Commit Message** | Gắn kèm Ticket ID: `fix(invoice): handle null customer (JIRA-892)`. | Gắn kèm Story ID: `feat(auth): implement US-002 login JWT`.                      |
+| Tiêu Chí           | 🏢 Doanh Nghiệp (Task Lẻ)                                           | 🚀 Dự Án Cá Nhân (Roadmap)                                                                                                           |
+| :----------------- | :------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------- |
+| **Nguồn yêu cầu**  | Ticket từ Jira / Linear / Redmine / Asana.                          | File `docs/PRODUCT_BACKLOG_ROADMAP.md`.                                                                                              |
+| **Cách kích hoạt** | Paste nội dung Ticket vào chat kèm mã task.                         | 1. `/generate-backlog` (lập roadmap từ ý tưởng)<br/>2. `/continue` (thực thi từng story)<br/>3. `/push` (commit & đẩy code lên Git). |
+| **Thủ tục**        | Tối giản, ưu tiên **Fast-Track** để giải quyết nhanh.               | Đầy đủ từ A đến Z (BA $\rightarrow$ Spec $\rightarrow$ TDD $\rightarrow$ Guide).                                                     |
+| **Chế độ Git**     | Dùng **`local`** hoặc **`stealth`** (giấu sạch file AI).            | Dùng **`team`** (theo dõi cả roadmap & spec trên Git).                                                                               |
+| **Commit Message** | Gắn kèm Ticket ID: `fix(invoice): handle null customer (JIRA-892)`. | Gắn kèm Story ID: `feat(auth): implement US-002 login JWT`.                                                                          |
 
 ---
 
@@ -442,12 +446,13 @@ flowchart TD
 
 ### ⚡ 1. Lệnh Tự Động Hóa (Commands)
 
-| Lệnh / Trigger                  | Bí Danh (Aliases)            | Ý Nghĩa & Giá Trị Thực Tế                                                            | Khi Nào Sử Dụng?                                         |
-| :------------------------------ | :--------------------------- | :----------------------------------------------------------------------------------- | :------------------------------------------------------- |
-| **`/skill-setup`**              | `/setup`, `/setup-workspace` | Quét manifest dự án, đối chiếu `catalog.json` và tự động nạp kỹ năng phù hợp.        | Khi mới tích hợp workflow vào dự án hoặc đổi tech stack. |
-| **`/command-git-push`**         | `/push`, `/ship`             | Kiểm tra cổng tài liệu, phân tách commit theo tầng (Modular Commit) và push an toàn. | Khi hoàn thành tính năng hoặc sửa lỗi cần đẩy lên Git.   |
-| **`/command-continue-project`** | `/continue`, `/next`         | Quét `PRODUCT_BACKLOG_ROADMAP.md` và kích hoạt chu trình làm tính năng tiếp theo.    | Trong dự án cá nhân/greenfield phát triển theo roadmap.  |
-| **`/command-user-guide`**       | `/user-guide`, `/guide`      | Khởi chạy Playwright chụp ảnh giao diện thực tế và viết tài liệu hướng dẫn.          | Sau khi hoàn thiện giao diện người dùng.                 |
+| Lệnh / Trigger                  | Bí Danh (Aliases)                      | Ý Nghĩa & Giá Trị Thực Tế                                                            | Khi Nào Sử Dụng?                                         |
+| :------------------------------ | :------------------------------------- | :----------------------------------------------------------------------------------- | :------------------------------------------------------- |
+| **`/skill-setup`**              | `/setup`, `/setup-workspace`           | Quét manifest dự án, đối chiếu `catalog.json` và tự động nạp kỹ năng phù hợp.        | Khi mới tích hợp workflow vào dự án hoặc đổi tech stack. |
+| **`/command-generate-backlog`** | `/generate-backlog`, `/create-roadmap` | Phỏng vấn nghiệp vụ 6 câu và tự sinh roadmap chuẩn schema v1.1 chống hallucination.  | Bắt đầu dự án mới hoặc khi có ý tưởng sản phẩm từ đầu.   |
+| **`/command-continue-project`** | `/continue`, `/next`                   | Quét `PRODUCT_BACKLOG_ROADMAP.md` và kích hoạt chu trình làm tính năng tiếp theo.    | Trong dự án cá nhân/greenfield phát triển theo roadmap.  |
+| **`/command-git-push`**         | `/push`, `/ship`                       | Kiểm tra cổng tài liệu, phân tách commit theo tầng (Modular Commit) và push an toàn. | Khi hoàn thành tính năng hoặc sửa lỗi cần đẩy lên Git.   |
+| **`/command-user-guide`**       | `/user-guide`, `/guide`                | Khởi chạy Playwright chụp ảnh giao diện thực tế và viết tài liệu hướng dẫn.          | Sau khi hoàn thiện giao diện người dùng.                 |
 
 ---
 
