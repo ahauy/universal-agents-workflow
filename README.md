@@ -196,11 +196,11 @@ Khi xây dựng sản phẩm cá nhân hoặc MVP từ đầu, bạn làm chủ 
    /generate-backlog "Ứng dụng flashcard học từ vựng SRS có AI chấm phát âm"
    ```
    - AI thực hiện phỏng vấn nhanh 6 câu qua 2 đợt (Platform, Auth, Content, Scale, Scope).
-   - Tự động sinh file `docs/PRODUCT_BACKLOG_ROADMAP.md` chuẩn schema v1.1 với YAML frontmatter tech-stack, danh mục Won't-Have (scope fence), chuỗi phụ thuộc (`Depends-on`), và độ phức tạp (`Effort: S/M/L/XL`).
+   - Tự động sinh file `docs/PRODUCT_BACKLOG_ROADMAP.md` chuẩn schema v1.2 với YAML frontmatter tech-stack, danh mục Won't-Have (scope fence), ma trận MoSCoW & RICE Score, sơ đồ ASCII roadmap, phân rã `Tasks: Backend / Frontend`, chuỗi phụ thuộc (`Depends-on`), độ phức tạp (`Effort: S/M/L/XL`), và Pre-Deploy Hardening checklist.
 
 2. **Kích hoạt tự động hóa toàn diện**: Gõ lệnh `/command-continue-project` (hoặc `/continue`, `/next`).
 3. **AI tự động vận hành trọn gói**:
-   - Quét roadmap, nạp `$TECH_CONTEXT`, kiểm tra Dependency Gate để bảo đảm không làm tính năng bị khóa.
+   - Quét roadmap, nạp `$TECH_CONTEXT`, kiểm tra Blocked Gate (`[!]`) và Dependency Gate để bảo đảm không làm tính năng bị khóa/vướng mắc.
    - Tự động định tuyến (Auto-routing): Story nhỏ chạy Fast-Track, Story vừa chạy Bounded BA, Story lớn kích hoạt `wayfinder`.
    - Chạy đầy đủ vòng đời: Phỏng vấn nghiệp vụ $\rightarrow$ Đặc tả SpecKit $\rightarrow$ TDD Implementation $\rightarrow$ Khởi chạy Playwright chụp ảnh màn hình thật lưu vào `docs/user-guides/`.
    - Tự động đánh dấu `[x]` vào User Story vừa hoàn tất và thông báo kết quả.
