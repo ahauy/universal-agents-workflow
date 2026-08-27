@@ -31,6 +31,9 @@ This command skill automates git staging, validates quality and user guide gates
 2. If the working tree is clean with no changes, notify the user and exit.
 3. **Automated Domain & Scope Classification**:
    Every changed file is strictly mapped to its legitimate target branch domain:
+   - **Git Tracking Mode Awareness**:
+     - Check if the repository uses **Local-Only**, **Stealth**, or **Hybrid** mode where `.agents/**`, `optional-stack-skills/**`, `GEMINI.md`, etc. are ignored by `.gitignore` or `.git/info/exclude`.
+     - **NEVER** force-add (`git add -f`) or attempt to commit ignored workflow files. Only tracked files are eligible for domain routing and commit layers.
    - **Global Governance, Agent Rules & Skill References** (`.agents/**`, `GEMINI.md`, `.specify/templates/**`, `package.json`, root configs):
      - **Target Domain**: `chore/governance-<slug>` or `chore/agent-skills` (or `main` if merged).
      - **STRICT PROHIBITION**: NEVER commit global governance or agent configs into domain feature branches (e.g. `feat/card-management`, `feat/auth-*`, `feat/deck-*`).

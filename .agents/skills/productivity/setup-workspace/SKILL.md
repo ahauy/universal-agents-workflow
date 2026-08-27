@@ -46,7 +46,7 @@ flowchart TD
    - Detect test runners (`vitest`, `jest`, `playwright`, `pytest`, `cargo test`).
    - Detect formatting/linting (`biome`, `prettier`, `eslint`, `ruff`).
 
-### Step 2: Initialize Shared Language & ADRs
+### Step 2: Initialize Shared Language, ADRs & Git Tracking
 
 1. **`CONTEXT.md` Initialization**:
    - If `CONTEXT.md` contains default placeholders, populate the initial components and packages found during Step 1.
@@ -54,10 +54,13 @@ flowchart TD
 2. **`adr/` Setup**:
    - Ensure `adr/` exists at workspace root with `adr-template.md`.
    - Seed `adr/0001-record-architecture-decisions.md` if not already present.
+3. **Git Tracking Configuration (Team vs Local-Only vs Stealth vs Hybrid)**:
+   - Check if the repository uses Team Mode (all files committed) or Private Mode.
+   - For Private Mode: Append workflow files to `.gitignore` (or `.git/info/exclude` for zero repository footprint).
 
 ### Step 3: Polyglot Stack & Framework Linking (Powered by catalog.json)
 
-1. Load [optional-stack-skills/catalog.json](../../../optional-stack-skills/catalog.json) and match items against the detected technology stack:
+1. Load [.agents/catalog.json](../../catalog.json) and match items against the detected technology stack:
    - **Language Skills & Rules**:
      - Python: `python-patterns`, `python-importlinter`
      - Go: `go-patterns`, `go-rules`, `go-depguard`
@@ -71,7 +74,7 @@ flowchart TD
      - Docker & Postgres: `docker-patterns`, `postgres-patterns`
      - MCP Code Intelligence: `code-review-graph` (Tree-sitter SQLite graph for token reduction)
 2. **Render Selection Table with Concise Summaries**:
-   Always display a structured Markdown table including the **Concise Summary (Mô tả ngắn gọn)** column for every detected skill so the user understands its exact benefit.
+   Always display a structured Markdown table including the **Concise Summary** column for every detected skill so the user understands its exact benefit.
 3. Prompt the user for confirmation (or run `/skill-setup` for the full automated onboarding experience).
 
 ### Step 4: Verification & Handoff
@@ -81,5 +84,6 @@ Output a clean onboarding report:
 - Detected Stack & Package Manager
 - Active Branch & Git Remote
 - Initialized `CONTEXT.md` and `adr/`
+- Git Tracking Status (`team`, `local`, `stealth`, or `hybrid`)
 - Activated Skills, Rules & MCP Servers (with short descriptions)
 - Recommended first skill to run (e.g. `route`, `intake-classifier`, or `improve-codebase-architecture`).
