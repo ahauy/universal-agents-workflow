@@ -126,9 +126,9 @@ Once confirmed by the user, the agent performs automated setup:
    - **If `uv` is NOT found**, prompt or execute the standard installation:
      - **macOS / Linux**: `curl -LsSf https://astral.sh/uv/install.sh | sh` (or `brew install uv`)
      - **Windows PowerShell**: `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`
-   - **Run Initial AST Indexing**: The agent immediately executes the indexing command in the workspace root:
+   - **Run Initial AST Graph Build**: The agent immediately executes the graph build command in the workspace root:
      ```bash
-     uvx code-review-graph index
+     uvx code-review-graph build
      ```
      _This downloads `code-review-graph` via `uvx`, parses codebase AST with Tree-sitter, and creates `.code-review-graph/graph.db`._
    - **Update `.agents/mcp_config.json`**:
