@@ -6,8 +6,9 @@ description: >-
   Conducts a structured grilling interview (2-3 batches, 6 core questions) to extract
   Product, Platform, Auth, Content, Monetization, and Scope constraints from the user's
   raw product idea. Then renders a fully-structured docs/PRODUCT_BACKLOG_ROADMAP.md
-  file with YAML frontmatter, Won't-Have fence, Dependency chain, Effort sizing, and
-  Context-budget fields — ready to power /command-continue-project auto-routing.
+  file (schema-version 1.2) with YAML frontmatter, Won't-Have fence, MoSCoW & RICE matrix,
+  ASCII roadmap tree, Dependency chain, Effort sizing, Context-budget, Tasks breakdown
+  (Backend/Frontend), and Pre-Deploy Hardening checklist — ready to power /command-continue-project.
   Zero hallucination: never invents stories or ACs without user confirmation.
 triggers:
   - "/generate-backlog"
@@ -25,8 +26,8 @@ triggers:
 
 Prevents **hallucinated scope**: AI must NEVER invent User Stories, Acceptance Criteria,
 or Won't-Have boundaries from a vague idea. This skill forces a structured grilling
-interview first, then renders the canonical `docs/PRODUCT_BACKLOG_ROADMAP.md` from
-confirmed answers only.
+interview first, then renders the canonical `docs/PRODUCT_BACKLOG_ROADMAP.md` (schema-version 1.2)
+from confirmed answers only.
 
 See template: [PRODUCT_BACKLOG_ROADMAP-template.md](../../.specify/templates/PRODUCT_BACKLOG_ROADMAP-template.md)
 
@@ -126,6 +127,7 @@ Only after explicit user confirmation ("ok", "đúng", "proceed", "generate", et
    - Không chia theo Layer (Database, Backend, Frontend).
    - Chia theo **User Journey End-to-End**: mỗi story đều chạm UI + API + DB.
    - Xác định tối đa 3–4 Epics/Module từ domain của ý tưởng.
+   - Lập **Bảng Ma Trận MoSCoW & RICE Score** sơ bộ cho các Epic.
 
 3. **Gán Effort & Context-budget**:
    - `S` (< 200 LOC, 1 entity, 1 screen) → `single-session`
@@ -136,28 +138,36 @@ Only after explicit user confirmation ("ok", "đúng", "proceed", "generate", et
 4. **Gán Dependency chain**: Mỗi story phải khai báo `Depends-on` và `Blocks` chính xác.
    Không có circular dependency. Auth thường là story đầu tiên, không có dependency.
 
-5. **Sprint Priority**:
+5. **Phân rã Tasks kỹ thuật sơ bộ (schema 1.2+)**:
+   - Dưới mỗi User Story, đính kèm mục `Tasks:` với 2 gạch đầu dòng:
+     - `Backend:` Endpoint, DTO, Service logic, DB schema.
+     - `Frontend:` UI Component, Page, Store/State, Form validation.
+
+6. **Sprint Priority & Go-Live Roadmap**:
+   - Vẽ **Sơ đồ tiến độ ASCII Roadmap Tree** bao quát các Sprint.
    - Sprint 1 (MVP): `Must-Have (P0)` chỉ. Max 5 stories.
    - Sprint 2: `Should-Have (P1)` trước, `Could-Have (P2)` sau. Max 5 stories.
-   - Future Horizons: Mọi thứ chưa cam kết.
+   - Future Horizons: Mọi ý tưởng chưa cam kết đánh dấu `[~]`.
+   - **Sprint Go-Live & Pre-Deploy Hardening**: Luôn đính kèm checklist bảo mật (Critical SEC-01 → SEC-03), DB migration, SPA routing, và smoke test.
 
-6. **Viết file** theo cấu trúc chuẩn từ template:
+7. **Viết file** theo cấu trúc chuẩn từ template:
    [PRODUCT_BACKLOG_ROADMAP-template.md](../../.specify/templates/PRODUCT_BACKLOG_ROADMAP-template.md)
 
-7. **Ghi ra** `docs/PRODUCT_BACKLOG_ROADMAP.md` (tạo thư mục `docs/` nếu chưa có).
+8. **Ghi ra** `docs/PRODUCT_BACKLOG_ROADMAP.md` (tạo thư mục `docs/` nếu chưa có).
 
 ### Step 6: Activation Message
 
 Sau khi file được tạo, thông báo:
 
 ```markdown
-✅ **File `docs/PRODUCT_BACKLOG_ROADMAP.md` đã sẵn sàng!**
+✅ **File `docs/PRODUCT_BACKLOG_ROADMAP.md` đã sẵn sàng (Schema v1.2)!**
 
 📊 **Tổng quan:**
 
 - Sprint 1 (MVP): `<N>` User Stories — ước tính `<X>` sessions
 - Sprint 2: `<N>` User Stories
 - Future Horizons: `<N>` ý tưởng
+- Go-Live Sprint: Đã tích hợp sẵn Pre-Deploy Hardening & Security Checklist
 
 🚀 **Bước tiếp theo:**
 Gõ `/continue` (hoặc `/command-continue-project`) để AI tự động bắt đầu làm
@@ -172,7 +182,7 @@ User Story đầu tiên (`<US-ID>: <Title>`) theo đúng pipeline BA → Spec �
 - ❌ **NEVER** invent Acceptance Criteria not derived from user answers.
 - ❌ **NEVER** set `[x]` on any story — only `/command-continue-project` can do that.
 - ❌ **NEVER** create `.specify/features/<slug>/` folders — that is `/command-continue-project`'s job.
-- ❌ **NEVER** write tech-specific implementation details inside AC — keep them business-level.
+- ❌ **NEVER** write tech-specific implementation details inside AC — keep them business-level (kỹ thuật để ở mục Tasks).
 - ✅ Always record any remaining ambiguity as `ASM-BACKLOG-NN` in a comment within the file.
 - ✅ Always use the YAML frontmatter tech-stack block even if user says "tùy AI" (fill with recommended stack).
 - ✅ Won't-Have section is MANDATORY. If user says "không biết", derive sensible defaults from the domain and list them for confirmation.
@@ -185,7 +195,8 @@ User Story đầu tiên (`<US-ID>: <Title>`) theo đúng pipeline BA → Spec �
 - [ ] Grilling Batch 2 answered (Multi-user, Monetization, Won't-Have)
 - [ ] Tech Stack confirmed (Q7) or AI recommendation stated
 - [ ] Decision summary presented and user confirmed
-- [ ] `docs/PRODUCT_BACKLOG_ROADMAP.md` written with valid YAML frontmatter
-- [ ] Every story has: Slug, Effort, Context-budget, Priority, Depends-on, Blocks, AC
+- [ ] `docs/PRODUCT_BACKLOG_ROADMAP.md` written with valid YAML frontmatter (schema-version: "1.2")
+- [ ] Every story has: Slug, Effort, Context-budget, Priority, Depends-on, Blocks, AC, and Tasks (Backend/Frontend)
+- [ ] MoSCoW & RICE matrix, ASCII roadmap tree, and Pre-Deploy Hardening checklist included
 - [ ] Won't-Have section is non-empty
 - [ ] Activation message with `/continue` call-to-action displayed

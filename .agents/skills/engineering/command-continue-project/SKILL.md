@@ -20,8 +20,8 @@ triggers:
 
 This command skill automatically inspects project progress in [PRODUCT_BACKLOG_ROADMAP.md](../../docs/PRODUCT_BACKLOG_ROADMAP.md) and triggers the next development phase in full compliance with [AGENTS.md](../../.agents/AGENTS.md).
 
-**Requires:** `docs/PRODUCT_BACKLOG_ROADMAP.md` following schema-version `1.1`.
-If file is missing or not schema-version 1.1, instruct user to run `/generate-backlog` first.
+**Requires:** `docs/PRODUCT_BACKLOG_ROADMAP.md` following schema-version `1.1` or `1.2`.
+If file is missing or not schema-version 1.1+, instruct user to run `/generate-backlog` first.
 Template: [PRODUCT_BACKLOG_ROADMAP-template.md](../../.specify/templates/PRODUCT_BACKLOG_ROADMAP-template.md)
 
 ---
@@ -46,28 +46,42 @@ Before starting analysis or code, ensure the working environment is synced with 
 
 1. Read `docs/PRODUCT_BACKLOG_ROADMAP.md`.
 
-2. **Extract YAML Frontmatter** (schema-version 1.1+):
+2. **Extract YAML Frontmatter** (schema-version 1.1+ / 1.2):
    - Read `tech-stack` block (language, backend, frontend, database, infra, test).
    - Store as `$TECH_CONTEXT` — this MUST be injected into the system prompt of every subagent
      dispatched in this session (business-analyst, system-architect, backend-developer, frontend-developer).
-   - If YAML frontmatter is missing → STOP. Instruct user: _"File chưa đúng schema v1.1. Chạy
+   - If YAML frontmatter is missing → STOP. Instruct user: _"File chưa đúng schema v1.1+. Chạy
      `/generate-backlog` để tạo file chuẩn."_
 
 3. **Find the target User Story** — in strict priority order:
    - First: any story with `[/]` (In Progress — resume before starting new work).
    - Then: the first `[ ]` from the top of the active Sprint downward.
+   - **Skip `[~]`**: Ignore deferred / future phase items.
 
-4. **Dependency Gate (MANDATORY — do NOT skip)**:
+4. **🛑 Blocked Story Gate (`[!]`) (MANDATORY)**:
+   - If the candidate story is marked `[!]` (Blocked / Review Needed):
+     - **STOP IMMEDIATELY**. Do not dispatch autonomous pipeline.
+     - Output:
+       ```markdown
+       ⚠️ **Story đang bị chặn / Cần làm rõ:** `[!] <US-ID> - <Story Title>`
+       Story này đã được đánh dấu là đang gặp vướng mắc hoặc cần quyết định kiến trúc trước khi thực thi.
+       👉 Hãy làm rõ yêu cầu hoặc gỡ bỏ rào cản trước khi tiếp tục.
+       ```
+     - Prompt user for decision or next steps.
+
+5. **Dependency Gate (MANDATORY — do NOT skip)**:
    - Read the story's `Depends-on` field.
    - For each dependency listed:
      - Check its checkbox status in the file.
-     - If any dependency is NOT `[x]` → **REFUSE** to proceed with the current story.
-     - Output: _"🚫 **Blocked:** `<US-ID>` cannot start until `<Depends-on>` is `[x]`.
-       Recommend working on `<Depends-on>` first."_
+     - If any dependency is NOT `[x]`:
+       - If dependency is `[!]`: Output: _"🚫 **Blocked:** `<US-ID>` phụ thuộc vào `<Depends-on>` nhưng story đó đang bị chặn `[!]`."_
+       - Else: Output: _"🚫 **Blocked:** `<US-ID>` cannot start until `<Depends-on>` is `[x]`. Recommend working on `<Depends-on>` first."_
+       - **REFUSE** to proceed with the current story.
    - If `Depends-on: (none)` or all dependencies are `[x]` → proceed.
 
-5. **Extract story metadata**:
-   - US ID (e.g. `US-AUTH-001`), Title, Slug, Priority, Effort, Context-budget, Acceptance Criteria.
+6. **Extract story metadata**:
+   - US ID (e.g. `US-AUTH-001`), Title, Slug, Priority, Effort, Context-budget, Acceptance Criteria (AC).
+   - **Tasks breakdown** (schema 1.2+): Extract `Tasks (Backend)` and `Tasks (Frontend)` checklist if present.
 
 ### Step 2: Inspect Current Story Deliverables
 
@@ -165,8 +179,11 @@ Before starting analysis or code, ensure the working environment is synced with 
 - **MANDATORY AUTOMATIC SUBAGENT DELEGATION**:
   - The Orchestrator is **STRICTLY PROHIBITED** from coding directly.
   - Create `test-plan.md` mapping User Stories to `TC-###` test cases.
-  - Dispatch `backend-developer` (`gemini-3.7-flash`) via `invoke_subagent` for Backend API, DTOs, Services, and Jest tests.
-  - Dispatch `frontend-developer` (`gemini-3.7-flash`) via `invoke_subagent` for React components, state hooks, pages, and Vitest tests.
+  - **Task Checklist Delegation** (schema 1.2+):
+    - Pass `Tasks (Backend)` checklist directly to `backend-developer` (`gemini-3.7-flash`).
+    - Pass `Tasks (Frontend)` checklist directly to `frontend-developer` (`gemini-3.7-flash`).
+  - Dispatch `backend-developer` via `invoke_subagent` for Backend API, DTOs, Services, and Unit/Integration tests.
+  - Dispatch `frontend-developer` via `invoke_subagent` for UI components, state stores, pages, and tests.
   - Dispatch `slice-implementer` (`gemini-3.7-flash`) to wire fullstack integration.
   - Dispatch `build-resolver` (`gemini-3.7-flash`) to fix any compilation / lint errors.
   - Follow TDD cycle in each slice: Write failing tests (Red) -> Implement minimal passing code (Green) -> Refactor.
@@ -180,6 +197,16 @@ Before starting analysis or code, ensure the working environment is synced with 
   - Dispatch `tech-doc-architect` (`gemini-3.7-flash`) via `invoke_subagent` to update [docs/features/<slug>/README.md](../../docs/features/).
   - Run full test suites (`pnpm test`).
   - Mark the User Story as `[x]` in `docs/PRODUCT_BACKLOG_ROADMAP.md`.
+
+#### Case E: Production Hardening & Go-Live Sprints (`US-DEPLOY-###`)
+
+- When the target User Story belongs to a Deployment / Go-Live sprint:
+  - Bypasses standard BA feature pipeline; routes to DevOps & Hardening Verification:
+    1. **Pre-Deploy Security Audit**: Verify zero hardcoded secrets, validate strong JWT secrets, inspect CORS whitelist.
+    2. **Database Migration Verification**: Verify schema migrations (`prisma migrate deploy` or equivalent).
+    3. **Hosting & SPA Routing Fallback**: Verify production Dockerfile/Nginx or CDN SPA fallback routing.
+    4. **Production Smoke Test**: Run automated Playwright smoke tests against target URL.
+  - Update Go-Live checklist in `docs/PRODUCT_BACKLOG_ROADMAP.md` and mark story as `[x]`.
 
 ---
 
