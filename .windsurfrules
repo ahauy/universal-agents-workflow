@@ -1,0 +1,13 @@
+# Windsurf Rules for Universal Agents Workflow
+# Single Source of Truth is AGENTS.md
+
+Before taking action, modifying code, or creating features, read and follow:
+- AGENTS.md
+- GEMINI.md
+- CONTEXT.md
+
+Invariants:
+1. Always follow the 7-phase pipeline in AGENTS.md.
+2. For language-specific files (Swift, Go, Rust, Python, TS), utilize specialized rules in .agents/rules/ and subagents in .agents/agents/.
+3. Zero AI-slop: clean document canvas, 1px borders, no unrequested gradients.
+4. Never commit or push to git autonomously without explicit user command.

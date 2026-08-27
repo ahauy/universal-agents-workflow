@@ -55,6 +55,22 @@
       "recommendation": "recommended"
     },
     {
+      "id": "python-rules",
+      "name": "Python Coding Style & Best Practices",
+      "category": "Language",
+      "short_description": "Standards for clean Python: typing discipline, Pydantic v2 validation, layer separation, and async cleanliness.",
+      "detection_markers": [
+        "pyproject.toml",
+        "requirements.txt",
+        "Pipfile",
+        "poetry.lock"
+      ],
+      "source_path": "optional-stack-skills/languages/python/rules/coding-style.md",
+      "target_type": "rule",
+      "target_path": ".agents/rules/python-coding-style.md",
+      "recommendation": "recommended"
+    },
+    {
       "id": "python-importlinter",
       "name": "Python Import-Linter Boundary Checker",
       "category": "Boundary Enforcement",
@@ -74,6 +90,17 @@
       "source_path": "optional-stack-skills/languages/rust/rust-patterns",
       "target_type": "skill",
       "target_path": ".agents/skills/engineering/rust-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "rust-rules",
+      "name": "Rust Coding Style & Safety Standards",
+      "category": "Language",
+      "short_description": "Rust API design guidelines: ownership semantics, pub(crate) encapsulation, zero raw unwrap in production, and Clippy compliance.",
+      "detection_markers": ["Cargo.toml"],
+      "source_path": "optional-stack-skills/languages/rust/rules/coding-style.md",
+      "target_type": "rule",
+      "target_path": ".agents/rules/rust-coding-style.md",
       "recommendation": "recommended"
     },
     {
@@ -198,6 +225,179 @@
       "source_path": ".agents/skills/engineering/docker-patterns",
       "target_type": "skill",
       "target_path": ".agents/skills/engineering/docker-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "swift-patterns",
+      "name": "Swift & SwiftUI Modern Architecture & Deep Modules",
+      "category": "Language",
+      "short_description": "Swift 6 strict concurrency, @Observable state architecture, actor isolation, SPM package boundaries, and Swift Testing standards.",
+      "detection_markers": [
+        "Package.swift",
+        "*.xcodeproj",
+        "*.xcworkspace",
+        "project.yml",
+        "*.swift"
+      ],
+      "source_path": "optional-stack-skills/languages/swift/swift-patterns",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/swift-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "swiftui-patterns",
+      "name": "SwiftUI Modern Architecture & Declarative Patterns",
+      "category": "Frontend",
+      "short_description": "SwiftUI state management with @Observable, view composition, type-safe NavigationStack, environment injection, and 60fps render performance.",
+      "detection_markers": [
+        "Package.swift",
+        "*.xcodeproj",
+        "project.yml",
+        "*.swift"
+      ],
+      "source_path": "optional-stack-skills/languages/swift/swiftui-patterns",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/swiftui-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "swift-concurrency",
+      "name": "Swift 6 & 6.2 Approachable Concurrency",
+      "category": "Language",
+      "short_description": "Actor isolation, Sendable enforcement, isolated conformances, structured TaskGroups, and data race prevention without manual locks.",
+      "detection_markers": [
+        "Package.swift",
+        "*.xcodeproj",
+        "project.yml",
+        "*.swift"
+      ],
+      "source_path": "optional-stack-skills/languages/swift/swift-concurrency",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/swift-concurrency",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "swift-protocol-di-testing",
+      "name": "Swift Protocol-Based Dependency Injection & Testing",
+      "category": "Testing",
+      "short_description": "Mock file systems, network clients, and storage behind focused Sendable protocols using modern Swift Testing (@Test).",
+      "detection_markers": [
+        "Package.swift",
+        "*.xcodeproj",
+        "project.yml",
+        "*.swift"
+      ],
+      "source_path": "optional-stack-skills/languages/swift/swift-protocol-di-testing",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/swift-protocol-di-testing",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "swift-actor-persistence",
+      "name": "Swift Actor-Based Thread-Safe Persistence",
+      "category": "Database",
+      "short_description": "Thread-safe data persistence using Swift actors: hybrid in-memory caching with atomic file-backed storage and zero data races.",
+      "detection_markers": [
+        "Package.swift",
+        "*.xcodeproj",
+        "project.yml",
+        "*.swift"
+      ],
+      "source_path": "optional-stack-skills/languages/swift/swift-actor-persistence",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/swift-actor-persistence",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "swift-rules",
+      "name": "Swift Coding Style & Standards",
+      "category": "Language",
+      "short_description": "Swift API Design Guidelines, Complete Concurrency safety, memory management ([weak self]), and SwiftLint conventions.",
+      "detection_markers": [
+        "Package.swift",
+        "*.xcodeproj",
+        "project.yml",
+        "*.swift"
+      ],
+      "source_path": "optional-stack-skills/languages/swift/rules/coding-style.md",
+      "target_type": "rule",
+      "target_path": ".agents/rules/swift-coding-style.md",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "swiftlint-config",
+      "name": "SwiftLint Architectural Boundary Linter",
+      "category": "Boundary Enforcement",
+      "short_description": "SwiftLint configuration enforcing strict rules: force unwrap/try/cast errors, file/function length boundaries, and concurrency safety.",
+      "detection_markers": [
+        "Package.swift",
+        "*.xcodeproj",
+        "project.yml",
+        "*.swift"
+      ],
+      "source_path": "optional-stack-skills/languages/swift/linters/.swiftlint.yml",
+      "target_type": "config",
+      "target_path": ".swiftlint.yml",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "swift-agents",
+      "name": "Swift Specialized Subagents (Reviewer & Build Resolver)",
+      "category": "Subagent",
+      "short_description": "Dedicated Swift subagents: swift-reviewer (ARC memory, Swift 6 concurrency, API guidelines) and swift-build-resolver (Xcode/SPM compilation fixer).",
+      "detection_markers": [
+        "Package.swift",
+        "*.xcodeproj",
+        "project.yml",
+        "*.swift"
+      ],
+      "source_path": "optional-stack-skills/languages/swift/agents",
+      "target_type": "agent",
+      "target_path": ".agents/agents",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "go-agents",
+      "name": "Go Specialized Subagents (Reviewer & Build Resolver)",
+      "category": "Subagent",
+      "short_description": "Dedicated Go subagents: go-reviewer (error wrapping, context, race detector) and go-build-resolver (import cycles, build fixer).",
+      "detection_markers": ["go.mod", "main.go"],
+      "source_path": "optional-stack-skills/languages/go/agents",
+      "target_type": "agent",
+      "target_path": ".agents/agents",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "python-agents",
+      "name": "Python Specialized Subagent (Reviewer)",
+      "category": "Subagent",
+      "short_description": "Dedicated Python subagent: python-reviewer (strict Mypy typing, Pydantic v2, layer separation, async safety).",
+      "detection_markers": ["pyproject.toml", "requirements.txt"],
+      "source_path": "optional-stack-skills/languages/python/agents",
+      "target_type": "agent",
+      "target_path": ".agents/agents",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "rust-agents",
+      "name": "Rust Specialized Subagents (Reviewer & Build Resolver)",
+      "category": "Subagent",
+      "short_description": "Dedicated Rust subagents: rust-reviewer (borrow checker, unsafe audit) and rust-build-resolver (lifetimes, Cargo build fixer).",
+      "detection_markers": ["Cargo.toml"],
+      "source_path": "optional-stack-skills/languages/rust/agents",
+      "target_type": "agent",
+      "target_path": ".agents/agents",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "typescript-agents",
+      "name": "TypeScript Specialized Subagents (Reviewer & Build Resolver)",
+      "category": "Subagent",
+      "short_description": "Dedicated TypeScript subagents: typescript-reviewer (type safety, hook purity, anti-AI-slop) and react-build-resolver (tsc, bundler fixer).",
+      "detection_markers": ["tsconfig.json", "package.json"],
+      "source_path": "optional-stack-skills/languages/typescript/agents",
+      "target_type": "agent",
+      "target_path": ".agents/agents",
       "recommendation": "recommended"
     },
     {

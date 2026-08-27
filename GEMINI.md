@@ -156,6 +156,10 @@ graph TD
   - `Model: "claude-opus-4.6" / "inherit"` (Deep Domain Elicitation): `business-analyst`.
   - `Model: "claude-sonnet-4.6" / "inherit"` (Architecture & Adversarial Review): `system-architect`, `code-reviewer`, `agent-evaluator`.
   - `Model: "gemini-3.7-flash"` (Fast Execution & Testing): `code-explorer`, `backend-developer`, `frontend-developer`, `slice-implementer`, `build-resolver`, `ui-ux-reviewer`, `tech-doc-architect`, `user-guide-creator`.
+- **Language Specialization (Zero Conflict / Dynamic Dispatch)**: When specialized stack subagents are present in `.agents/agents/` (e.g., `swift-reviewer`, `swift-build-resolver`, `go-reviewer`, `rust-reviewer`):
+  - In **Phase 5**, the orchestrator delegates compilation and build resolution to `<lang>-build-resolver`.
+  - In **Phase 6A**, the orchestrator delegates adversarial code inspection to `<lang>-reviewer`.
+  - The generic `build-resolver` and `code-reviewer` serve as polyglot fallbacks, ensuring zero naming conflict and zero workflow divergence.
 - **Pre-execution Catalog Definition**: Before running any phase, the orchestrator MUST ensure subagents are defined via `define_subagent` with specialized system prompts.
 
 ### Protocol Execution Chain:

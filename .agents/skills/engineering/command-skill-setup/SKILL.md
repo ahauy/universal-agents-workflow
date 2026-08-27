@@ -38,6 +38,7 @@ flowchart TD
 Scan the project root directory to identify technology detection markers with zero excessive token reading overhead:
 
 1. **Programming Languages**:
+   - Swift / Apple: `Package.swift`, `project.yml`, `*.xcodeproj`, `*.xcworkspace`, `*.swift`
    - Go: `go.mod`, `main.go`
    - Python: `pyproject.toml`, `requirements.txt`, `Pipfile`, `poetry.lock`, `setup.py`
    - Rust: `Cargo.toml`
@@ -118,8 +119,22 @@ Once confirmed by the user, the agent performs automated setup:
    - Copy rule files to `.agents/rules/<rule-id>.md`.
    - Copy linter configuration files (`depguard.yaml`, `.importlinter.ini`, `dependency-cruiser.config.cjs`) to workspace root if not already present.
    - **Important**: The target repository NEVER contains an `optional-stack-skills/` directory. All activated skills live cleanly inside `.agents/skills/engineering/`.
-2. **Configure `code-review-graph` MCP (if selected Yes)**:
-   - Update `.agents/mcp_config.json`:
+2. **Automated Setup for `code-review-graph` MCP (if selected Yes)**:
+   - **Prerequisite Check**: Check if Astral's `uv` / `uvx` is installed:
+     ```bash
+     which uvx || which uv
+     ```
+   - **If `uv` is NOT found**, prompt or execute the standard installation:
+     - **macOS / Linux**: `curl -LsSf https://astral.sh/uv/install.sh | sh` (or `brew install uv`)
+     - **Windows PowerShell**: `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`
+   - **Run Official Auto-Configuration & Graph Build**: The agent executes the official one-command setup followed by the graph build:
+     ```bash
+     uvx code-review-graph install -y
+     uvx code-review-graph build
+     ```
+     _`install -y` automatically configures MCP servers across all detected AI tools (Antigravity, Cursor, Windsurf, Claude Code) and adds `.code-review-graph/` to `.gitignore`._
+     _`build` parses the codebase with Tree-sitter and creates the local SQLite AST graph (`.code-review-graph/graph.db`)._
+   - **Workspace MCP Verification**: Ensure `.agents/mcp_config.json` also has the server registered:
      ```json
      {
        "mcpServers": {
@@ -134,10 +149,6 @@ Once confirmed by the user, the agent performs automated setup:
          }
        }
      }
-     ```
-   - Guide the user to run the initial indexing command:
-     ```bash
-     uvx code-review-graph index
      ```
 3. **Configure Git Tracking Mode (based on Step 3 selection)**:
    - **Local-Only Mode**: Append the following block to `.gitignore`:

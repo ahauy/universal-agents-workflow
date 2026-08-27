@@ -162,6 +162,10 @@ try {
     Write-Host "`n📦 Đang sao chép các thành phần Universal Agents Workflow..." -ForegroundColor White
 
     function Copy-WorkflowItem ($src, $dest, $name) {
+        if (-not $dest -or $dest -eq $Target -or $dest -eq "$Target\" -or $dest -eq "$Target/") {
+            Write-Host "  ⚠️  CẢNH BÁO AN TOÀN: Đường dẫn đích không hợp lệ hoặc trỏ vào root: $name. Bỏ qua!" -ForegroundColor Red
+            return
+        }
         if (Test-Path $src) {
             if (Test-Path -PathType Container $src) {
                 if (-not (Test-Path $dest)) { New-Item -ItemType Directory -Path $dest -Force | Out-Null }
@@ -171,7 +175,8 @@ try {
                 if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
                 Copy-Item -Path $src -Destination $dest -Force
             }
-            Write-Host "  ✅ Đã tích hợp: $name" -ForegroundColor Cyan
+            $relPath = $dest.Replace($Target, "").TrimStart("\", "/")
+            Write-Host "  ✅ Đã tích hợp: $name ➔ $relPath" -ForegroundColor Cyan
         }
     }
 
@@ -179,7 +184,12 @@ try {
     Copy-WorkflowItem (Join-Path $SourceDir ".specify") (Join-Path $Target ".specify") ".specify/"
     Copy-WorkflowItem (Join-Path $SourceDir "adr") (Join-Path $Target "adr") "adr/"
     Copy-WorkflowItem (Join-Path $SourceDir "CONTEXT.md") (Join-Path $Target "CONTEXT.md") "CONTEXT.md"
+    Copy-WorkflowItem (Join-Path $SourceDir "AGENTS.md") (Join-Path $Target "AGENTS.md") "AGENTS.md"
     Copy-WorkflowItem (Join-Path $SourceDir "GEMINI.md") (Join-Path $Target "GEMINI.md") "GEMINI.md"
+    Copy-WorkflowItem (Join-Path $SourceDir "CLAUDE.md") (Join-Path $Target "CLAUDE.md") "CLAUDE.md"
+    Copy-WorkflowItem (Join-Path $SourceDir ".cursorrules") (Join-Path $Target ".cursorrules") ".cursorrules"
+    Copy-WorkflowItem (Join-Path $SourceDir ".windsurfrules") (Join-Path $Target ".windsurfrules") ".windsurfrules"
+    Copy-WorkflowItem (Join-Path $SourceDir ".github\copilot-instructions.md") (Join-Path $Target ".github\copilot-instructions.md") ".github/copilot-instructions.md"
 
     # Record workflow source repository metadata
     $sourceMetadata = @{
@@ -197,69 +207,65 @@ try {
     }
 
     # ------------------------------------------------------------------------------
-    # 4. Smart Stack Scan & Selective Skill Injection
+    # 4. Smart Stack Scan & Selective Skill Injection (Registry-Driven Engine)
     # ------------------------------------------------------------------------------
-    Write-Host "`n🔍 Đang quét Tech Stack của dự án đích..." -ForegroundColor White
+    Write-Host "`n🔍 Đang quét Tech Stack của dự án đích (Registry-Driven)..." -ForegroundColor White
 
-    $matchedSkills = @()
+    $catalogPath = Join-Path $SourceDir "optional-stack-skills\catalog.json"
+    $matchedItems = @()
 
-    if ((Test-Path (Join-Path $Target "go.mod")) -or (Test-Path (Join-Path $Target "main.go"))) {
-        $matchedSkills += @("go-patterns", "go-rules", "go-depguard")
-    }
-
-    if ((Test-Path (Join-Path $Target "pyproject.toml")) -or (Test-Path (Join-Path $Target "requirements.txt")) -or (Test-Path (Join-Path $Target "poetry.lock"))) {
-        $matchedSkills += @("python-patterns", "python-importlinter")
-    }
-
-    if (Test-Path (Join-Path $Target "Cargo.toml")) {
-        $matchedSkills += @("rust-patterns")
-    }
-
-    if (Test-Path (Join-Path $Target "package.json")) {
-        $matchedSkills += @("typescript-patterns")
-        $pkgContent = Get-Content (Join-Path $Target "package.json") -Raw -ErrorAction SilentlyContinue
-        if ($pkgContent -match "@nestjs" -or (Test-Path (Join-Path $Target "nest-cli.json"))) {
-            $matchedSkills += @("nestjs-patterns")
+    if (Test-Path $catalogPath) {
+        $catalog = Get-Content $catalogPath -Raw | ConvertFrom-Json
+        foreach ($item in $catalog.items) {
+            if ($item.target_type -eq "mcp") { continue }
+            $isMatched = $false
+            foreach ($m in $item.detection_markers) {
+                if ($m -like "*:*") {
+                    $parts = $m -split ":"
+                    $filePath = Join-Path $Target $parts[0]
+                    $kw = $parts[1].Trim('"' , "'")
+                    if (Test-Path $filePath) {
+                        try {
+                            if ((Get-Content $filePath -Raw -ErrorAction SilentlyContinue) -match [regex]::Escape($kw)) {
+                                $isMatched = $true; break
+                            }
+                        } catch {}
+                    }
+                } elseif ($m -like "*\**" -or $m -like "*.*") {
+                    if (Get-ChildItem -Path $Target -Filter $m -Recurse -Depth 3 -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch "(\.git|\.agents|node_modules|DerivedData|\.build)" }) {
+                        $isMatched = $true; break
+                    }
+                } else {
+                    if (Test-Path (Join-Path $Target $m)) {
+                        $isMatched = $true; break
+                    }
+                }
+            }
+            if ($isMatched) {
+                $matchedItems += $item
+            }
         }
-        if ($pkgContent -match "react" -or (Test-Path (Join-Path $Target "next.config.js")) -or (Test-Path (Join-Path $Target "next.config.mjs")) -or (Test-Path (Join-Path $Target "next.config.ts"))) {
-            $matchedSkills += @("react-rules", "frontend-patterns")
+    }
+
+    if ($matchedItems.Count -gt 0) {
+        Write-Host "  🎯 Phát hiện các thành phần tech stack phù hợp trong catalog.json:" -ForegroundColor Green
+        foreach ($item in $matchedItems) {
+            Write-Host "     - $($item.name) ($($item.id))" -ForegroundColor Cyan
         }
-    }
-
-    if (Test-Path (Join-Path $Target "prisma\schema.prisma")) {
-        $matchedSkills += @("prisma-patterns")
-    }
-
-    if ((Test-Path (Join-Path $Target "Dockerfile")) -or (Test-Path (Join-Path $Target "docker-compose.yml")) -or (Test-Path (Join-Path $Target "compose.yaml"))) {
-        $matchedSkills += @("docker-patterns")
-    }
-
-    if ($matchedSkills.Count -gt 0) {
-        Write-Host "  🎯 Phát hiện các kỹ năng stack phù hợp: $($matchedSkills -join ', ')" -ForegroundColor Green
         $doInject = $true
         if (-not $Yes) {
-            $injectChoice = Read-Host "👉 Bạn có muốn tự động nạp các kỹ năng trên vào .agents/skills/? [Y/n]"
+            $injectChoice = Read-Host "👉 Bạn có muốn tự động nạp các thành phần trên vào dự án? [Y/n]"
             if ($injectChoice -match "^[nN]") { $doInject = $false }
         }
         if ($doInject) {
-            foreach ($skill in $matchedSkills) {
-                switch ($skill) {
-                    "go-patterns" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\languages\go\go-patterns") (Join-Path $Target ".agents\skills\engineering\go-patterns") "go-patterns" }
-                    "go-rules" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\languages\go\rules\coding-style.md") (Join-Path $Target ".agents\rules\go-coding-style.md") "go-rules" }
-                    "go-depguard" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\languages\go\depguard.yaml") (Join-Path $Target "depguard.yaml") "depguard.yaml" }
-                    "python-patterns" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\languages\python\python-patterns") (Join-Path $Target ".agents\skills\engineering\python-patterns") "python-patterns" }
-                    "python-importlinter" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\languages\python\.importlinter.ini") (Join-Path $Target ".importlinter.ini") ".importlinter.ini" }
-                    "rust-patterns" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\languages\rust\rust-patterns") (Join-Path $Target ".agents\skills\engineering\rust-patterns") "rust-patterns" }
-                    "typescript-patterns" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\languages\typescript\typescript-patterns") (Join-Path $Target ".agents\skills\engineering\typescript-patterns") "typescript-patterns" }
-                    "nestjs-patterns" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\frameworks\nestjs-patterns") (Join-Path $Target ".agents\skills\engineering\nestjs-patterns") "nestjs-patterns" }
-                    "frontend-patterns" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\frameworks\frontend-patterns") (Join-Path $Target ".agents\skills\engineering\frontend-patterns") "frontend-patterns" }
-                    "prisma-patterns" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\frameworks\prisma-patterns") (Join-Path $Target ".agents\skills\engineering\prisma-patterns") "prisma-patterns" }
-                    "docker-patterns" { Copy-WorkflowItem (Join-Path $SourceDir ".agents\skills\engineering\docker-patterns") (Join-Path $Target ".agents\skills\engineering\docker-patterns") "docker-patterns" }
-                }
+            foreach ($item in $matchedItems) {
+                $srcPath = Join-Path $SourceDir $item.source_path
+                $tgtPath = Join-Path $Target $item.target_path
+                Copy-WorkflowItem $srcPath $tgtPath $item.name
             }
         }
     } else {
-        Write-Host "  ℹ️  Không phát hiện tech stack đặc thù trong danh mục ECC (ví dụ: dự án Swift, C/C++, Kotlin)." -ForegroundColor Cyan
+        Write-Host "  ℹ️  Không phát hiện tech stack đặc thù trong danh mục catalog.json." -ForegroundColor Cyan
         Write-Host "  ✨ Giữ dự án 100% sạch sẽ: Không sao chép các kỹ năng thừa!" -ForegroundColor Green
     }
 

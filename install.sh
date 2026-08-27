@@ -37,10 +37,10 @@ prompt_read() {
   local prompt_text="$1"
   local __resultvar="$2"
   local input_val=""
-  if [ -c /dev/tty ]; then
-    read -r -p "$prompt_text" input_val < /dev/tty
+  if [ -c /dev/tty ] && { : < /dev/tty ; } 2>/dev/null; then
+    read -r -p "$prompt_text" input_val < /dev/tty || true
   else
-    read -r -p "$prompt_text" input_val
+    read -r -p "$prompt_text" input_val || true
   fi
   eval "$__resultvar=\"$input_val\""
 }
@@ -70,7 +70,7 @@ while [[ $# -gt 0 ]]; do
       MODE="$2"
       shift 2
       ;;
-    -y|--yes)
+    -y|--yes|--non-interactive)
       NON_INTERACTIVE=true
       shift
       ;;
@@ -240,6 +240,12 @@ copy_item() {
   local src="$1"
   local dest="$2"
   local name="$3"
+
+  # HARD GUARD: TUYỆT ĐỐI KHÔNG sao chép vào thư mục root nếu target_path rỗng hoặc bằng TARGET_DIR
+  if [ -z "$dest" ] || [ "$dest" = "$TARGET_DIR" ] || [ "$dest" = "$TARGET_DIR/" ]; then
+    echo -e "  ⚠️  ${RED}CẢNH BÁO AN TOÀN: Phát hiện đường dẫn đích không hợp lệ hoặc trỏ vào root: ${name}. Bỏ qua!${NC}"
+    return 1
+  fi
   
   if [ -e "$src" ]; then
     if [ -d "$src" ]; then
@@ -248,9 +254,11 @@ copy_item() {
       # Also copy hidden files if any
       cp -R "$src/".[!.]* "$dest/" 2>/dev/null || true
     else
+      mkdir -p "$(dirname "$dest")"
       cp -p "$src" "$dest"
     fi
-    echo -e "  ✅ Đã tích hợp: ${CYAN}${name}${NC}"
+    local rel_dest="${dest#$TARGET_DIR/}"
+    echo -e "  ✅ Đã tích hợp: ${CYAN}${name}${NC} ➔ ${GREEN}${rel_dest}${NC}"
   else
     echo -e "  ⚠️ Không tìm thấy nguồn: ${name}"
   fi
@@ -260,7 +268,12 @@ copy_item "$SOURCE_DIR/.agents" "$TARGET_DIR/.agents" ".agents/"
 copy_item "$SOURCE_DIR/.specify" "$TARGET_DIR/.specify" ".specify/"
 copy_item "$SOURCE_DIR/adr" "$TARGET_DIR/adr" "adr/"
 copy_item "$SOURCE_DIR/CONTEXT.md" "$TARGET_DIR/CONTEXT.md" "CONTEXT.md"
+copy_item "$SOURCE_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md" "AGENTS.md"
 copy_item "$SOURCE_DIR/GEMINI.md" "$TARGET_DIR/GEMINI.md" "GEMINI.md"
+copy_item "$SOURCE_DIR/CLAUDE.md" "$TARGET_DIR/CLAUDE.md" "CLAUDE.md"
+copy_item "$SOURCE_DIR/.cursorrules" "$TARGET_DIR/.cursorrules" ".cursorrules"
+copy_item "$SOURCE_DIR/.windsurfrules" "$TARGET_DIR/.windsurfrules" ".windsurfrules"
+copy_item "$SOURCE_DIR/.github/copilot-instructions.md" "$TARGET_DIR/.github/copilot-instructions.md" ".github/copilot-instructions.md"
 
 # Record workflow source repository metadata
 cat > "$TARGET_DIR/.agents/workflow-source.json" << EOF
@@ -277,50 +290,80 @@ if [ -f "$SOURCE_DIR/optional-stack-skills/catalog.json" ] && [ ! -f "$TARGET_DI
 fi
 
 # ------------------------------------------------------------------------------
-# 5. Smart Stack Scan & Selective Skill Injection (Zero Unused Files)
+# 5. Smart Stack Scan & Selective Skill Injection (Registry-Driven Engine)
 # ------------------------------------------------------------------------------
-echo -e "\n🔍 ${BOLD}Đang quét Tech Stack của dự án đích...${NC}"
+echo -e "\n🔍 ${BOLD}Đang quét Tech Stack của dự án đích (Registry-Driven)...${NC}"
 
-MATCHED_SKILLS=()
+CATALOG_PATH="$SOURCE_DIR/optional-stack-skills/catalog.json"
+MATCHED_ENTRIES=""
 
-# Fast checks for detection markers
-if [ -f "$TARGET_DIR/go.mod" ] || [ -f "$TARGET_DIR/main.go" ]; then
-  MATCHED_SKILLS+=("go-patterns" "go-rules" "go-depguard")
+if command -v python3 >/dev/null 2>&1 && [ -f "$CATALOG_PATH" ]; then
+  MATCHED_ENTRIES=$(python3 -c '
+import json, os, sys, fnmatch
+
+target = sys.argv[1]
+catalog_file = sys.argv[2]
+
+try:
+    with open(catalog_file) as f:
+        data = json.load(f)
+except Exception:
+    sys.exit(0)
+
+for item in data.get("items", []):
+    if item.get("target_type") == "mcp":
+        continue
+    markers = item.get("detection_markers", [])
+    is_matched = False
+    for m in markers:
+        if ":" in m:
+            parts = m.split(":", 1)
+            filepath = os.path.join(target, parts[0])
+            keyword = parts[1].strip().strip("\"").strip("\x27")
+            if os.path.isfile(filepath):
+                try:
+                    with open(filepath, "r", errors="ignore") as pf:
+                        if keyword in pf.read():
+                            is_matched = True
+                            break
+                except Exception:
+                    pass
+        elif "*" in m:
+            for root, dirs, files in os.walk(target):
+                dirs[:] = [d for d in dirs if d not in [".git", ".agents", "node_modules", "DerivedData", ".build"]]
+                if any(fnmatch.fnmatch(fn, m) for fn in files + dirs):
+                    is_matched = True
+                    break
+            if is_matched:
+                break
+        else:
+            if os.path.exists(os.path.join(target, m)):
+                is_matched = True
+                break
+    if is_matched:
+        src = item.get("source_path", "").strip()
+        tgt = item.get("target_path", "").strip()
+        name = item.get("name", item.get("id", "")).strip()
+        mid = item.get("id", "").strip()
+        if src and tgt:
+            print(src)
+            print(tgt)
+            print(name)
+            print(mid)
+' "$TARGET_DIR" "$CATALOG_PATH" 2>/dev/null)
 fi
 
-if [ -f "$TARGET_DIR/pyproject.toml" ] || [ -f "$TARGET_DIR/requirements.txt" ] || [ -f "$TARGET_DIR/poetry.lock" ]; then
-  MATCHED_SKILLS+=("python-patterns" "python-importlinter")
-fi
-
-if [ -f "$TARGET_DIR/Cargo.toml" ]; then
-  MATCHED_SKILLS+=("rust-patterns")
-fi
-
-if [ -f "$TARGET_DIR/package.json" ]; then
-  MATCHED_SKILLS+=("typescript-patterns")
-  if grep -q "@nestjs" "$TARGET_DIR/package.json" 2>/dev/null || [ -f "$TARGET_DIR/nest-cli.json" ]; then
-    MATCHED_SKILLS+=("nestjs-patterns")
-  fi
-  if grep -q "react" "$TARGET_DIR/package.json" 2>/dev/null || [ -f "$TARGET_DIR/next.config.js" ] || [ -f "$TARGET_DIR/next.config.mjs" ] || [ -f "$TARGET_DIR/next.config.ts" ]; then
-    MATCHED_SKILLS+=("react-rules" "frontend-patterns")
-  fi
-fi
-
-if [ -f "$TARGET_DIR/prisma/schema.prisma" ]; then
-  MATCHED_SKILLS+=("prisma-patterns")
-fi
-
-if [ -f "$TARGET_DIR/Dockerfile" ] || [ -f "$TARGET_DIR/docker-compose.yml" ] || [ -f "$TARGET_DIR/compose.yaml" ]; then
-  MATCHED_SKILLS+=("docker-patterns")
-fi
-
-if [ ${#MATCHED_SKILLS[@]} -gt 0 ]; then
-  echo -e "  🎯 ${GREEN}Phát hiện các kỹ năng stack phù hợp:${NC} ${MATCHED_SKILLS[*]}"
+if [ -n "$MATCHED_ENTRIES" ]; then
+  echo -e "  🎯 ${GREEN}Phát hiện các thành phần tech stack phù hợp trong catalog.json:${NC}"
+  while read -r src && read -r tgt && read -r name && read -r mid; do
+    [ -z "$name" ] && continue
+    echo -e "     - ${CYAN}${name}${NC} (${mid}) ➔ ${tgt}"
+  done <<< "$MATCHED_ENTRIES"
   
   DO_INJECT=true
   if [ "$NON_INTERACTIVE" != true ]; then
     INJECT_CHOICE=""
-    prompt_read "👉 Bạn có muốn tự động nạp các kỹ năng trên vào .agents/skills/? [Y/n]: " INJECT_CHOICE
+    prompt_read "👉 Bạn có muốn tự động nạp các thành phần trên vào dự án? [Y/n]: " INJECT_CHOICE
     case "${INJECT_CHOICE:-y}" in
       n|N) DO_INJECT=false ;;
       *) DO_INJECT=true ;;
@@ -328,46 +371,13 @@ if [ ${#MATCHED_SKILLS[@]} -gt 0 ]; then
   fi
 
   if [ "$DO_INJECT" = true ]; then
-    for skill in "${MATCHED_SKILLS[@]}"; do
-      case "$skill" in
-        go-patterns)
-          copy_item "$SOURCE_DIR/optional-stack-skills/languages/go/go-patterns" "$TARGET_DIR/.agents/skills/engineering/go-patterns" "go-patterns"
-          ;;
-        go-rules)
-          copy_item "$SOURCE_DIR/optional-stack-skills/languages/go/rules/coding-style.md" "$TARGET_DIR/.agents/rules/go-coding-style.md" "go-rules"
-          ;;
-        go-depguard)
-          copy_item "$SOURCE_DIR/optional-stack-skills/languages/go/depguard.yaml" "$TARGET_DIR/depguard.yaml" "depguard.yaml"
-          ;;
-        python-patterns)
-          copy_item "$SOURCE_DIR/optional-stack-skills/languages/python/python-patterns" "$TARGET_DIR/.agents/skills/engineering/python-patterns" "python-patterns"
-          ;;
-        python-importlinter)
-          copy_item "$SOURCE_DIR/optional-stack-skills/languages/python/.importlinter.ini" "$TARGET_DIR/.importlinter.ini" ".importlinter.ini"
-          ;;
-        rust-patterns)
-          copy_item "$SOURCE_DIR/optional-stack-skills/languages/rust/rust-patterns" "$TARGET_DIR/.agents/skills/engineering/rust-patterns" "rust-patterns"
-          ;;
-        typescript-patterns)
-          copy_item "$SOURCE_DIR/optional-stack-skills/languages/typescript/typescript-patterns" "$TARGET_DIR/.agents/skills/engineering/typescript-patterns" "typescript-patterns"
-          ;;
-        nestjs-patterns)
-          copy_item "$SOURCE_DIR/optional-stack-skills/frameworks/nestjs-patterns" "$TARGET_DIR/.agents/skills/engineering/nestjs-patterns" "nestjs-patterns"
-          ;;
-        frontend-patterns)
-          copy_item "$SOURCE_DIR/optional-stack-skills/frameworks/frontend-patterns" "$TARGET_DIR/.agents/skills/engineering/frontend-patterns" "frontend-patterns"
-          ;;
-        prisma-patterns)
-          copy_item "$SOURCE_DIR/optional-stack-skills/frameworks/prisma-patterns" "$TARGET_DIR/.agents/skills/engineering/prisma-patterns" "prisma-patterns"
-          ;;
-        docker-patterns)
-          copy_item "$SOURCE_DIR/.agents/skills/engineering/docker-patterns" "$TARGET_DIR/.agents/skills/engineering/docker-patterns" "docker-patterns"
-          ;;
-      esac
-    done
+    while read -r src && read -r tgt && read -r name && read -r mid; do
+      [ -z "$src" ] || [ -z "$tgt" ] && continue
+      copy_item "$SOURCE_DIR/$src" "$TARGET_DIR/$tgt" "$name"
+    done <<< "$MATCHED_ENTRIES"
   fi
 else
-  echo -e "  ℹ️  ${CYAN}Không phát hiện tech stack đặc thù trong danh mục ECC (ví dụ: dự án Swift, C/C++, Kotlin).${NC}"
+  echo -e "  ℹ️  ${CYAN}Không phát hiện tech stack đặc thù trong danh mục catalog.json.${NC}"
   echo -e "  ✨ ${GREEN}Giữ dự án 100% sạch sẽ: Không sao chép các kỹ năng thừa!${NC}"
 fi
 
