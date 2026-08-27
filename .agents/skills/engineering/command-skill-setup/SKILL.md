@@ -126,12 +126,14 @@ Once confirmed by the user, the agent performs automated setup:
    - **If `uv` is NOT found**, prompt or execute the standard installation:
      - **macOS / Linux**: `curl -LsSf https://astral.sh/uv/install.sh | sh` (or `brew install uv`)
      - **Windows PowerShell**: `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`
-   - **Run Initial AST Graph Build**: The agent immediately executes the graph build command in the workspace root:
+   - **Run Official Auto-Configuration & Graph Build**: The agent executes the official one-command setup followed by the graph build:
      ```bash
+     uvx code-review-graph install -y
      uvx code-review-graph build
      ```
-     _This downloads `code-review-graph` via `uvx`, parses codebase AST with Tree-sitter, and creates `.code-review-graph/graph.db`._
-   - **Update `.agents/mcp_config.json`**:
+     _`install -y` automatically configures MCP servers across all detected AI tools (Antigravity, Cursor, Windsurf, Claude Code) and adds `.code-review-graph/` to `.gitignore`._
+     _`build` parses the codebase with Tree-sitter and creates the local SQLite AST graph (`.code-review-graph/graph.db`)._
+   - **Workspace MCP Verification**: Ensure `.agents/mcp_config.json` also has the server registered:
      ```json
      {
        "mcpServers": {
@@ -147,7 +149,6 @@ Once confirmed by the user, the agent performs automated setup:
        }
      }
      ```
-   - **Protect Git from Local Database**: Ensure `.code-review-graph/` is added to `.gitignore` (or `.git/info/exclude`) so the local SQLite database is never pushed to remote Git.
 3. **Configure Git Tracking Mode (based on Step 3 selection)**:
    - **Local-Only Mode**: Append the following block to `.gitignore`:
      ```gitignore
