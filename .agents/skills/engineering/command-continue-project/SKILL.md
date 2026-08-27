@@ -3,8 +3,9 @@ invocation: user
 name: command-continue-project
 description: >-
   Activated when the user types /command-continue-project (or shortcuts /continue, /next, /auto-continue-project).
-  Automatically scans docs/PRODUCT_BACKLOG_ROADMAP.md, identifies the next uncompleted User Story or Task,
-  and activates the WordStreak development pipeline (BA Pipeline -> Speckit -> TDD -> Docs).
+  Automatically scans docs/PRODUCT_BACKLOG_ROADMAP.md (schema-version 1.1+), reads YAML frontmatter tech-stack,
+  checks Depends-on/Blocks dependency chain, reads Effort + Context-budget for auto-routing,
+  and activates the full development pipeline (BA Pipeline -> Speckit -> TDD -> Docs).
 triggers:
   - "/command-continue-project"
   - "/continue"
@@ -17,7 +18,11 @@ triggers:
 
 # Command: Continue Project Workflow (/command-continue-project)
 
-This command skill automatically inspects project progress in [PRODUCT_BACKLOG_ROADMAP.md](../../docs/PRODUCT_BACKLOG_ROADMAP.md) and triggers the next development phase in full compliance with [AGENTS.md](../../.agents/AGENTS.md) and [wordstreak-workflow](../wordstreak-workflow/SKILL.md).
+This command skill automatically inspects project progress in [PRODUCT_BACKLOG_ROADMAP.md](../../docs/PRODUCT_BACKLOG_ROADMAP.md) and triggers the next development phase in full compliance with [AGENTS.md](../../.agents/AGENTS.md).
+
+**Requires:** `docs/PRODUCT_BACKLOG_ROADMAP.md` following schema-version `1.1`.
+If file is missing or not schema-version 1.1, instruct user to run `/generate-backlog` first.
+Template: [PRODUCT_BACKLOG_ROADMAP-template.md](../../.specify/templates/PRODUCT_BACKLOG_ROADMAP-template.md)
 
 ---
 
@@ -40,10 +45,29 @@ Before starting analysis or code, ensure the working environment is synced with 
 ### Step 1: Scan Backlog & Roadmap
 
 1. Read `docs/PRODUCT_BACKLOG_ROADMAP.md`.
-2. Determine the current active Sprint and find the first User Story with status:
-   - `[/]` (In Progress / Partially completed)
-   - Or `[ ]` (To Do / Next in backlog)
-3. Extract the US ID (e.g., `US-CARD-02`, `US-SRS-01`), story title, and Acceptance Criteria (AC).
+
+2. **Extract YAML Frontmatter** (schema-version 1.1+):
+   - Read `tech-stack` block (language, backend, frontend, database, infra, test).
+   - Store as `$TECH_CONTEXT` — this MUST be injected into the system prompt of every subagent
+     dispatched in this session (business-analyst, system-architect, backend-developer, frontend-developer).
+   - If YAML frontmatter is missing → STOP. Instruct user: _"File chưa đúng schema v1.1. Chạy
+     `/generate-backlog` để tạo file chuẩn."_
+
+3. **Find the target User Story** — in strict priority order:
+   - First: any story with `[/]` (In Progress — resume before starting new work).
+   - Then: the first `[ ]` from the top of the active Sprint downward.
+
+4. **Dependency Gate (MANDATORY — do NOT skip)**:
+   - Read the story's `Depends-on` field.
+   - For each dependency listed:
+     - Check its checkbox status in the file.
+     - If any dependency is NOT `[x]` → **REFUSE** to proceed with the current story.
+     - Output: _"🚫 **Blocked:** `<US-ID>` cannot start until `<Depends-on>` is `[x]`.
+       Recommend working on `<Depends-on>` first."_
+   - If `Depends-on: (none)` or all dependencies are `[x]` → proceed.
+
+5. **Extract story metadata**:
+   - US ID (e.g. `US-AUTH-001`), Title, Slug, Priority, Effort, Context-budget, Acceptance Criteria.
 
 ### Step 2: Inspect Current Story Deliverables
 
@@ -55,19 +79,44 @@ Before starting analysis or code, ensure the working environment is synced with 
 
 ### Step 3: Route & Execute the Appropriate Phase
 
+**Auto-routing matrix** (read BEFORE dispatching any subagent):
+
+| Effort | Context-budget | BA Depth                                           | wayfinder?                            |
+| :----- | :------------- | :------------------------------------------------- | :------------------------------------ |
+| S      | single-session | Fast-Track (2–3 questions only, skip gap-analysis) | ❌ No                                 |
+| M      | single-session | Bounded Task (stages 1→2→4→5→6→7→8)                | ❌ No                                 |
+| L      | single-session | Full Feature (all 8 stages)                        | ❌ No                                 |
+| L      | multi-session  | Full Feature (all 8 stages)                        | ✅ Yes — invoke `wayfinder` before BA |
+| XL     | multi-session  | Full Feature (all 8 stages)                        | ✅ Yes — invoke `wayfinder` before BA |
+
+> **Tech Context Injection (MANDATORY):** Every `invoke_subagent` call in Steps A–D MUST
+> include `$TECH_CONTEXT` from Step 1 in the subagent's system prompt. This eliminates
+> tech stack hallucination across all phases.
+
 #### Case A: No Domain Baseline (Net-New Feature)
+
+- **Pre-check wayfinder** (if Effort = L|XL AND Context-budget = multi-session):
+  - Dispatch `wayfinder` skill to map decision tickets before any BA work.
+  - Only proceed to BA after wayfinder map is confirmed by user.
 
 - **MANDATORY AUTOMATIC SUBAGENT DELEGATION**:
   - The Orchestrator MUST NEVER run BA stages directly on the primary context.
-  - **Step 1 (Intake)**: Dispatch `business-analyst` via `invoke_subagent` (`claude-opus-4.6` / `inherit`) to run `intake-classifier` and create `.specify/features/<slug>/`.
+  - **Step 1 (Intake)**: Dispatch `business-analyst` via `invoke_subagent` (`claude-opus-4.6` / `inherit`)
+    with `$TECH_CONTEXT` in system prompt. Run `intake-classifier` and create `.specify/features/<slug>/`.
+  - Override classification to match roadmap Effort field: `S`→Micro-Task, `M`→Bounded, `L|XL`→Full Feature.
 
 - **🛑 INTERACTIVE ELICITATION INTERVIEW GATE (Stage 2 — MANDATORY CUSTOMER INTERVIEW)**:
   - The AI **MUST PAUSE** before domain modeling, gap analysis, or spec writing.
-  - AI MUST present 2–3 targeted clarification questions directly to the user (via chat or `ask_question`) covering business goals, key state machine transitions, business rules/formulas, and edge cases.
-  - **Strict Zero-Hallucination Policy**: AI is strictly prohibited from inventing business rules or silently making assumptions. Anything ambiguous or unspecified must be asked and confirmed by the user.
+  - AI MUST present 2–3 targeted clarification questions directly to the user covering
+    business goals, key state machine transitions, business rules/formulas, and edge cases.
+  - **Strict Zero-Hallucination Policy**: AI is strictly prohibited from inventing business rules
+    or silently making assumptions. Anything ambiguous or unspecified must be asked and confirmed.
+  - AC from roadmap file serve as the interview ANCHOR — verify each AC is correctly understood.
 
 - **Step 2 (Domain Modeling & Spec Generation — Stages 3–8)**:
-  - Once the user answers the elicitation questions, dispatch `business-analyst` to execute Stages 3–8 (`gap-analysis`, `domain-modeling`, `risk-contradiction-scanner`, `spec-writer`, `spec-validator`, `handover`) and compile `baseline.md`.
+  - Once the user answers the elicitation questions, dispatch `business-analyst` to execute
+    Stages 3–8 (`gap-analysis`, `domain-modeling`, `risk-contradiction-scanner`, `spec-writer`,
+    `spec-validator`, `handover`) and compile `baseline.md`.
 
 - **🛑 CONFIRMATION GATE 1 — Spec Sign-Off (MANDATORY)**:
   After `business-analyst` completes and `baseline.md` is drafted, the Orchestrator **MUST STOP** and present a structured summary of the Domain Baseline to the user for review. The AI may **not** proceed to Speckit or any implementation work until the user gives explicit approval.
@@ -141,6 +190,9 @@ When `/command-continue-project` runs, output a concise status summary:
 ```markdown
 🎯 **Target User Story:** [<US ID> - <Story Title>]
 📌 **Epic / Sprint:** [<Epic Name> | Sprint <Number>]
-📊 **Current Stage:** [<Not Started / BA Analysis / Technical Planning / TDD Implementation / Quality Review & Docs>]
+⚡ **Effort / Budget:** [<S|M|L|XL> / <single-session|multi-session>]
+🔗 **Dependency Gate:** [✅ Clear | 🚫 Blocked by <US-ID>]
+🛠️ **Tech Context:** [<language> + <backend> + <frontend> + <database>]
+📊 **Current Stage:** [Not Started / wayfinder / BA Analysis / Technical Planning / TDD Implementation / Quality Review & Docs]
 🚀 **Next Immediate Action:** [<Specific step the agent is executing now>]
 ```
