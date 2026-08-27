@@ -1,0 +1,220 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "name": "Universal Agents Workflow - Curated Skill Catalog",
+  "version": "1.0.0",
+  "description": "Curated catalog of modular skills, rules, boundary linters, and intelligence MCP servers with auto-detection markers and concise descriptions.",
+  "items": [
+    {
+      "id": "go-patterns",
+      "name": "Go Idiomatic Architecture & Deep Modules",
+      "category": "Language",
+      "short_description": "Enforces Go idioms: internal/ package boundaries, minimal consumer-defined interfaces, structured error wrapping, and anti-anemic domain models.",
+      "detection_markers": ["go.mod", "main.go"],
+      "source_path": "optional-stack-skills/languages/go/go-patterns",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/go-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "go-rules",
+      "name": "Go Coding Style & Rules",
+      "category": "Language",
+      "short_description": "Coding standards for Go: naming conventions, concurrency safety, table-driven unit testing, and defer cleanup rules.",
+      "detection_markers": ["go.mod"],
+      "source_path": "optional-stack-skills/languages/go/rules/coding-style.md",
+      "target_type": "rule",
+      "target_path": ".agents/rules/go-coding-style.md",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "go-depguard",
+      "name": "Go Depguard Architectural Linter",
+      "category": "Boundary Enforcement",
+      "short_description": "Golangci-lint boundary checker configuration preventing unauthorized cross-package imports and keeping domain packages isolated.",
+      "detection_markers": ["go.mod"],
+      "source_path": "optional-stack-skills/languages/go/depguard.yaml",
+      "target_type": "config",
+      "target_path": "depguard.yaml",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "python-patterns",
+      "name": "Python Deep Modules & Robust Typing",
+      "category": "Language",
+      "short_description": "Modern Python architectural standards using Pydantic v2 schemas, strict Mypy typing, Ruff linting, and Pytest fixture hierarchies.",
+      "detection_markers": [
+        "pyproject.toml",
+        "requirements.txt",
+        "Pipfile",
+        "poetry.lock",
+        "setup.py"
+      ],
+      "source_path": "optional-stack-skills/languages/python/python-patterns",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/python-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "python-importlinter",
+      "name": "Python Import-Linter Boundary Checker",
+      "category": "Boundary Enforcement",
+      "short_description": "Enforces strict layer hierarchy in Python codebases (Domain -> Services -> Adapters) using import-linter contracts.",
+      "detection_markers": ["pyproject.toml", "requirements.txt"],
+      "source_path": "optional-stack-skills/languages/python/.importlinter.ini",
+      "target_type": "config",
+      "target_path": ".importlinter.ini",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "rust-patterns",
+      "name": "Rust Idiomatic Workspaces & Deep Modules",
+      "category": "Language",
+      "short_description": "Rust workspace boundary design: pub(crate) encapsulation, typed error trees with thiserror/anyhow, and trait-based zero-cost abstractions.",
+      "detection_markers": ["Cargo.toml"],
+      "source_path": "optional-stack-skills/languages/rust/rust-patterns",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/rust-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "typescript-patterns",
+      "name": "TypeScript Deep Modules & Seam Discipline",
+      "category": "Language",
+      "short_description": "Clean TypeScript architecture: explicit barrel files (index.ts), branded types, schema validation with Zod, and avoidance of circular dependencies.",
+      "detection_markers": ["tsconfig.json", "package.json"],
+      "source_path": "optional-stack-skills/languages/typescript/rules",
+      "target_type": "rule",
+      "target_path": ".agents/rules/typescript-rules",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "ts-dependency-cruiser",
+      "name": "TypeScript Dependency-Cruiser Configuration",
+      "category": "Boundary Enforcement",
+      "short_description": "Automated architectural boundary validator preventing UI code from leaking into domain entities and blocking cyclic imports.",
+      "detection_markers": ["package.json", "tsconfig.json"],
+      "source_path": "optional-stack-skills/languages/typescript/dependency-cruiser.config.cjs",
+      "target_type": "config",
+      "target_path": "dependency-cruiser.config.cjs",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "react-rules",
+      "name": "React & Next.js Best Practices",
+      "category": "Framework",
+      "short_description": "Comprehensive React standards: hook purity, custom hook extraction, Server/Client component separation, and robust accessibility.",
+      "detection_markers": ["react", "next", "package.json:\"react\""],
+      "source_path": "optional-stack-skills/frameworks/react-rules",
+      "target_type": "rule",
+      "target_path": ".agents/rules/react-rules",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "nestjs-patterns",
+      "name": "NestJS Enterprise Microservices Architecture",
+      "category": "Framework",
+      "short_description": "Enterprise NestJS patterns: modular dependency injection, CQRS event sourcing, class-validator DTOs, and layered controllers/services.",
+      "detection_markers": [
+        "@nestjs/core",
+        "nest-cli.json",
+        "package.json:\"@nestjs/core\""
+      ],
+      "source_path": "optional-stack-skills/frameworks/nestjs-patterns",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/nestjs-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "prisma-patterns",
+      "name": "Prisma ORM Schema & Migration Workflows",
+      "category": "Database",
+      "short_description": "Safe schema evolutions, relation modeling, zero-downtime migration scripts, and resilient transaction handling with Prisma Client.",
+      "detection_markers": [
+        "prisma/schema.prisma",
+        "schema.prisma",
+        "package.json:\"@prisma/client\""
+      ],
+      "source_path": "optional-stack-skills/frameworks/prisma-patterns",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/prisma-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "frontend-patterns",
+      "name": "Modern Frontend Component Patterns",
+      "category": "Frontend",
+      "short_description": "Production UI architecture: compound component patterns, headless UI state machines, CSS custom properties, and keyboard navigation.",
+      "detection_markers": [
+        "package.json:\"react\"",
+        "package.json:\"vue\"",
+        "package.json:\"svelte\""
+      ],
+      "source_path": "optional-stack-skills/frameworks/frontend-patterns",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/frontend-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "liquid-glass-design",
+      "name": "Liquid Glass Visual Design & Tokens",
+      "category": "Design System",
+      "short_description": "Curated design tokens for premium modern interfaces: glassmorphic depth, 1px hairline borders, obsidian pills, and WCAG AA contrast.",
+      "detection_markers": [
+        "tailwind.config.js",
+        "tailwind.config.ts",
+        "package.json:\"tailwindcss\""
+      ],
+      "source_path": "optional-stack-skills/frameworks/liquid-glass-design",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/liquid-glass-design",
+      "recommendation": "optional"
+    },
+    {
+      "id": "postgres-patterns",
+      "name": "PostgreSQL Performance & Indexing Standards",
+      "category": "Database",
+      "short_description": "Database design excellence: composite indexing strategy, JSONB querying, optimistic locking, and connection pooling best practices.",
+      "detection_markers": [
+        "docker-compose.yml:\"postgres\"",
+        "package.json:\"pg\"",
+        "requirements.txt:\"psycopg2\""
+      ],
+      "source_path": ".agents/skills/engineering/postgres-patterns",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/postgres-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "docker-patterns",
+      "name": "Docker Multi-Stage Containerization",
+      "category": "DevOps",
+      "short_description": "Production container guidelines: minimal distroless base images, non-root user execution, caching layers, and healthcheck setups.",
+      "detection_markers": [
+        "Dockerfile",
+        "docker-compose.yml",
+        "docker-compose.yaml",
+        "compose.yaml"
+      ],
+      "source_path": ".agents/skills/engineering/docker-patterns",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/docker-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "code-review-graph",
+      "name": "Code-Review-Graph Local MCP Intelligence Server",
+      "category": "Intelligence (MCP)",
+      "short_description": "AST-based persistent SQLite code graph (Tree-sitter) enabling subagents (code-explorer, code-reviewer) to query callers, callees, and blast-radius with up to 26x fewer tokens.",
+      "detection_markers": ["git", ".git"],
+      "source_path": "https://github.com/tirth8205/code-review-graph",
+      "target_type": "mcp",
+      "target_path": ".agents/mcp_config.json",
+      "mcp_config": {
+        "command": "uvx",
+        "args": ["code-review-graph", "serve"],
+        "type": "stdio"
+      },
+      "recommendation": "optional"
+    }
+  ]
+}
