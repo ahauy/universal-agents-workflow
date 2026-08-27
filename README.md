@@ -9,10 +9,15 @@
 
 1. [Điểm Nổi Bật Cốt Lõi](#-1-điểm-nổi-bật-cốt-lõi)
 2. [Triết lý Kiến trúc: Hai Mặt Phẳng (Two-Plane Architecture)](#-2-triết-lý-kiến-trúc-hai-mặt-phẳng-two-plane-architecture)
-3. [Hướng dẫn Bắt đầu Nhanh (Getting Started)](#-3-hướng-dẫn-bắt-đầu-nhanh-getting-started)
+3. [Bản Chất & Hướng Dẫn Sử Dụng Bộ Kỹ Năng (Agent Skills)](#-3-bản-chất--hướng-dẫn-sử-dụng-bộ-kỹ-năng-agent-skills)
+   - [⚠️ Vì sao không thấy Skill khi gõ / trong menu gợi ý của IDE?](#️-vì-sao-không-thấy-skill-khi-gõ--trong-menu-gợi-ý-của-ide)
+   - [3 Cách kích hoạt kỹ năng đơn giản](#-3-cách-kích-hoạt-kỹ-năng-đơn-giản)
+   - [Cấu trúc & vị trí lưu trữ thực tế của bộ Skill](#-cấu-trúc--vị-trí-lưu-trữ-thực-tế-của-bộ-skill)
+   - [Cách kiểm tra danh sách Skill đang hoạt động](#-cách-kiểm-tra-danh-sách-skill-đang-hoạt-động)
+4. [Hướng dẫn Bắt đầu Nhanh (Getting Started)](#-4-hướng-dẫn-bắt-đầu-nhanh-getting-started)
    - [Phương án A: Khởi tạo Dự án Mới Toanh (Greenfield)](#phương-án-a-khởi-tạo-dự-án-mới-toanh-greenfield)
    - [Phương án B: Tích hợp vào Dự án ĐANG CÓ SẴN (Brownfield / Existing Codebase)](#phương-án-b-tích-hợp-vào-dự-án-đang-có-sẵn-brownfield--existing-codebase)
-4. [Hướng dẫn Vận hành Từ Đầu Đến Cuối (End-to-End Workflow: A đến Z)](#-4-hướng-dẫn-vận-hành-từ-đầu-đến-cuối-end-to-end-workflow-a-đến-z)
+5. [Hướng dẫn Vận hành Từ Đầu Đến Cuối (End-to-End Workflow: A đến Z)](#-5-hướng-dẫn-vận-hành-từ-đầu-đến-cuối-end-to-end-workflow-a-đến-z)
    - [Bước 1: Quét & Tự động Cấu hình (`/skill-setup`)](#bước-1-quét--tự-động-cấu-hình-skill-setup)
    - [Bước 2: Khảo sát Nghiệp vụ & Ký duyệt Baseline (Phase 1 BA Pipeline)](#bước-2-khảo-sát-nghiệp-vụ--ký-duyệt-baseline-phase-1-ba-pipeline)
    - [Bước 3: Đặc tả Kỹ thuật & Kế hoạch Thực thi (Phase 2–4 SpecKit)](#bước-3-đặc-tả-kỹ-thuật--kế-hoạch-thực-thi-phase-24-speckit)
@@ -20,22 +25,22 @@
    - [Bước 5: Phản biện Kép Độc lập (Phase 6A Dual-Pass Review)](#bước-5-phản-biện-kép-độc-lập-phase-6a-dual-pass-review)
    - [Bước 6: Tài liệu hóa Diataxis & User Guide Hình Ảnh Thật (Phase 6B Docs)](#bước-6-tài-liệu-hóa-diataxis--user-guide-hình-ảnh-thật-phase-6b-docs)
    - [Bước 7: Đóng gói Modular Commit & Đẩy Mã Nguồn (`/command-git-push`)](#bước-7-đóng-gói-modular-commit--đẩy-mã-nguồn-command-git-push)
-5. [Các Kịch bản Vận hành Bổ trợ](#-5-các-kịch-bản-vận-hành-bổ-trợ)
+6. [Các Kịch bản Vận hành Bổ trợ](#-6-các-kịch-bản-vận-hành-bổ-trợ)
    - [Kịch bản 1: Xử lý nhanh lỗi nhỏ (Micro-Task Fast-Track)](#kịch-bản-1-xử-lý-nhanh-lỗi-nhỏ-micro-task-fast-track)
    - [Kịch bản 2: Tiếp tục dự án từ Roadmap (`/command-continue-project`)](#kịch-bản-2-tiếp-tục-dự-án-từ-roadmap-command-continue-project)
    - [Kịch bản 3: Thám hiểm dự án lớn trong sương mù (`wayfinder`)](#kịch-bản-3-thám-hiểm-dự-án-lớn-trong-sương-mù-wayfinder)
    - [Kịch bản 4: Hồi cứu & nén ngữ cảnh ca làm việc (`/retro` & `/handoff`)](#kịch-bản-4-hồi-cứu--nén-ngữ-cảnh-ca-làm-việc-retro--handoff)
-6. [Bảng Tra Cứu Lệnh Nhanh (Cheatsheet Slash Commands)](#-6-bảng-tra-cứu-lệnh-nhanh-cheatsheet-slash-commands)
-7. [Danh mục 13 Subagents Chuyên Trách](#-7-danh-mục-13-subagents-chuyên-trách)
-8. [Khóa Bảo Vệ Cơ Học & Git Guardrails](#-8-khóa-bảo-vệ-cơ-học--git-guardrails)
-9. [Bảng Tra Cứu Xử Lý Sự Cố (Failure-Mode Index)](#-9-bảng-tra-cứu-xử-lý-sự-cố-failure-mode-index)
+7. [Bảng Tra Cứu Toàn Bộ Kỹ Năng & Lệnh (Cheatsheet Skills & Commands)](#-7-bảng-tra-cứu-toàn-bộ-kỹ-năng--lệnh-cheatsheet-skills--commands)
+8. [Danh mục 13 Subagents Chuyên Trách](#-8-danh-mục-13-subagents-chuyên-trách)
+9. [Khóa Bảo Vệ Cơ Học & Git Guardrails](#-9-khóa-bảo-vệ-cơ-học--git-guardrails)
+10. [Bảng Tra Cứu Xử Lý Sự Cố (Failure-Mode Index)](#-10-bảng-tra-cứu-xử-lý-sự-cố-failure-mode-index)
 
 ---
 
 ## ✨ 1. Điểm Nổi Bật Cốt Lõi
 
 - 🌍 **100% Đa Ngôn Ngữ (Polyglot & Language-Agnostic)**: Hoạt động trơn tru trên Go, Rust, Python, TypeScript/JavaScript, Java/Kotlin, C# .NET, PHP, Ruby. Tự động nhận diện stack qua manifest (`go.mod`, `Cargo.toml`, `pyproject.toml`, `package.json`, `pom.xml`).
-- 🎯 **Onboarding Thích Ứng Thông Minh (`/skill-setup`)**: Tự động nhận diện dự án, tra cứu danh mục chuẩn [optional-stack-skills/catalog.json](file:///optional-stack-skills/catalog.json) và hiển thị bảng đề xuất kỹ năng kèm **mô tả nội dung ngắn gọn** trước khi kích hoạt.
+- 🎯 **Onboarding Thích Ứng Thông Minh (`/skill-setup`)**: Tự động nhận diện dự án, tra cứu danh mục chuẩn [optional-stack-skills/catalog.json](optional-stack-skills/catalog.json) và hiển thị bảng đề xuất kỹ năng kèm **mô tả nội dung ngắn gọn** trước khi kích hoạt.
 - 🕸️ **Tích hợp MCP Code Intelligence (`code-review-graph`)**: Hỗ trợ kết nối MCP server Tree-sitter + SQLite cục bộ, cho phép agent tra cứu quan hệ gọi hàm/class và blast-radius với chi phí token giảm tới 26x.
 - 🛡️ **Zero Hallucination & Zero Silent Assumptions**: Bắt buộc phỏng vấn tương tác 6 trụ cột nghiệp vụ (`grilling`) theo chuẩn IREB/BABOK trước khi viết dòng code nào.
 - ⚡ **Quy Chế Fast-Track Cho Micro-Task**: Xử lý các thay đổi nhỏ (< 30 dòng, fix bug hiển nhiên, đổi biến, sửa typo) nhanh chóng, bỏ qua thủ tục BA nặng nề, đi thẳng vào chu trình TDD.
@@ -76,7 +81,107 @@ graph LR
 
 ---
 
-## 🚀 3. Hướng dẫn Bắt đầu Nhanh (Getting Started)
+## 🧩 3. Bản Chất & Hướng Dẫn Sử Dụng Bộ Kỹ Năng (Agent Skills)
+
+> [!IMPORTANT]
+>
+> ### ⚠️ Vì sao không thấy Skill khi gõ `/` trong menu gợi ý của IDE?
+>
+> - Trong các AI Editor (như **Antigravity IDE, Cursor, Windsurf, Claude Code**), khi bạn gõ dấu `/` trên thanh chat, menu popup tự động gợi ý (autocomplete) chỉ hiển thị các **lệnh hệ thống dựng sẵn của IDE** (Built-in IDE commands như `/goal`, `/schedule`, `/learn`, `/grill-me`...).
+> - Các kỹ năng trong bộ framework này là **Agent Skills** (các chỉ dẫn quy trình nghiệp vụ & kỹ thuật định dạng chuẩn `SKILL.md` nằm trong thư mục `.agents/skills/`), chứ **KHÔNG PHẢI** là extension cài từ marketplace hay command cứng trong giao diện editor.
+> - **Bạn không cần menu gợi ý của IDE để dùng Skill!** Hãy xem 3 cách kích hoạt bên dưới.
+
+### 💡 3 Cách Kích Hoạt Kỹ Năng Đơn Giản
+
+```mermaid
+graph LR
+    subgraph S1 ["Cách 1: Gõ lệnh trực tiếp"]
+        C1["Nhập /skill-setup, /command-git-push..."]
+    end
+    subgraph S2 ["Cách 2: Tự động theo ngữ cảnh"]
+        C2["Yêu cầu tự nhiên: 'Làm tính năng...', 'Debug bug...'"]
+    end
+    subgraph S3 ["Cách 3: Chỉ định đích danh"]
+        C3["'Dùng skill grilling phỏng vấn tôi', 'Chạy wayfinder'"]
+    end
+    C1 --> Agent["🤖 AI Agent nạp SKILL.md & thực thi"]
+    C2 --> Agent
+    C3 --> Agent
+```
+
+1. **Cách 1: Nhập lệnh trực tiếp vào khung chat (Khuyên dùng)**:
+   Bạn chỉ cần gõ tên lệnh (có dấu `/` hoặc không có dấu `/`) vào ô chat như một tin nhắn thông thường và nhấn **Enter / Gửi**:
+   - Gõ: `/skill-setup` hoặc `chạy skill setup` (hoặc `setup dự án`) $\rightarrow$ Agent đọc [.agents/skills/engineering/command-skill-setup/SKILL.md](.agents/skills/engineering/command-skill-setup/SKILL.md) để quét stack và gợi ý bộ kỹ năng phù hợp.
+   - Gõ: `/command-git-push` hoặc `push code lên git` $\rightarrow$ Agent đọc [.agents/skills/engineering/command-git-push/SKILL.md](.agents/skills/engineering/command-git-push/SKILL.md), kiểm tra cổng user guide, chia modular commits và push an toàn.
+   - Gõ: `/command-continue-project` hoặc `tiếp tục roadmap` $\rightarrow$ Agent đọc [.agents/skills/engineering/command-continue-project/SKILL.md](.agents/skills/engineering/command-continue-project/SKILL.md) và tự động làm task tiếp theo.
+   - Gõ: `/route` hoặc `bây giờ nên làm bước gì?` $\rightarrow$ Agent kích hoạt [.agents/skills/productivity/route/SKILL.md](.agents/skills/productivity/route/SKILL.md) để định hướng quy trình chuẩn.
+   - Gõ: `/wait-what` hoặc `giải thích lại bình dân hơn` $\rightarrow$ Agent kích hoạt [.agents/skills/productivity/wait-what/SKILL.md](.agents/skills/productivity/wait-what/SKILL.md) để diễn giải lại bằng từ ngữ đời thường.
+
+2. **Cách 2: Tự động kích hoạt theo ngữ cảnh (Model-Invoked / Không cần nhớ lệnh)**:
+   Bạn **hoàn toàn không cần nhớ tên lệnh hay bất kỳ cú pháp nào**. Toàn bộ 50+ skills đã được khai báo mô tả năng lực trong hệ thống. Khi bạn đưa ra một yêu cầu công việc tự nhiên, AI Agent sẽ tự động đối chiếu và tự nạp skill phù hợp:
+   - Khi bạn nói: _"Tôi muốn làm tính năng nạp tiền ví qua cổng thanh toán"_ $\rightarrow$ Agent tự động kích hoạt `intake-classifier` $\rightarrow$ `elicitation-interview`.
+   - Khi bạn nói: _"Thiết kế giúp tôi API quản lý giỏ hàng"_ $\rightarrow$ Agent tự động nạp `api-design`.
+   - Khi bạn nói: _"Hàm query DB này bị crash, chẩn đoán giúp tôi"_ $\rightarrow$ Agent tự động nạp `diagnosing-bugs`.
+   - Khi bạn nói: _"Hãy kiểm tra giao diện màn hình này có đạt chuẩn không"_ $\rightarrow$ Agent tự động nạp `ui-design-review`.
+
+3. **Cách 3: Chỉ định đích danh skill bằng ngôn ngữ tự nhiên (Explicit Prompting)**:
+   Bạn có thể gọi trực tiếp tên bất kỳ skill nào bạn thấy trong repository:
+   - _"Hãy dùng skill `grilling` để phỏng vấn sâu tôi về tính năng này."_
+   - _"Dùng skill `wayfinder` để lập bản đồ quyết định giải quyết bài toán lớn này."_
+   - _"Chạy skill `setup-deep-modules` để cài đặt linter khóa ranh giới module."_
+   - _"Hãy dùng `prototype` để dựng nhanh bản nháp HTML giao diện trước."_
+
+---
+
+### 📂 Cấu Trúc & Vị Trí Lưu Trữ Thực Tế Của Bộ Skill
+
+Tất cả các skill trong dự án đều được tổ chức minh bạch dưới dạng thư mục chứa file hướng dẫn `SKILL.md`:
+
+```text
+Universal-Agents-Workflow/
+├── .agents/
+│   ├── skills.json                         # File khai báo đường dẫn nạp kỹ năng cho Agent
+│   └── skills/
+│       ├── engineering/                    # 47 kỹ năng kỹ thuật & lệnh tự động hóa
+│       │   ├── command-skill-setup/        # Lệnh /skill-setup (quét repo, nạp skill)
+│       │   ├── command-continue-project/   # Lệnh /command-continue-project (làm tiếp roadmap)
+│       │   ├── command-git-push/           # Lệnh /command-git-push (push an toàn, chia commit)
+│       │   ├── command-user-guide/         # Lệnh /command-user-guide (chụp ảnh thật, làm guide)
+│       │   ├── api-design/                 # Chuẩn thiết kế RESTful API
+│       │   ├── codebase-design/            # Thiết kế Deep Modules & Clean Seams
+│       │   ├── diagnosing-bugs/            # Chẩn đoán lỗi 6 bước
+│       │   ├── domain-modeling/            # Thiết kế RBAC, State Machine, ERD
+│       │   ├── elicitation-interview/      # Phỏng vấn 6 trụ cột nghiệp vụ
+│       │   ├── intake-classifier/          # Phân loại độ phức tạp công việc
+│       │   ├── setup-deep-modules/         # Cài đặt linter ranh giới module
+│       │   ├── speckit-*/                  # Bộ kỹ năng lập kế hoạch SpecKit
+│       │   └── ...                         # (Xem danh mục chi tiết ở Mục 7)
+│       └── productivity/                   # 7 kỹ năng năng suất & giao tiếp
+│           ├── route/                      # Định tuyến thông minh khi băn khoăn (/route)
+│           ├── grilling/                   # Phỏng vấn phản biện sâu (/grill-me)
+│           ├── wait-what/                  # Dịch thuật ngữ kỹ thuật sang từ ngữ bình dân
+│           ├── handoff/                    # Nén bộ nhớ ngữ cảnh ca làm việc
+│           ├── retro/                      # Hồi cứu và tối ưu hóa luật/agent
+│           └── to-questionnaire/           # Xuất bảng câu hỏi cho stakeholder
+└── optional-stack-skills/                  # Kỹ năng theo ngôn ngữ & framework (tùy chọn)
+    ├── catalog.json                        # Danh mục tự động nạp (Python, Go, Rust, React, Vue...)
+    ├── frameworks/                         # NestJS, FastAPI, Django, Express...
+    └── languages/                          # Python, TypeScript, Go, Rust...
+```
+
+---
+
+### 🔍 Cách Kiểm Tra Danh Sách Skill Đang Hoạt Động
+
+Để kiểm tra xem Agent đã nạp các skill của dự án hay chưa, bạn chỉ cần gõ trong khung chat:
+
+> _"Liệt kê danh sách các skill bạn đang có"_ hoặc _"Kiểm tra danh sách kỹ năng khả dụng"_
+
+Agent sẽ phản hồi danh sách toàn bộ các skill được đăng ký từ `.agents/skills/` và xác nhận sẵn sàng thi hành.
+
+---
+
+## 🚀 4. Hướng dẫn Bắt đầu Nhanh (Getting Started)
 
 ### Phương án A: Khởi tạo Dự án Mới Toanh (Greenfield)
 
@@ -94,8 +199,11 @@ Nếu bạn bắt đầu một repository hoàn toàn mới từ đầu:
    git branch -M main
    ```
 3. **Chạy lệnh thiết lập thích ứng**:
-   Mở dự án trong AI Editor (Antigravity IDE, Cursor, Claude Code, Codex) và gõ:
-   > _`/skill-setup`_
+   Mở dự án trong AI Editor (Antigravity IDE, Cursor, Claude Code, Codex) và gửi tin nhắn chat:
+
+   > _`/skill-setup`_ (hoặc gõ _`chạy skill setup`_)
+
+   _(Lưu ý: Chỉ cần gửi tin nhắn bình thường trong khung chat của Agent, không cần tìm trong menu popup gợi ý của IDE)._
 
 ---
 
@@ -142,19 +250,21 @@ cp .workflow-core/GEMINI.md ./
    .agents/scripts/hooks/*.log
    ```
 2. **Kích hoạt lệnh `/skill-setup`**:
-   Gõ trong khung chat của Agent:
+   Gõ vào ô chat của Agent và nhấn gửi:
 
-   > _`/skill-setup`_
+   > _`/skill-setup`_ (hoặc gõ _`chạy skill setup`_)
+
+   _(Lưu ý: Gửi tin nhắn như câu chat thông thường, Agent sẽ tự động nạp skill tương ứng)._
 
    Agent sẽ tự động:
    - Quét toàn bộ codebase hiện có của bạn (nhận diện chính xác ngôn ngữ, framework, database, test runner).
-   - Đọc [optional-stack-skills/catalog.json](file:///optional-stack-skills/catalog.json) và hiển thị bảng gợi ý kỹ năng kèm **mô tả ngắn gọn**.
+   - Đọc [optional-stack-skills/catalog.json](optional-stack-skills/catalog.json) và hiển thị bảng gợi ý kỹ năng kèm **mô tả ngắn gọn**.
    - Hỏi bạn có muốn bật **`code-review-graph` MCP Server** để lập chỉ mục AST cho codebase có sẵn (giúp review và code explorer siêu tiết kiệm token) không.
-   - Tự động điền các dịch vụ, package hiện có của bạn vào bảng **Components & Services Overview** trong [CONTEXT.md](file:///CONTEXT.md).
+   - Tự động điền các dịch vụ, package hiện có của bạn vào bảng **Components & Services Overview** trong [CONTEXT.md](CONTEXT.md).
 
 ---
 
-## 🔄 4. Hướng dẫn Vận hành Từ Đầu Đến Cuối (End-to-End Workflow: A đến Z)
+## 🔄 5. Hướng dẫn Vận hành Từ Đầu Đến Cuối (End-to-End Workflow: A đến Z)
 
 Toàn bộ chu trình phát triển một tính năng hoặc một sản phẩm được vận hành qua 7 bước chuẩn mực:
 
@@ -173,11 +283,11 @@ flowchart TD
 ### Bước 1: Quét & Tự động Cấu hình (`/skill-setup`)
 
 - **Mục tiêu**: Chuẩn bị môi trường, nạp đúng kỹ năng dự án cần, loại bỏ "Context Bloat".
-- **Cách thực hiện**: Gõ `/skill-setup`.
+- **Cách thực hiện**: Nhập `/skill-setup` (hoặc `chạy skill setup`) vào ô chat của Agent.
 - **Đầu ra**:
   - Bảng danh mục kỹ năng tương thích hiển thị kèm mô tả ngắn gọn (Concise Summary).
   - Tự động copy skill/rules vào `.agents/skills/engineering/` và `.agents/rules/`.
-  - Cập nhật [CONTEXT.md](file:///CONTEXT.md) và cấu hình `code-review-graph` MCP (nếu chọn).
+  - Cập nhật [CONTEXT.md](CONTEXT.md) và cấu hình `code-review-graph` MCP (nếu chọn).
 
 ---
 
@@ -271,7 +381,7 @@ flowchart TD
 
 ---
 
-## ⚡ 5. Các Kịch bản Vận hành Bổ trợ
+## ⚡ 6. Các Kịch bản Vận hành Bổ trợ
 
 ### Kịch bản 1: Xử lý nhanh lỗi nhỏ (Micro-Task Fast-Track)
 
@@ -301,23 +411,69 @@ Khi có mục tiêu rất lớn, nhiều nhánh rẽ chưa rõ ràng:
 
 ---
 
-## ⌨️ 6. Bảng Tra Cứu Lệnh Nhanh (Cheatsheet Slash Commands)
+## ⌨️ 7. Bảng Tra Cứu Toàn Bộ Kỹ Năng & Lệnh (Cheatsheet Skills & Commands)
 
-| Lệnh / Phím tắt                 | Vai trò & Tác dụng                                                    | Khi nào nên dùng?                                           |
-| :------------------------------ | :-------------------------------------------------------------------- | :---------------------------------------------------------- |
-| **`/skill-setup`**              | Quét dự án, hiển thị bảng kỹ năng kèm mô tả ngắn gọn, cấu hình MCP.   | Khi mới clone repo hoặc tích hợp vào dự án có sẵn.          |
-| **`/command-continue-project`** | Tự động đọc roadmap và triển khai user story tiếp theo.               | Khi bắt đầu ngày làm việc mới hoặc tiếp tục task dang dở.   |
-| **`/command-git-push`**         | Kiểm tra cổng user guide, chia modular commits và push an toàn.       | Khi hoàn thành xong một tính năng hoặc một lát cắt.         |
-| **`/command-user-guide`**       | Mở Playwright chụp ảnh màn hình thật và xuất file hướng dẫn markdown. | Khi muốn tạo tài liệu hướng dẫn trực quan cho tính năng UI. |
-| **`/setup-deep-modules`**       | Tự động cài đặt boundary linter (`depguard`, `import-linter`...).     | Khi muốn khóa cứng ranh giới kiến trúc, chống rò rỉ import. |
-| **`/route`**                    | Định tuyến thông minh khi không biết nên dùng skill nào tiếp theo.    | Khi bị phân vân giữa các bước trong quy trình.              |
-| **`/wait-what`**                | Giải thích lại đề xuất kỹ thuật phức tạp bằng ngôn ngữ bình dân.      | Khi AI nói quá nhiều thuật ngữ khó hiểu.                    |
-| **`/retro`**                    | Hồi cứu phiên làm việc, loại bỏ rule bloat và tinh chỉnh prompt.      | Cuối ngày làm việc hoặc sau khi ship xong 1 milestone lớn.  |
-| **`/handoff`**                  | Nén bộ nhớ ngữ cảnh hiện tại để bàn giao cho agent phiên sau.         | Khi context window đạt trên 70% dung lượng.                 |
+Dưới đây là danh mục phân loại đầy đủ toàn bộ kỹ năng có sẵn trong repository:
+
+### 1. Lệnh Quy Trình & Thiết Lập Nhanh (Workflow Commands)
+
+| Lệnh / Skill                    | Vị trí file `SKILL.md`                                                                   | Vai trò & Tác dụng                                                    | Khi nào nên dùng?                                           |
+| :------------------------------ | :--------------------------------------------------------------------------------------- | :-------------------------------------------------------------------- | :---------------------------------------------------------- |
+| **`/skill-setup`**              | [command-skill-setup](.agents/skills/engineering/command-skill-setup/SKILL.md)           | Quét dự án, hiển thị bảng kỹ năng kèm mô tả ngắn gọn, cấu hình MCP.   | Khi mới clone repo hoặc tích hợp vào dự án có sẵn.          |
+| **`/command-continue-project`** | [command-continue-project](.agents/skills/engineering/command-continue-project/SKILL.md) | Tự động đọc roadmap và triển khai user story tiếp theo.               | Khi bắt đầu ngày làm việc mới hoặc tiếp tục task dang dở.   |
+| **`/command-git-push`**         | [command-git-push](.agents/skills/engineering/command-git-push/SKILL.md)                 | Kiểm tra cổng user guide, chia modular commits và push an toàn.       | Khi hoàn thành xong một tính năng hoặc một lát cắt.         |
+| **`/command-user-guide`**       | [command-user-guide](.agents/skills/engineering/command-user-guide/SKILL.md)             | Mở Playwright chụp ảnh màn hình thật và xuất file hướng dẫn markdown. | Khi muốn tạo tài liệu hướng dẫn trực quan cho tính năng UI. |
+| **`/setup-deep-modules`**       | [setup-deep-modules](.agents/skills/engineering/setup-deep-modules/SKILL.md)             | Tự động cài đặt boundary linter (`depguard`, `import-linter`...).     | Khi muốn khóa cứng ranh giới kiến trúc, chống rò rỉ import. |
+
+### 2. Kỹ Năng Năng Suất & Giao Tiếp (Productivity Skills)
+
+| Kỹ năng                | Vị trí file `SKILL.md`                                                    | Vai trò & Tác dụng                                               | Cách gọi / Khi nào nên dùng?                                    |
+| :--------------------- | :------------------------------------------------------------------------ | :--------------------------------------------------------------- | :-------------------------------------------------------------- |
+| **`route`**            | [route](.agents/skills/productivity/route/SKILL.md)                       | Định tuyến thông minh khi không biết nên dùng skill nào tiếp.    | Gõ `/route` hoặc hỏi _"bây giờ nên làm bước gì?"_               |
+| **`grilling`**         | [grilling](.agents/skills/productivity/grilling/SKILL.md)                 | Phỏng vấn phản biện sâu từng nhánh thiết kế, không đoán mò.      | Gõ `/grill-me` hoặc _"Hãy phỏng vấn sâu tôi về tính năng này"_  |
+| **`wait-what`**        | [wait-what](.agents/skills/productivity/wait-what/SKILL.md)               | Giải thích lại đề xuất kỹ thuật phức tạp bằng từ ngữ bình dân.   | Gõ `/wait-what` hoặc _"Giải thích lại bằng từ ngữ dễ hiểu hơn"_ |
+| **`handoff`**          | [handoff](.agents/skills/productivity/handoff/SKILL.md)                   | Nén bộ nhớ ngữ cảnh hiện tại để bàn giao cho agent phiên sau.    | Gõ `/handoff` khi context window đạt trên 70% dung lượng.       |
+| **`retro`**            | [retro](.agents/skills/productivity/retro/SKILL.md)                       | Hồi cứu phiên làm việc, loại bỏ rule bloat và tinh chỉnh prompt. | Gõ `/retro` vào cuối ngày làm việc hoặc sau milestone lớn.      |
+| **`to-questionnaire`** | [to-questionnaire](.agents/skills/productivity/to-questionnaire/SKILL.md) | Xuất bảng câu hỏi Markdown gửi stakeholder / phòng ban khác.     | Khi cần lấy ý kiến bất đồng bộ từ PO hoặc team ngoài.           |
+| **`setup-workspace`**  | [setup-workspace](.agents/skills/productivity/setup-workspace/SKILL.md)   | Tự cấu hình workspace, phát hiện package manager và framework.   | Được `/skill-setup` gọi ngầm hoặc chạy độc lập.                 |
+
+### 3. Kỹ Năng Vòng Đời BA & Thiết Kế (BA & SpecKit Skills)
+
+| Kỹ năng                          | Vị trí file `SKILL.md`                                                                       | Vai trò & Giai đoạn                                                   |
+| :------------------------------- | :------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------- |
+| **`intake-classifier`**          | [intake-classifier](.agents/skills/engineering/intake-classifier/SKILL.md)                   | Phân loại độ phức tạp: Micro-Task / Spike / Bounded / Full Feature.   |
+| **`elicitation-interview`**      | [elicitation-interview](.agents/skills/engineering/elicitation-interview/SKILL.md)           | Khảo sát phỏng vấn 6 trụ cột nghiệp vụ, bắt buộc dừng hỏi người dùng. |
+| **`gap-analysis`**               | [gap-analysis](.agents/skills/engineering/gap-analysis/SKILL.md)                             | Phân tích AS-IS vs TO-BE và khoảng cách chuyển đổi hệ thống.          |
+| **`domain-modeling`**            | [domain-modeling](.agents/skills/engineering/domain-modeling/SKILL.md)                       | Thiết kế ma trận RBAC, Mermaid State Machine, Business Rules, ERD.    |
+| **`risk-contradiction-scanner`** | [risk-contradiction-scanner](.agents/skills/engineering/risk-contradiction-scanner/SKILL.md) | Quét mâu thuẫn logic, khóa scope MoSCoW, lập Risk Register.           |
+| **`spec-writer`**                | [spec-writer](.agents/skills/engineering/spec-writer/SKILL.md)                               | Biên soạn PRD, SRS và User Stories chuẩn Given-When-Then.             |
+| **`spec-validator`**             | [spec-validator](.agents/skills/engineering/spec-validator/SKILL.md)                         | Thẩm định chất lượng đặc tả độc lập theo tiêu chuẩn IEEE 29148.       |
+| **`handover`**                   | [handover](.agents/skills/engineering/handover/SKILL.md)                                     | Ký duyệt Domain Baseline `SIGNED-OFF v1.0`, xuất bản Dev Brief.       |
+| **`speckit-specify`**            | [speckit-specify](.agents/skills/engineering/speckit-specify/SKILL.md)                       | Tạo tài liệu đặc tả kỹ thuật chính thức `spec.md`.                    |
+| **`speckit-plan`**               | [speckit-plan](.agents/skills/engineering/speckit-plan/SKILL.md)                             | Lập kế hoạch kiến trúc, contracts DTO và data model (`plan.md`).      |
+| **`speckit-tasks`**              | [speckit-tasks](.agents/skills/engineering/speckit-tasks/SKILL.md)                           | Phân rã danh sách nhiệm vụ lập trình tuần tự (`tasks.md`).            |
+| **`speckit-analyze`**            | [speckit-analyze](.agents/skills/engineering/speckit-analyze/SKILL.md)                       | Kiểm tra tính nhất quán giữa spec.md, plan.md và tasks.md.            |
+
+### 4. Kỹ Năng Kỹ Thuật & Kiểm Thử Chất Lượng (Engineering & Testing Skills)
+
+| Kỹ năng                              | Vị trí file `SKILL.md`                                                                               | Vai trò chính                                                         |
+| :----------------------------------- | :--------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------- |
+| **`api-design`**                     | [api-design](.agents/skills/engineering/api-design/SKILL.md)                                         | Chuẩn thiết kế REST API, DTOs, HTTP status, phân trang và bảo mật.    |
+| **`codebase-design`**                | [codebase-design](.agents/skills/engineering/codebase-design/SKILL.md)                               | Nguyên lý Deep Modules, Seam Discipline, chống anemic services.       |
+| **`diagnosing-bugs`**                | [diagnosing-bugs](.agents/skills/engineering/diagnosing-bugs/SKILL.md)                               | Quy trình chẩn đoán & fix lỗi 6 pha, chống phỏng đoán mò mẫm.         |
+| **`ui-design-review`**               | [ui-design-review](.agents/skills/engineering/ui-design-review/SKILL.md)                             | Phản biện giao diện 2-Pass (Pass A: Anti-AI-Slop, Pass B: Spec & UX). |
+| **`frontend-design`**                | [frontend-design](.agents/skills/engineering/frontend-design/SKILL.md)                               | Thiết kế UI thẩm mỹ cao, bảng màu tinh tế, tránh AI-slop template.    |
+| **`motion-design`**                  | [motion-design](.agents/skills/engineering/motion-design/SKILL.md)                                   | Hoạt họa, hiệu ứng chuyển cảnh, physics spring chuẩn UX.              |
+| **`docker-patterns`**                | [docker-patterns](.agents/skills/engineering/docker-patterns/SKILL.md)                               | Chuẩn Dockerfile multi-stage, docker-compose dev môi trường.          |
+| **`postgres-patterns`**              | [postgres-patterns](.agents/skills/engineering/postgres-patterns/SKILL.md)                           | Thiết kế schema PostgreSQL, indexing, RLS security policies.          |
+| **`e2e-testing`**                    | [e2e-testing](.agents/skills/engineering/e2e-testing/SKILL.md)                                       | Viết và bảo trì kiểm thử End-to-End Playwright chuẩn POM.             |
+| **`resolving-merge-conflicts`**      | [resolving-merge-conflicts](.agents/skills/engineering/resolving-merge-conflicts/SKILL.md)           | Giải quyết xung đột git theo ý đồ ngữ nghĩa, không merge mù quáng.    |
+| **`verification-before-completion`** | [verification-before-completion](.agents/skills/engineering/verification-before-completion/SKILL.md) | Chạy kiểm định toàn diện trước khi đóng task hoặc merge PR.           |
+| **`wizard`**                         | [wizard](.agents/skills/engineering/wizard/SKILL.md)                                                 | Tạo kịch bản bash tương tác cho cấu hình hạ tầng, secrets phức tạp.   |
 
 ---
 
-## 🤖 7. Danh mục 13 Subagents Chuyên Trách
+## 🤖 8. Danh mục 13 Subagents Chuyên Trách
 
 ```mermaid
 graph TD
@@ -368,7 +524,7 @@ graph TD
 
 ---
 
-## 🛡️ 8. Khóa Bảo Vệ Cơ Học & Git Guardrails
+## 🛡️ 9. Khóa Bảo Vệ Cơ Học & Git Guardrails
 
 Hệ thống tích hợp các cơ chế khóa cứng (Mechanical Hooks) trong `.agents/hooks.json`:
 
@@ -379,7 +535,7 @@ Hệ thống tích hợp các cơ chế khóa cứng (Mechanical Hooks) trong `.
 
 ---
 
-## 🔍 9. Bảng Tra Cứu Xử Lý Sự Cố (Failure-Mode Index)
+## 🔍 10. Bảng Tra Cứu Xử Lý Sự Cố (Failure-Mode Index)
 
 | Triệu chứng / Cảm giác bế tắc                                    | Nguyên nhân cốt lõi         | Kỹ năng cần gọi                                                        |
 | :--------------------------------------------------------------- | :-------------------------- | :--------------------------------------------------------------------- |
