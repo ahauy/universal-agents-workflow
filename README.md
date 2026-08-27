@@ -30,13 +30,43 @@ Trong phát triển phần mềm với AI, các lập trình viên thường đ�
 
 ### Phương Án 1: Tích Hợp Vào Dự Án Đang Có (Brownfield - Khuyên dùng)
 
-Chỉ cần chạy 1 dòng lệnh duy nhất từ thư mục `Universal-Agents-Workflow`:
+Bạn có 2 cách cực kỳ linh hoạt để tích hợp bộ khung vào dự án đang làm:
 
-```bash
-./install.sh /duong-dan/toi/du-an-cua-ban
-```
+#### ⚡ Cách 1: Chạy trực tiếp trong dự án của bạn (Không cần clone repo trước)
 
-Script sẽ tự động sao chép bộ khung và hiển thị menu chọn **Chế độ Quản lý Git**:
+Mở terminal ngay tại thư mục dự án bạn đang làm và chạy 1 dòng lệnh duy nhất tương ứng với hệ điều hành:
+
+- **🍎 macOS / 🐧 Linux / 🪟 Windows (Git Bash)**:
+
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh | bash
+  ```
+
+  _(Hoặc: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh)"`)_
+
+- **🪟 Windows (PowerShell)**:
+  ```powershell
+  irm https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.ps1 | iex
+  ```
+
+> Script sẽ tự động kéo các thành phần cần thiết từ GitHub về thư mục tạm, quét Tech Stack, hiển thị menu chọn chế độ Git và tích hợp sạch sẽ vào dự án của bạn, sau đó tự động dọn dẹp sạch sẽ.
+
+#### 💻 Cách 2: Chạy từ thư mục đã clone `Universal-Agents-Workflow`
+
+Nếu bạn đã clone thư mục `Universal-Agents-Workflow` về máy:
+
+- **macOS / Linux / Git Bash**:
+  ```bash
+  ./install.sh /duong-dan/toi/du-an-cua-ban
+  ```
+- **Windows PowerShell**:
+  ```powershell
+  .\install.ps1 -Target "D:\duong-dan\toi\du-an"
+  ```
+
+---
+
+Cả 2 cách trên đều hiển thị menu tương tác để bạn chọn **Chế độ Quản lý Git**:
 
 ```text
 ? Chọn chế độ quản lý Git cho Universal Agents Workflow trong dự án đích:
@@ -47,10 +77,14 @@ Script sẽ tự động sao chép bộ khung và hiển thị menu chọn **Ch�
 ```
 
 > [!TIP]
-> **Tự động hóa hoàn toàn (Non-interactive cho CI/CD hoặc Script)**:
+> **Tự động hóa hoàn toàn (Non-interactive cho CI/CD hoặc chạy nhanh)**:
 >
 > ```bash
-> ./install.sh --target=/duong-dan/du-an --mode=local -y
+> # macOS / Linux / Git Bash:
+> curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh | bash -s -- --mode=local -y
+>
+> # Windows PowerShell:
+> .\install.ps1 -Mode local -Yes
 > ```
 
 #### 🛡️ Bảng So Sánh 4 Chế Độ Git:
