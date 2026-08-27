@@ -55,19 +55,24 @@ flowchart TD
    - Ensure `adr/` exists at workspace root with `adr-template.md`.
    - Seed `adr/0001-record-architecture-decisions.md` if not already present.
 
-### Step 3: Polyglot Stack & Framework Linking
+### Step 3: Polyglot Stack & Framework Linking (Powered by catalog.json)
 
-1. Check `optional-stack-skills/` against the detected technology stack:
-   - **Language Skills** (`optional-stack-skills/languages/`):
-     - Python: `python-patterns`, `.importlinter.ini`
-     - Go: `go-patterns`, `depguard.yaml`
-     - Rust: `rust-patterns`, `cargo-deny`
-     - TypeScript/Node: `typescript-patterns`, `dependency-cruiser.config.cjs`
-   - **Framework Skills** (`optional-stack-skills/frameworks/`):
+1. Load [optional-stack-skills/catalog.json](../../../optional-stack-skills/catalog.json) and match items against the detected technology stack:
+   - **Language Skills & Rules**:
+     - Python: `python-patterns`, `python-importlinter`
+     - Go: `go-patterns`, `go-rules`, `go-depguard`
+     - Rust: `rust-patterns`
+     - TypeScript/Node: `typescript-patterns`, `ts-dependency-cruiser`
+   - **Frameworks & UI**:
      - NestJS: `nestjs-patterns`
      - Prisma ORM: `prisma-patterns`
-     - React / Web UI: `frontend-patterns`, `liquid-glass-design`
-2. Prompt the user to link or copy the matching language/framework skills into `.agents/skills/engineering/` (or run `setup-deep-modules` to install boundary enforcement automatically).
+     - React / Next.js: `react-rules`, `frontend-patterns`, `liquid-glass-design`
+   - **Infrastructure & Intelligence (MCP)**:
+     - Docker & Postgres: `docker-patterns`, `postgres-patterns`
+     - MCP Code Intelligence: `code-review-graph` (Tree-sitter SQLite graph for token reduction)
+2. **Render Selection Table with Concise Summaries**:
+   Always display a structured Markdown table including the **Concise Summary (Mô tả ngắn gọn)** column for every detected skill so the user understands its exact benefit.
+3. Prompt the user for confirmation (or run `/skill-setup` for the full automated onboarding experience).
 
 ### Step 4: Verification & Handoff
 
@@ -76,4 +81,5 @@ Output a clean onboarding report:
 - Detected Stack & Package Manager
 - Active Branch & Git Remote
 - Initialized `CONTEXT.md` and `adr/`
+- Activated Skills, Rules & MCP Servers (with short descriptions)
 - Recommended first skill to run (e.g. `route`, `intake-classifier`, or `improve-codebase-architecture`).

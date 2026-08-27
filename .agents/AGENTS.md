@@ -140,22 +140,22 @@ graph TD
 
 When encountering friction or uncertainty, look up the symptom below to immediately identify the correct skill:
 
-| Symptom / Friction                                                  | Root Cause                      | Target Skill & Path                                                   |
-| ------------------------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------- |
-| _"I don't understand what was just proposed / jargon feels dense"_  | Terminology misalignment        | `wait-what` (`productivity/wait-what`)                                |
-| _"Unsure which skill, command, or lifecycle phase to run next"_     | Framework navigation hesitation | `route` (`productivity/route`)                                        |
-| _"Feature scope is vague; too many hidden design branches"_         | Incomplete elicitation          | `grilling` (`productivity/grilling`)                                  |
-| _"Ambitious effort with unclear path / too large for one session"_  | Fog of War / unmapped decisions | `wayfinder` (`engineering/wayfinder`)                                 |
-| _"A critical requirement depends on external team input"_           | Cross-stakeholder dependency    | `to-questionnaire` (`productivity/to-questionnaire`)                  |
-| _"Debating between two UI layouts or state machine models"_         | Abstract speculation            | `prototype` (`engineering/prototype`)                                 |
-| _"Git merge or rebase produced messy conflicts"_                    | Git branch divergence           | `resolving-merge-conflicts` (`engineering/resolving-merge-conflicts`) |
-| _"Bug reproduced but root cause is unknown or flaky"_               | Guess-and-check debugging       | `diagnosing-bugs` (`engineering/diagnosing-bugs`)                     |
-| _"Modules feel shallow, coupled, or leaky cross-imports"_           | Architectural erosion           | `improve-codebase-architecture` / `setup-deep-modules`                |
-| _"Session ended; want to optimize agent environment or rule bloat"_ | Feedback loop missing           | `retro` (`productivity/retro`)                                        |
-| _"Agent context window is filling up or session is ending"_         | Memory bloat & drift            | `handoff` (`productivity/handoff`)                                    |
-| _"Writing new system skills, rules, or instructions"_               | Unfocused agent documentation   | `writing-for-agents` (`engineering/writing-for-agents`)               |
-| _"Starting a new repo or onboarding project from scratch"_          | Manual configuration burden     | `setup-workspace` (`productivity/setup-workspace`)                    |
-| _"Reviewing code or catching regressions before merge"_             | Unstructured code review        | `code-reviewer` (dual pass: Standards + Spec)                         |
+| Symptom / Friction                                                  | Root Cause                      | Target Skill & Path                                                    |
+| ------------------------------------------------------------------- | ------------------------------- | ---------------------------------------------------------------------- |
+| _"I don't understand what was just proposed / jargon feels dense"_  | Terminology misalignment        | `wait-what` (`productivity/wait-what`)                                 |
+| _"Unsure which skill, command, or lifecycle phase to run next"_     | Framework navigation hesitation | `route` (`productivity/route`)                                         |
+| _"Feature scope is vague; too many hidden design branches"_         | Incomplete elicitation          | `grilling` (`productivity/grilling`)                                   |
+| _"Ambitious effort with unclear path / too large for one session"_  | Fog of War / unmapped decisions | `wayfinder` (`engineering/wayfinder`)                                  |
+| _"A critical requirement depends on external team input"_           | Cross-stakeholder dependency    | `to-questionnaire` (`productivity/to-questionnaire`)                   |
+| _"Debating between two UI layouts or state machine models"_         | Abstract speculation            | `prototype` (`engineering/prototype`)                                  |
+| _"Git merge or rebase produced messy conflicts"_                    | Git branch divergence           | `resolving-merge-conflicts` (`engineering/resolving-merge-conflicts`)  |
+| _"Bug reproduced but root cause is unknown or flaky"_               | Guess-and-check debugging       | `diagnosing-bugs` (`engineering/diagnosing-bugs`)                      |
+| _"Modules feel shallow, coupled, or leaky cross-imports"_           | Architectural erosion           | `improve-codebase-architecture` / `setup-deep-modules`                 |
+| _"Session ended; want to optimize agent environment or rule bloat"_ | Feedback loop missing           | `retro` (`productivity/retro`)                                         |
+| _"Agent context window is filling up or session is ending"_         | Memory bloat & drift            | `handoff` (`productivity/handoff`)                                     |
+| _"Writing new system skills, rules, or instructions"_               | Unfocused agent documentation   | `writing-for-agents` (`engineering/writing-for-agents`)                |
+| _"Starting a new repo or onboarding project from scratch"_          | Manual configuration burden     | `/skill-setup` (`engineering/command-skill-setup` / `setup-workspace`) |
+| _"Reviewing code or catching regressions before merge"_             | Unstructured code review        | `code-reviewer` (dual pass: Standards + Spec)                          |
 
 ---
 
@@ -178,7 +178,7 @@ When encountering friction or uncertainty, look up the symptom below to immediat
 | **Session context compaction for agent handoff**           | `handoff` (≠ handover)                                       | `productivity/handoff`                      |
 | **Hunk-by-hunk git conflict resolution by intent**         | `resolving-merge-conflicts`                                  | `engineering/resolving-merge-conflicts`     |
 | **Intelligent skill and workflow router**                  | `route`                                                      | `productivity/route`                        |
-| **One-time repository onboarding & self-configuration**    | `setup-workspace`                                            | `productivity/setup-workspace`              |
+| **One-time repository onboarding & self-configuration**    | `/skill-setup` / `setup-workspace`                           | `engineering/command-skill-setup`           |
 | **AS-IS / TO-BE / gap analysis (Full Feature)**            | `gap-analysis`                                               | `engineering/gap-analysis`                  |
 | **RBAC, state machines, business rules, ERD**              | `domain-modeling` (syncs `CONTEXT.md` & `adr/`)              | `engineering/domain-modeling`               |
 | **Risk register, contradiction scan, MoSCoW**              | `risk-contradiction-scanner`                                 | `engineering/risk-contradiction-scanner`    |
@@ -208,6 +208,7 @@ When encountering friction or uncertainty, look up the symptom below to immediat
 | **Command: Resume project development from roadmap**       | `/command-continue-project`                                  | `engineering/command-continue-project`      |
 | **Command: Automated modular commit & push**               | `/command-git-push`                                          | `engineering/command-git-push`              |
 | **Command: Generate end-user guide with real screenshots** | `/command-user-guide`                                        | `engineering/command-user-guide`            |
+| **Command: Adaptive project onboarding & skill setup**     | `/command-skill-setup` (alias: `/skill-setup`, `/setup`)     | `engineering/command-skill-setup`           |
 
 ---
 
