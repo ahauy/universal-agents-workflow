@@ -205,6 +205,7 @@ When encountering friction or uncertainty, look up the symptom below to immediat
 | **Backend & REST API design patterns**                     | `api-design`                                                 | `engineering/api-design`                    |
 | **E2E test, Playwright test**                              | `e2e-testing`                                                | `engineering/e2e-testing`                   |
 | **Git branch, commit, merge workflow**                     | `git-workflow`                                               | `engineering/git-workflow`                  |
+| **Command: Generate product backlog & roadmap**            | `/command-generate-backlog` (alias: `/generate-backlog`)     | `engineering/command-generate-backlog`      |
 | **Command: Resume project development from roadmap**       | `/command-continue-project`                                  | `engineering/command-continue-project`      |
 | **Command: Automated modular commit & push**               | `/command-git-push`                                          | `engineering/command-git-push`              |
 | **Command: Generate end-user guide with real screenshots** | `/command-user-guide`                                        | `engineering/command-user-guide`            |
