@@ -310,6 +310,10 @@ if [ -f "$TARGET_DIR/prisma/schema.prisma" ]; then
   MATCHED_SKILLS+=("prisma-patterns")
 fi
 
+if [ -f "$TARGET_DIR/Package.swift" ] || [ -f "$TARGET_DIR/project.yml" ] || compgen -G "$TARGET_DIR/*.xcodeproj" > /dev/null 2>&1 || compgen -G "$TARGET_DIR/*.xcworkspace" > /dev/null 2>&1 || [ -n "$(find "$TARGET_DIR" -maxdepth 2 -name "*.swift" -print -quit 2>/dev/null)" ]; then
+  MATCHED_SKILLS+=("swift-patterns" "swift-rules")
+fi
+
 if [ -f "$TARGET_DIR/Dockerfile" ] || [ -f "$TARGET_DIR/docker-compose.yml" ] || [ -f "$TARGET_DIR/compose.yaml" ]; then
   MATCHED_SKILLS+=("docker-patterns")
 fi
@@ -350,6 +354,12 @@ if [ ${#MATCHED_SKILLS[@]} -gt 0 ]; then
           ;;
         typescript-patterns)
           copy_item "$SOURCE_DIR/optional-stack-skills/languages/typescript/typescript-patterns" "$TARGET_DIR/.agents/skills/engineering/typescript-patterns" "typescript-patterns"
+          ;;
+        swift-patterns)
+          copy_item "$SOURCE_DIR/optional-stack-skills/languages/swift/swift-patterns" "$TARGET_DIR/.agents/skills/engineering/swift-patterns" "swift-patterns"
+          ;;
+        swift-rules)
+          copy_item "$SOURCE_DIR/optional-stack-skills/languages/swift/rules/coding-style.md" "$TARGET_DIR/.agents/rules/swift-coding-style.md" "swift-rules"
           ;;
         nestjs-patterns)
           copy_item "$SOURCE_DIR/optional-stack-skills/frameworks/nestjs-patterns" "$TARGET_DIR/.agents/skills/engineering/nestjs-patterns" "nestjs-patterns"

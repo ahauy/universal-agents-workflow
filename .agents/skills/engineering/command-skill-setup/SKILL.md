@@ -118,8 +118,20 @@ Once confirmed by the user, the agent performs automated setup:
    - Copy rule files to `.agents/rules/<rule-id>.md`.
    - Copy linter configuration files (`depguard.yaml`, `.importlinter.ini`, `dependency-cruiser.config.cjs`) to workspace root if not already present.
    - **Important**: The target repository NEVER contains an `optional-stack-skills/` directory. All activated skills live cleanly inside `.agents/skills/engineering/`.
-2. **Configure `code-review-graph` MCP (if selected Yes)**:
-   - Update `.agents/mcp_config.json`:
+2. **Automated Setup for `code-review-graph` MCP (if selected Yes)**:
+   - **Prerequisite Check**: Check if Astral's `uv` / `uvx` is installed:
+     ```bash
+     which uvx || which uv
+     ```
+   - **If `uv` is NOT found**, prompt or execute the standard installation:
+     - **macOS / Linux**: `curl -LsSf https://astral.sh/uv/install.sh | sh` (or `brew install uv`)
+     - **Windows PowerShell**: `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`
+   - **Run Initial AST Indexing**: The agent immediately executes the indexing command in the workspace root:
+     ```bash
+     uvx code-review-graph index
+     ```
+     _This downloads `code-review-graph` via `uvx`, parses codebase AST with Tree-sitter, and creates `.code-review-graph/graph.db`._
+   - **Update `.agents/mcp_config.json`**:
      ```json
      {
        "mcpServers": {
@@ -135,10 +147,7 @@ Once confirmed by the user, the agent performs automated setup:
        }
      }
      ```
-   - Guide the user to run the initial indexing command:
-     ```bash
-     uvx code-review-graph index
-     ```
+   - **Protect Git from Local Database**: Ensure `.code-review-graph/` is added to `.gitignore` (or `.git/info/exclude`) so the local SQLite database is never pushed to remote Git.
 3. **Configure Git Tracking Mode (based on Step 3 selection)**:
    - **Local-Only Mode**: Append the following block to `.gitignore`:
      ```gitignore

@@ -201,6 +201,39 @@
       "recommendation": "recommended"
     },
     {
+      "id": "swift-patterns",
+      "name": "Swift & SwiftUI Modern Architecture & Deep Modules",
+      "category": "Language",
+      "short_description": "Swift 6 strict concurrency, @Observable state architecture, actor isolation, SPM package boundaries, and Swift Testing standards.",
+      "detection_markers": [
+        "Package.swift",
+        "*.xcodeproj",
+        "*.xcworkspace",
+        "project.yml",
+        "*.swift"
+      ],
+      "source_path": "optional-stack-skills/languages/swift/swift-patterns",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/swift-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "swift-rules",
+      "name": "Swift Coding Style & Standards",
+      "category": "Language",
+      "short_description": "Swift API Design Guidelines, Complete Concurrency safety, memory management ([weak self]), and SwiftLint conventions.",
+      "detection_markers": [
+        "Package.swift",
+        "*.xcodeproj",
+        "project.yml",
+        "*.swift"
+      ],
+      "source_path": "optional-stack-skills/languages/swift/rules/coding-style.md",
+      "target_type": "rule",
+      "target_path": ".agents/rules/swift-coding-style.md",
+      "recommendation": "recommended"
+    },
+    {
       "id": "code-review-graph",
       "name": "Code-Review-Graph Local MCP Intelligence Server",
       "category": "Intelligence (MCP)",

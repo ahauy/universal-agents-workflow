@@ -230,6 +230,10 @@ try {
         $matchedSkills += @("prisma-patterns")
     }
 
+    if ((Test-Path (Join-Path $Target "Package.swift")) -or (Test-Path (Join-Path $Target "project.yml")) -or (Get-ChildItem -Path $Target -Filter "*.xcodeproj" -Directory -ErrorAction SilentlyContinue) -or (Get-ChildItem -Path $Target -Filter "*.xcworkspace" -Directory -ErrorAction SilentlyContinue) -or (Get-ChildItem -Path $Target -Filter "*.swift" -File -Recurse -Depth 2 -ErrorAction SilentlyContinue)) {
+        $matchedSkills += @("swift-patterns", "swift-rules")
+    }
+
     if ((Test-Path (Join-Path $Target "Dockerfile")) -or (Test-Path (Join-Path $Target "docker-compose.yml")) -or (Test-Path (Join-Path $Target "compose.yaml"))) {
         $matchedSkills += @("docker-patterns")
     }
@@ -251,6 +255,8 @@ try {
                     "python-importlinter" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\languages\python\.importlinter.ini") (Join-Path $Target ".importlinter.ini") ".importlinter.ini" }
                     "rust-patterns" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\languages\rust\rust-patterns") (Join-Path $Target ".agents\skills\engineering\rust-patterns") "rust-patterns" }
                     "typescript-patterns" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\languages\typescript\typescript-patterns") (Join-Path $Target ".agents\skills\engineering\typescript-patterns") "typescript-patterns" }
+                    "swift-patterns" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\languages\swift\swift-patterns") (Join-Path $Target ".agents\skills\engineering\swift-patterns") "swift-patterns" }
+                    "swift-rules" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\languages\swift\rules\coding-style.md") (Join-Path $Target ".agents\rules\swift-coding-style.md") "swift-rules" }
                     "nestjs-patterns" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\frameworks\nestjs-patterns") (Join-Path $Target ".agents\skills\engineering\nestjs-patterns") "nestjs-patterns" }
                     "frontend-patterns" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\frameworks\frontend-patterns") (Join-Path $Target ".agents\skills\engineering\frontend-patterns") "frontend-patterns" }
                     "prisma-patterns" { Copy-WorkflowItem (Join-Path $SourceDir "optional-stack-skills\frameworks\prisma-patterns") (Join-Path $Target ".agents\skills\engineering\prisma-patterns") "prisma-patterns" }
