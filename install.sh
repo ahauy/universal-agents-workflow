@@ -5,6 +5,7 @@
 # Usage:
 #   ./install.sh [TARGET_DIR]
 #   ./install.sh --target=/path/to/project --mode=local -y
+#   ./install.sh --update          (Smart Update Mode)
 #
 # Modes:
 #   1) team    - Track all in Git (Shared AI Workflow)
@@ -48,6 +49,7 @@ prompt_read() {
 TARGET_DIR=""
 MODE=""
 NON_INTERACTIVE=false
+UPDATE_MODE=false
 
 # ------------------------------------------------------------------------------
 # 1. Parse CLI Arguments
@@ -74,6 +76,10 @@ while [[ $# -gt 0 ]]; do
       NON_INTERACTIVE=true
       shift
       ;;
+    --update|-u)
+      UPDATE_MODE=true
+      shift
+      ;;
     -h|--help)
       cat << 'EOF'
 Universal Agents Workflow - Installer
@@ -90,6 +96,7 @@ Options:
                           stealth : Add all workflow files to target .git/info/exclude
                           hybrid  : Track Specs/ADRs/CONTEXT, ignore .agents & AI rules
   -y, --yes             Non-interactive mode (use defaults or provided arguments)
+  --update, -u          Smart Update Mode: update framework, protect all project data
   -h, --help            Show this help message
 
 Examples:
@@ -99,6 +106,10 @@ Examples:
   # Run from cloned repository:
   ./install.sh ../my-existing-project
   ./install.sh --target=../my-project --mode=local -y
+
+  # Update existing installation (protects all project data):
+  ./install.sh --update
+  curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh | bash -s -- --update
 EOF
       exit 0
       ;;
@@ -236,6 +247,33 @@ echo -e "\n📦 ${BOLD}Đang sao chép các thành phần Universal Agents Workf
 # Ensure destination directories exist
 mkdir -p "$TARGET_DIR"
 
+# Project data paths that are NEVER overwritten (not even on fresh install if they already exist)
+PROTECTED_DATA_PATHS=(
+  "CONTEXT.md"
+  "PRODUCT_BACKLOG_ROADMAP.md"
+  "CHANGELOG.md"
+  "UPGRADE_NOTICE.md"
+  "adr"
+  "docs/features"
+  "docs/user-guides"
+  "docs/architecture"
+  "docs/RUN_AND_TEST.md"
+  ".specify/features"
+  "src"
+)
+
+is_project_data() {
+  local dest_rel="${1#$TARGET_DIR/}"
+  for protected in "${PROTECTED_DATA_PATHS[@]}"; do
+    if [ "$dest_rel" = "$protected" ] || \
+       [ "$dest_rel" = "$protected/" ] || \
+       [[ "$dest_rel" == "$protected/"* ]]; then
+      return 0  # is protected
+    fi
+  done
+  return 1  # not protected
+}
+
 copy_item() {
   local src="$1"
   local dest="$2"
@@ -246,7 +284,14 @@ copy_item() {
     echo -e "  ⚠️  ${RED}CẢNH BÁO AN TOÀN: Phát hiện đường dẫn đích không hợp lệ hoặc trỏ vào root: ${name}. Bỏ qua!${NC}"
     return 1
   fi
-  
+
+  # PROTECTION GATE: Skip project data files that already exist
+  if [ -e "$dest" ] && is_project_data "$dest"; then
+    local rel_dest="${dest#$TARGET_DIR/}"
+    echo -e "  🛡️  Bảo vệ dữ liệu dự án: ${CYAN}${name}${NC} ➔ ${YELLOW}${rel_dest} (đã tồn tại, bỏ qua)${NC}"
+    return 0
+  fi
+
   if [ -e "$src" ]; then
     if [ -d "$src" ]; then
       mkdir -p "$dest"
@@ -275,12 +320,53 @@ copy_item "$SOURCE_DIR/.cursorrules" "$TARGET_DIR/.cursorrules" ".cursorrules"
 copy_item "$SOURCE_DIR/.windsurfrules" "$TARGET_DIR/.windsurfrules" ".windsurfrules"
 copy_item "$SOURCE_DIR/.github/copilot-instructions.md" "$TARGET_DIR/.github/copilot-instructions.md" ".github/copilot-instructions.md"
 
-# Record workflow source repository metadata
+# ── Smart Update Mode: delegate to Python engine if --update was passed ──────
+if [ "$UPDATE_MODE" = true ]; then
+  if command -v python3 >/dev/null 2>&1 && [ -f "$TARGET_DIR/.agents/scripts/update-engine.py" ]; then
+    echo -e "\n🔄 ${BOLD}Chạy Smart Update Engine (3-Way Hash)...${NC}"
+    python3 "$TARGET_DIR/.agents/scripts/update-engine.py" --apply --target "$TARGET_DIR"
+    exit $?
+  elif command -v python3 >/dev/null 2>&1; then
+    # Engine not present yet — copy it first then run
+    mkdir -p "$TARGET_DIR/.agents/scripts"
+    cp "$SOURCE_DIR/.agents/scripts/update-engine.py" "$TARGET_DIR/.agents/scripts/update-engine.py"
+    echo -e "\n🔄 ${BOLD}Chạy Smart Update Engine (3-Way Hash)...${NC}"
+    python3 "$TARGET_DIR/.agents/scripts/update-engine.py" --apply --target "$TARGET_DIR"
+    exit $?
+  else
+    echo -e "${YELLOW}⚠️ Python 3 không có sẵn. Tiến hành cài đặt bình thường (không có 3-way hash).${NC}"
+  fi
+fi
+
+# Record workflow source repository metadata (with full protectedPaths)
+INSTALL_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 cat > "$TARGET_DIR/.agents/workflow-source.json" << EOF
 {
+  "sourceRepo": "https://github.com/ahauy/universal-agents-workflow.git",
   "sourcePath": "$SOURCE_DIR",
-  "version": "1.0.0",
-  "installedAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  "version": "1.1.0",
+  "gitMode": "$MODE",
+  "installedAt": "$INSTALL_DATE",
+  "lastCheckedAt": "$INSTALL_DATE",
+  "protectedPaths": [
+    "CONTEXT.md",
+    "PRODUCT_BACKLOG_ROADMAP.md",
+    "CHANGELOG.md",
+    "UPGRADE_NOTICE.md",
+    "adr/",
+    "!adr/adr-template.md",
+    "docs/features/",
+    "docs/user-guides/",
+    "docs/architecture/",
+    "docs/RUN_AND_TEST.md",
+    ".specify/features/",
+    "src/",
+    ".env",
+    ".env.*",
+    "*.local",
+    "*.local.md"
+  ],
+  "manifest": {}
 }
 EOF
 
@@ -446,7 +532,68 @@ case "$MODE" in
 esac
 
 # ------------------------------------------------------------------------------
-# 6. Final Summary & Next Steps
+# 7. Generate UPGRADE_NOTICE.md (hướng dẫn cập nhật cho người dùng)
+# ------------------------------------------------------------------------------
+if [ ! -f "$TARGET_DIR/UPGRADE_NOTICE.md" ]; then
+  cat > "$TARGET_DIR/UPGRADE_NOTICE.md" << 'NOTICE_EOF'
+# How to Get Updates — Universal Agents Workflow
+
+This project uses **Universal Agents Workflow** as its AI agent framework.
+
+## Check & Apply Updates
+
+### Option 1 — In your AI Editor (recommended)
+
+Type `/update` in the AI chat:
+```
+/update
+```
+The AI will check for a new version and apply it safely using the 3-Way Hash engine.
+
+### Option 2 — CLI
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh | bash -s -- --update
+```
+
+### Option 3 — Python engine directly
+
+```bash
+# Check only (no changes)
+python3 .agents/scripts/update-engine.py --check
+
+# Apply update
+python3 .agents/scripts/update-engine.py --apply
+```
+
+## What Is Protected During Updates?
+
+Your project data is **NEVER overwritten**:
+
+| Protected | Description |
+|---|---|
+| `CONTEXT.md` | Project ubiquitous language |
+| `PRODUCT_BACKLOG_ROADMAP.md` | Product backlog & roadmap |
+| `CHANGELOG.md` | Project change history |
+| `adr/` | Architecture Decision Records |
+| `docs/features/` | Technical documentation |
+| `docs/user-guides/` | End-user guides with screenshots |
+| `docs/architecture/` | Architecture diagrams & docs |
+| `.specify/features/` | Feature specs, test plans, baseline |
+| `src/` | Your source code |
+| `.env`, `.env.*` | Environment variables & secrets |
+
+User-added custom skills in `.agents/` are also **never deleted**.
+
+## Release Notes
+
+See: <https://github.com/ahauy/universal-agents-workflow/releases>
+NOTICE_EOF
+  echo -e "  📄 ${GREEN}Đã tạo UPGRADE_NOTICE.md${NC} — hướng dẫn cách cập nhật framework sau này."
+fi
+
+# ------------------------------------------------------------------------------
+# 8. Final Summary & Next Steps
 # ------------------------------------------------------------------------------
 echo -e "\n${BOLD}${GREEN}🎉 Cài đặt hoàn tất thành công!${NC}"
 echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -455,4 +602,5 @@ echo -e "  1. Mở dự án đích trong AI Editor (Antigravity IDE, Cursor, Win
 echo -e "  2. Gõ vào ô chat của Agent:"
 echo -e "     ${CYAN}/skill-setup${NC} (hoặc ${CYAN}setup dự án${NC})"
 echo -e "     để quét Tech Stack tự động và kích hoạt các kỹ năng chuyên biệt."
+echo -e "  3. Để cập nhật framework sau này: gõ ${CYAN}/update${NC} trong chat."
 echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
