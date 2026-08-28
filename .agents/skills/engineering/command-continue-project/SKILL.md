@@ -5,6 +5,7 @@ description: >-
   Activated when the user types /command-continue-project (or shortcuts /continue, /next, /auto-continue-project).
   Automatically scans docs/PRODUCT_BACKLOG_ROADMAP.md (schema-version 1.1+), reads YAML frontmatter tech-stack,
   checks Depends-on/Blocks dependency chain, reads Effort + Context-budget for auto-routing,
+  integrates grilling to resolve blockers [!] and Stage 2 elicitation,
   and activates the full development pipeline (BA Pipeline -> Speckit -> TDD -> Docs).
 triggers:
   - "/command-continue-project"
@@ -60,14 +61,18 @@ Before starting analysis or code, ensure the working environment is synced with 
 
 4. **🛑 Blocked Story Gate (`[!]`) (MANDATORY)**:
    - If the candidate story is marked `[!]` (Blocked / Review Needed):
-     - **STOP IMMEDIATELY**. Do not dispatch autonomous pipeline.
+     - **STOP IMMEDIATELY**. Do not dispatch autonomous implementation pipeline.
      - Output:
        ```markdown
        ⚠️ **Story đang bị chặn / Cần làm rõ:** `[!] <US-ID> - <Story Title>`
        Story này đã được đánh dấu là đang gặp vướng mắc hoặc cần quyết định kiến trúc trước khi thực thi.
        👉 Hãy làm rõ yêu cầu hoặc gỡ bỏ rào cản trước khi tiếp tục.
        ```
-     - Prompt user for decision or next steps.
+     - **Proactive Unblocking via `grilling`**:
+       - Offer or prompt the user immediately:
+         _"Bạn có muốn kích hoạt phiên phỏng vấn nhanh (`grilling`) để làm rõ khúc mắc nghiệp vụ / trade-off kiến trúc và gỡ trạng thái [!] ngay không?"_
+       - If user confirms: run a focused `grilling` loop (`.agents/skills/productivity/grilling`) (2–3 targeted questions with Context, Options A/B, and Recommended), record the resolution into the story notes or `01-elicitation.md`, update status in `docs/PRODUCT_BACKLOG_ROADMAP.md` from `[!]` to `[/]` or `[ ]`, and proceed with the pipeline.
+       - If user declines: wait for user's manual instructions or unblock action.
 
 5. **Dependency Gate (MANDATORY — do NOT skip)**:
    - Read the story's `Depends-on` field.
@@ -121,11 +126,25 @@ Before starting analysis or code, ensure the working environment is synced with 
 
 - **🛑 INTERACTIVE ELICITATION INTERVIEW GATE (Stage 2 — MANDATORY CUSTOMER INTERVIEW)**:
   - The AI **MUST PAUSE** before domain modeling, gap analysis, or spec writing.
-  - AI MUST present 2–3 targeted clarification questions directly to the user covering
-    business goals, key state machine transitions, business rules/formulas, and edge cases.
-  - **Strict Zero-Hallucination Policy**: AI is strictly prohibited from inventing business rules
-    or silently making assumptions. Anything ambiguous or unspecified must be asked and confirmed.
-  - AC from roadmap file serve as the interview ANCHOR — verify each AC is correctly understood.
+  - **Delegation to `grilling` Primitive (`.agents/skills/productivity/grilling`) & `elicitation-interview`**:
+    - Subagent `business-analyst` conducts the interview following the `grilling` recursive protocol: Frame → Branch → Batch 2–3 questions → Zero silent assumptions.
+    - AI MUST present 2–3 targeted clarification questions directly to the user covering business goals, key state machine transitions, business rules/formulas, and edge cases.
+    - **Anchor on Roadmap AC**: The Acceptance Criteria (AC) already documented in `PRODUCT_BACKLOG_ROADMAP.md` serve as the interview ANCHOR. Only grill on branches that are underspecified, missing, or high-risk (e.g. error recovery, concurrency, RBAC boundaries). Do not re-ask what is already settled in AC.
+    - **Effort-Calibrated Depth**:
+      - `Effort: S` (Fast-Track): Max 1 batch (1–2 concise questions) or skip interview if AC is 100% crystal clear.
+      - `Effort: M` (Bounded Task): 1 batch (2–3 targeted questions) focused on touched domain pillars.
+      - `Effort: L|XL` (Full Feature): Standard multi-batch grilling across 6 domain pillars.
+    - **Standard Question Format**:
+      ```markdown
+      **Question <N>: <Subject>**
+
+      - Context & Why it matters: <impact>
+      - Proposed Options:
+        - Option A: <details>
+        - Option B: <details>
+      - Recommended: <recommendation with rationale>
+      ```
+    - **Strict Zero-Hallucination Policy**: AI is strictly prohibited from inventing business rules or silently making assumptions. Anything ambiguous or unspecified must be asked and confirmed.
 
 - **Step 2 (Domain Modeling & Spec Generation — Stages 3–8)**:
   - Once the user answers the elicitation questions, dispatch `business-analyst` to execute
@@ -141,8 +160,8 @@ Before starting analysis or code, ensure the working environment is synced with 
   - Concrete proposals for unresolved items, formatted as selectable options where possible.
 
   **If the user does NOT confirm (asks questions, requests changes, or is unsure):**
-  - Do NOT proceed.
-  - Identify the specific blocker and dispatch follow-up questions or concrete proposals.
+  - Do NOT proceed and do NOT guess changes silently.
+  - Trigger a focused `grilling` loop (`.agents/skills/productivity/grilling`) to isolate the root objection, explore trade-offs, and present concrete options (Option A vs Option B with rationale).
   - Re-present the updated spec summary and loop back to this gate until the user explicitly says "approve", "confirmed", "let's proceed", or equivalent.
 
   **Only when the user explicitly approves**: mark `baseline.md` as `SIGNED-OFF v1.0` and advance to Case B.
@@ -166,8 +185,9 @@ Before starting analysis or code, ensure the working environment is synced with 
   - Proposals for any unresolved design questions.
 
   **If the user does NOT confirm (asks questions, requests changes, or is unsure):**
-  - Do NOT proceed.
-  - Identify the specific blocker, update the plan with the architect subagent, and re-present for approval.
+  - Do NOT proceed and do NOT make speculative architecture changes.
+  - Trigger a technical `grilling` loop (`.agents/skills/productivity/grilling`) to resolve architectural conflicts or trade-offs with the user.
+  - Update the plan with the architect subagent, and re-present for approval.
   - Loop back to this gate until the user explicitly approves.
 
   **Only when the user explicitly approves**: advance to Case C.
