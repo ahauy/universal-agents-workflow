@@ -11,7 +11,6 @@ metadata:
   source: "templates/commands/plan.md"
 ---
 
-
 ## User Input
 
 ```text
@@ -23,6 +22,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 ## Pre-Execution Checks
 
 **Check for extension hooks (before planning)**:
+
 - Check if `.specify/extensions.yml` exists in the project root.
 - If it exists, read it and look for entries under the `hooks.before_plan` key
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
@@ -75,6 +75,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 **You MUST complete this section before reporting completion to the user.**
 
 Check if `.specify/extensions.yml` exists in the project root.
+
 - If it does not exist, or no hooks are registered under `hooks.after_plan`, skip to the Completion Report.
 - If it exists, read it and look for entries under the `hooks.after_plan` key.
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue to the Completion Report.
@@ -156,7 +157,47 @@ Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated 
    - Do not include full implementation code, model/service/controller bodies, migrations, or complete test suites
    - Keep this artifact as a validation/run guide; implementation details belong in `tasks.md` and the implementation phase
 
-**Output**: data-model.md, /contracts/*, quickstart.md
+4. **Generate C4 Architecture Diagrams** → appended to `plan.md`:
+
+   **C4 Level 1 — System Context** (paste into `plan.md` under `## Architecture Diagrams`):
+
+   ```mermaid
+   C4Context
+     title System Context — <Feature Name>
+     Person(user, "User", "Primary actor interacting with the system")
+     System(system, "<System Name>", "<One-line description>")
+     System_Ext(ext1, "<External System>", "<e.g. Payment Gateway, Auth Provider>")
+     Rel(user, system, "Uses")
+     Rel(system, ext1, "Calls")
+   ```
+
+   _Fill in system name, actors, and external dependencies from `spec.md` User Journeys._
+
+   **C4 Level 2 — Container View** (paste into `plan.md` after Level 1):
+
+   ```mermaid
+   C4Container
+     title Container View — <Feature Name>
+     Person(user, "User")
+     Container(api, "API / Backend", "<language + framework>", "Handles business logic")
+     Container(db, "Database", "<DB tech>", "Persists entities")
+     Container(frontend, "Frontend / App", "<framework>", "User interface")
+     Rel(user, frontend, "Interacts")
+     Rel(frontend, api, "API calls", "HTTP/REST")
+     Rel(api, db, "Reads/Writes", "SQL / ORM")
+   ```
+
+   _Add or remove containers based on actual tech stack in `CONTEXT.md`._
+
+   **Module Boundary Map** (paste into `plan.md` after diagrams):
+
+   | Module     | Responsibility                  | Public Interface        | Depends On |
+   | ---------- | ------------------------------- | ----------------------- | ---------- |
+   | `<module>` | `<from plan.md component list>` | `<entry file / facade>` | `<list>`   |
+
+   _Extract module names and responsibilities directly from the Component Architecture section of this plan. Do not invent modules._
+
+**Output**: data-model.md, /contracts/*, quickstart.md, plan.md (with C4 diagrams + module map)
 
 ## Key rules
 

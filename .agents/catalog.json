@@ -492,6 +492,17 @@
         "type": "stdio"
       },
       "recommendation": "optional"
+    },
+    {
+      "id": "scaffold-architecture",
+      "name": "Architecture Scaffolding (P3→P5 Bridge)",
+      "category": "Engineering / Architecture",
+      "short_description": "Generates project/feature folder structure, seeds base files (shared types, domain errors, DTO stubs), writes ADR-ARCH-001, and updates CONTEXT.md Module Map. Runs after speckit-plan, before implementation. Always asks user to confirm blueprint (C4 Layered, Hexagonal, or Feature-Based). Polyglot: TypeScript, Go, Python, Flutter, Swift, Rust.",
+      "detection_markers": ["plan.md", "data-model.md", ".specify/"],
+      "source_path": ".agents/skills/engineering/scaffold-architecture",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/scaffold-architecture",
+      "recommendation": "recommended"
     }
   ]
 }
