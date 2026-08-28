@@ -26,6 +26,10 @@ param (
     [switch]$Yes = $false,
 
     [Parameter()]
+    [alias("u")]
+    [switch]$Update = $false,
+
+    [Parameter()]
     [alias("h")]
     [switch]$Help = $false
 )
@@ -48,6 +52,7 @@ Options:
                           stealth : Add all workflow files to target .git/info/exclude
                           hybrid  : Track Specs/ADRs/CONTEXT, ignore .agents & AI rules
   -Yes, -y              Non-interactive mode (use defaults or provided arguments)
+  -Update, -u           Smart Update Mode: update framework, protect all project data
   -Help, -h             Show this help message
 
 Examples:
@@ -56,6 +61,9 @@ Examples:
 
   # Run from cloned repository:
   .\install.ps1 -Target "..\my-existing-project" -Mode "local" -Yes
+
+  # Update existing installation (protects all project data):
+  .\install.ps1 -Update
 "@
     exit 0
 }
@@ -161,9 +169,45 @@ try {
     # ------------------------------------------------------------------------------
     Write-Host "`n📦 Đang sao chép các thành phần Universal Agents Workflow..." -ForegroundColor White
 
+    # Project data paths that are NEVER overwritten
+    $protectedDataPaths = @(
+        "CONTEXT.md",
+        "PRODUCT_BACKLOG_ROADMAP.md",
+        "CHANGELOG.md",
+        "UPGRADE_NOTICE.md",
+        "adr",
+        "docs\features",
+        "docs/features",
+        "docs\user-guides",
+        "docs/user-guides",
+        "docs\architecture",
+        "docs/architecture",
+        "docs\RUN_AND_TEST.md",
+        "docs/RUN_AND_TEST.md",
+        ".specify\features",
+        ".specify/features",
+        "src"
+    )
+
+    function Test-IsProjectData ($destPath) {
+        $destRel = $destPath.Replace($Target, "").TrimStart("\", "/").Replace("/", "\")
+        foreach ($p in $protectedDataPaths) {
+            $pNorm = $p.Replace("/", "\")
+            if ($destRel -eq $pNorm -or $destRel.StartsWith($pNorm + "\")) {
+                return $true
+            }
+        }
+        return $false
+    }
+
     function Copy-WorkflowItem ($src, $dest, $name) {
         if (-not $dest -or $dest -eq $Target -or $dest -eq "$Target\" -or $dest -eq "$Target/") {
             Write-Host "  ⚠️  CẢNH BÁO AN TOÀN: Đường dẫn đích không hợp lệ hoặc trỏ vào root: $name. Bỏ qua!" -ForegroundColor Red
+            return
+        }
+        if ((Test-Path $dest) -and (Test-IsProjectData $dest)) {
+            $relPath = $dest.Replace($Target, "").TrimStart("\", "/")
+            Write-Host "  🛡️  Bảo vệ dữ liệu dự án: $name ➔ $relPath (đã tồn tại, bỏ qua)" -ForegroundColor Yellow
             return
         }
         if (Test-Path $src) {
@@ -191,12 +235,54 @@ try {
     Copy-WorkflowItem (Join-Path $SourceDir ".windsurfrules") (Join-Path $Target ".windsurfrules") ".windsurfrules"
     Copy-WorkflowItem (Join-Path $SourceDir ".github\copilot-instructions.md") (Join-Path $Target ".github\copilot-instructions.md") ".github/copilot-instructions.md"
 
-    # Record workflow source repository metadata
+    # ── Smart Update Mode: delegate to Python engine if -Update was passed ──────
+    if ($Update) {
+        $enginePath = Join-Path $Target ".agents\scripts\update-engine.py"
+        $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+        if (-not $pythonCmd) { $pythonCmd = Get-Command python3 -ErrorAction SilentlyContinue }
+        if ($pythonCmd) {
+            if (-not (Test-Path $enginePath)) {
+                $engineParent = Split-Path -Parent $enginePath
+                if (-not (Test-Path $engineParent)) { New-Item -ItemType Directory -Path $engineParent -Force | Out-Null }
+                Copy-Item (Join-Path $SourceDir ".agents\scripts\update-engine.py") $enginePath -Force
+            }
+            Write-Host "`n🔄 Chạy Smart Update Engine (3-Way Hash)..." -ForegroundColor White
+            & $pythonCmd.Source $enginePath --apply --target $Target
+            return
+        } else {
+            Write-Host "⚠️ Python không có sẵn. Tiến hành cài đặt bình thường (không có 3-way hash)." -ForegroundColor Yellow
+        }
+    }
+
+    # Record workflow source repository metadata (with full protectedPaths)
+    $installDate = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
     $sourceMetadata = @{
+        sourceRepo = "https://github.com/ahauy/universal-agents-workflow.git"
         sourcePath = $SourceDir
-        version = "1.0.0"
-        installedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-    } | ConvertTo-Json
+        version = "1.1.0"
+        gitMode = $Mode
+        installedAt = $installDate
+        lastCheckedAt = $installDate
+        protectedPaths = @(
+            "CONTEXT.md",
+            "PRODUCT_BACKLOG_ROADMAP.md",
+            "CHANGELOG.md",
+            "UPGRADE_NOTICE.md",
+            "adr/",
+            "!adr/adr-template.md",
+            "docs/features/",
+            "docs/user-guides/",
+            "docs/architecture/",
+            "docs/RUN_AND_TEST.md",
+            ".specify/features/",
+            "src/",
+            ".env",
+            ".env.*",
+            "*.local",
+            "*.local.md"
+        )
+        manifest = @{}
+    } | ConvertTo-Json -Depth 5
     Set-Content -Path (Join-Path $Target ".agents\workflow-source.json") -Value $sourceMetadata -Force
 
     # Ensure catalog.json exists inside .agents/
@@ -337,6 +423,69 @@ AGENTS.md
         }
     }
 
+    # ------------------------------------------------------------------------------
+    # 6. Generate UPGRADE_NOTICE.md (hướng dẫn cập nhật cho người dùng)
+    # ------------------------------------------------------------------------------
+    $upgradeNoticePath = Join-Path $Target "UPGRADE_NOTICE.md"
+    if (-not (Test-Path $upgradeNoticePath)) {
+        $noticeContent = @"
+# How to Get Updates — Universal Agents Workflow
+
+This project uses **Universal Agents Workflow** as its AI agent framework.
+
+## Check & Apply Updates
+
+### Option 1 — In your AI Editor (recommended)
+
+Type `/update` in the AI chat:
+```
+/update
+```
+The AI will check for a new version and apply it safely using the 3-Way Hash engine.
+
+### Option 2 — CLI (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.ps1 | iex -ArgumentList "-Update"
+```
+
+### Option 3 — Python engine directly
+
+```bash
+# Check only (no changes)
+python .agents/scripts/update-engine.py --check
+
+# Apply update
+python .agents/scripts/update-engine.py --apply
+```
+
+## What Is Protected During Updates?
+
+Your project data is **NEVER overwritten**:
+
+| Protected | Description |
+|---|---|
+| `CONTEXT.md` | Project ubiquitous language |
+| `PRODUCT_BACKLOG_ROADMAP.md` | Product backlog & roadmap |
+| `CHANGELOG.md` | Project change history |
+| `adr/` | Architecture Decision Records |
+| `docs/features/` | Technical documentation |
+| `docs/user-guides/` | End-user guides with screenshots |
+| `docs/architecture/` | Architecture diagrams & docs |
+| `.specify/features/` | Feature specs, test plans, baseline |
+| `src/` | Your source code |
+| `.env`, `.env.*` | Environment variables & secrets |
+
+User-added custom skills in `.agents/` are also **never deleted**.
+
+## Release Notes
+
+See: https://github.com/ahauy/universal-agents-workflow/releases
+"@
+        Set-Content -Path $upgradeNoticePath -Value $noticeContent -Force
+        Write-Host "  📄 Đã tạo UPGRADE_NOTICE.md — hướng dẫn cách cập nhật framework sau này." -ForegroundColor Green
+    }
+
     Write-Host "`n🎉 Cài đặt hoàn tất thành công!" -ForegroundColor Green
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     Write-Host "👉 Bước tiếp theo:"
@@ -344,6 +493,7 @@ AGENTS.md
     Write-Host "  2. Gõ vào ô chat của Agent:"
     Write-Host "     /skill-setup (hoặc setup dự án)"
     Write-Host "     để quét Tech Stack tự động và kích hoạt các kỹ năng chuyên biệt."
+    Write-Host "  3. Để cập nhật framework sau này: gõ /update trong chat."
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`n"
 }
 finally {

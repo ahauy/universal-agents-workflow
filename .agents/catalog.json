@@ -503,6 +503,17 @@
       "target_type": "skill",
       "target_path": ".agents/skills/engineering/scaffold-architecture",
       "recommendation": "recommended"
+    },
+    {
+      "id": "command-update",
+      "name": "Smart Framework Update (/update)",
+      "category": "Engineering / DevOps",
+      "short_description": "3-Way Hash Smart Update Engine: safely updates Universal Agents Workflow to latest version. Protects all project data (CONTEXT.md, adr/, docs/, .specify/features/, src/, PRODUCT_BACKLOG_ROADMAP.md, CHANGELOG.md, .env*). Auto-updates unmodified framework files, asks [K]eep/[O]verwrite/[D]iff for locally-modified ones. Zero Deletion Policy for user-added skills. Offline-safe with graceful fallback.",
+      "detection_markers": [".agents/workflow-source.json"],
+      "source_path": ".agents/skills/engineering/command-update",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/command-update",
+      "recommendation": "recommended"
     }
   ]
 }
