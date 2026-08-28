@@ -541,6 +541,7 @@ flowchart TD
 | **`/command-continue-project`** | `/continue`, `/next`                   | Quét `PRODUCT_BACKLOG_ROADMAP.md`, phỏng vấn `grilling` gỡ blocker `[!]` và kích hoạt chu trình làm tính năng tiếp theo. | Trong dự án cá nhân/greenfield phát triển theo roadmap.  |
 | **`/command-git-push`**         | `/push`, `/ship`                       | Kiểm tra cổng tài liệu, phân tách commit theo tầng (Modular Commit) và push an toàn.                                     | Khi hoàn thành tính năng hoặc sửa lỗi cần đẩy lên Git.   |
 | **`/command-user-guide`**       | `/user-guide`, `/guide`                | Khởi chạy Playwright chụp ảnh giao diện thực tế và viết tài liệu hướng dẫn.                                              | Sau khi hoàn thiện giao diện người dùng.                 |
+| **`/command-update`**           | `/update`, `/upgrade`                  | Cập nhật framework an toàn với động cơ 3-Way Hash; bảo vệ 100% dữ liệu dự án và giữ nguyên custom skill.                 | Khi có bản phát hành mới hoặc muốn đồng bộ framework.    |
 
 ---
 
@@ -635,6 +636,57 @@ Framework tích hợp các script hook kiểm soát cơ học tại [.agents/scr
 - ❌ **Chặn commit trực tiếp vào `main`/`master`**: Bắt buộc tạo nhánh tính năng (`feat/*`, `chore/*`).
 - ❌ **Chặn commit chứa mã độc/Secret**: Quét tự động private keys, `.env`, tokens trước khi commit.
 - ❌ **Bảo vệ Lockfile đa ngôn ngữ**: Ngăn chặn AI cài nhầm package manager làm lệch lockfile (`pnpm`, `npm`, `yarn`, `poetry`, `cargo`).
+
+---
+
+## 🔄 Cập Nhật & Nâng Cấp Thông Minh (Smart Update & 3-Way Hash Engine)
+
+Hệ thống cập nhật thông minh giải quyết triệt để bài toán **nâng cấp framework mà không làm mất dữ liệu dự án hoặc custom code của người dùng**:
+
+```mermaid
+flowchart TD
+    Start["Kích hoạt Update (/update hoặc install.sh --update)"] --> ReadProtected["Bước 0: Đọc & Khóa protectedPaths\ntừ workflow-source.json"]
+    ReadProtected --> Scan["Quét SHA-256 Checksum toàn bộ tệp"]
+
+    Scan --> Cat1{"1. Loại Tệp là gì?"}
+
+    Cat1 -->|"🛡️ Project Data Plane\n(CONTEXT.md, adr/, docs/, .specify/features/, src/, .env*)"| KeepData["BẢO VỆ TUYỆT ĐỐI\nBỏ qua 100%, không bao giờ ghi đè\n[PROTECTED]"]
+
+    Cat1 -->|"✨ Custom Skill/Agent do user tự thêm vào .agents/"| KeepCustom["ZERO DELETION POLICY\nGiữ nguyên vẹn 100%, không xóa\n[USER-CUSTOM RETAINED]"]
+
+    Cat1 -->|"🔄 Core Framework File (.agents/, prompts, rules)"| CheckHash{"2. Checksum hiện tại vs Installed Hash"}
+
+    CheckHash -->|"current_hash == installed_hash\n(User CHƯA TỪNG sửa)"| AutoUpdate["✅ SAFE UPDATE\nTự động cập nhật lên bản mới nhất\n[UPDATED]"]
+
+    CheckHash -->|"current_hash != installed_hash\n(User ĐÃ SỬA file này)"| Conflict["⚠️ PHÁT HIỆN XUNG ĐỘT\nDừng lại và hỏi người dùng:"]
+
+    Conflict --> Opt1["[K]eep: Giữ bản tùy biến của bạn"]
+    Conflict --> Opt2["[O]verwrite: Ghi đè bản mới (tạo backup .bak)"]
+    Conflict --> Opt3["[D]iff: Tải bản .upstream để tự merge"]
+```
+
+### 3 Cách Kích Hoạt Cập Nhật:
+
+1. **Trực tiếp trong AI Editor (Khuyên dùng)**:
+   ```text
+   /update
+   ```
+2. **Qua dòng lệnh CLI (macOS / Linux)**:
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh | bash -s -- --update
+   ```
+3. **Qua PowerShell (Windows)**:
+   ```powershell
+   irm https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.ps1 | iex -ArgumentList "-Update"
+   ```
+
+### Bảng Phân Định Ranh Giới Dữ Liệu:
+
+| Nhóm Tệp                               | Danh Sách Đường Dẫn                                                                                                                                                                                                                            | Cơ Chế Bảo Vệ                                                                          |
+| :------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
+| **Project Data Plane** (Dữ liệu dự án) | `CONTEXT.md`, `PRODUCT_BACKLOG_ROADMAP.md`, `CHANGELOG.md`, `UPGRADE_NOTICE.md`, `adr/` (trừ template), `docs/features/`, `docs/user-guides/`, `docs/architecture/`, `docs/RUN_AND_TEST.md`, `.specify/features/`, `src/`, `.env*`, `*.local*` | 🛡️ **Bảo vệ tuyệt đối**: Bỏ qua 100%, không bao giờ ghi đè khi update.                 |
+| **User Customizations**                | Bất kỳ custom skill/agent/rule nào do user tự tạo thêm trong `.agents/`                                                                                                                                                                        | 👤 **Zero Deletion Policy**: Giữ nguyên vẹn, không bao giờ bị xóa.                     |
+| **Framework Core Files**               | `.agents/skills/`, `.agents/agents/`, `.agents/scripts/`, `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `.cursorrules`, `.windsurfrules`, `.specify/templates/`, `.specify/workflows/`                                                                | 🔄 **3-Way Hash Checksum**: Tự động update nếu chưa sửa; hỏi xác nhận nếu user đã sửa. |
 
 ---
 

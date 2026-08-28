@@ -155,6 +155,7 @@ When encountering friction or uncertainty, look up the symptom below to immediat
 | _"Agent context window is filling up or session is ending"_         | Memory bloat & drift            | `handoff` (`productivity/handoff`)                                     |
 | _"Writing new system skills, rules, or instructions"_               | Unfocused agent documentation   | `writing-for-agents` (`engineering/writing-for-agents`)                |
 | _"Starting a new repo or onboarding project from scratch"_          | Manual configuration burden     | `/skill-setup` (`engineering/command-skill-setup` / `setup-workspace`) |
+| _"Upgrading framework or syncing upstream changes safely"_          | Framework evolution & drift     | `/command-update` (`engineering/command-update`)                       |
 | _"Reviewing code or catching regressions before merge"_             | Unstructured code review        | `code-reviewer` (dual pass: Standards + Spec)                          |
 
 ---
@@ -188,6 +189,7 @@ When encountering friction or uncertainty, look up the symptom below to immediat
 | **Technical Specification (equiv. to-spec)**               | `speckit-specify`                                            | `engineering/speckit-specify`               |
 | **Architecture Plan & Contract DTOs**                      | `speckit-plan`                                               | `engineering/speckit-plan`                  |
 | **Granular Task Decomposition**                            | `speckit-tasks`                                              | `engineering/speckit-tasks`                 |
+| **Architecture Scaffolding (P3→P5 Bridge)**                | `scaffold-architecture`                                      | `engineering/scaffold-architecture`         |
 | **Session retrospective & environment tuning**             | `retro`                                                      | `productivity/retro`                        |
 | **Decision tickets map for large ambiguous efforts**       | `wayfinder`                                                  | `engineering/wayfinder`                     |
 | **Automated deep module & seam enforcement (Polyglot)**    | `setup-deep-modules`                                         | `engineering/setup-deep-modules`            |
@@ -210,6 +212,7 @@ When encountering friction or uncertainty, look up the symptom below to immediat
 | **Command: Automated modular commit & push**               | `/command-git-push`                                          | `engineering/command-git-push`              |
 | **Command: Generate end-user guide with real screenshots** | `/command-user-guide`                                        | `engineering/command-user-guide`            |
 | **Command: Adaptive project onboarding & skill setup**     | `/command-skill-setup` (alias: `/skill-setup`, `/setup`)     | `engineering/command-skill-setup`           |
+| **Command: Smart Framework Update & 3-Way Hash Sync**      | `/command-update` (alias: `/update`, `/upgrade`)             | `engineering/command-update`                |
 
 ---
 
