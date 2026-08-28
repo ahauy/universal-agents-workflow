@@ -38,6 +38,7 @@ flowchart TD
 Scan the project root directory to identify technology detection markers with zero excessive token reading overhead:
 
 1. **Programming Languages**:
+   - Flutter / Dart: `pubspec.yaml`, `*.dart`, `.flutter-plugins`
    - Swift / Apple: `Package.swift`, `project.yml`, `*.xcodeproj`, `*.xcworkspace`, `*.swift`
    - Go: `go.mod`, `main.go`
    - Python: `pyproject.toml`, `requirements.txt`, `Pipfile`, `poetry.lock`, `setup.py`
