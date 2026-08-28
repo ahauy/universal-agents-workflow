@@ -17,6 +17,7 @@
 - [🎯 Ý Nghĩa Cốt Lõi Của Dự Án](#-ý-nghĩa-cốt-lõi-của-dự-án)
 - [🚀 Hướng Dẫn Bắt Đầu Nhanh (Quickstart)](#-hướng-dẫn-bắt-đầu-nhanh-quickstart)
   - [Phương Án 1: Tích Hợp Vào Dự Án Đang Có (Brownfield)](#phương-án-1-tích-hợp-vào-dự-án-đang-có-brownfield---khuyên-dùng)
+  - [🔄 Cập Nhật Bộ Khung Lên Bản Mới Nhất (Update / Upgrade)](#-cập-nhật-bộ-khung-lên-bản-mới-nhất-update--upgrade)
   - [Phương Án 2: Khởi Tạo Dự Án Mới Toanh (Greenfield)](#phương-án-2-khởi-tạo-dự-án-mới-toanh-greenfield)
 - [🎮 Cách Sử Dụng Bộ Kỹ Năng Trong AI Editor](#-cách-sử-dụng-bộ-kỹ-năng-trong-ai-editor)
 - [🎯 2 Kịch Bản Vận Hành Thực Tế: Doanh Nghiệp vs Dự Án Cá Nhân](#-2-kịch-bản-vận-hành-thực-tế-doanh-nghiệp-vs-dự-án-cá-nhân)
@@ -29,6 +30,7 @@
   - [🔹 Bước 1: Khởi Tạo & Onboarding Dự Án](#-bước-1-khởi-tạo--onboarding-dự-án-onboard--detect-stack)
   - [🔹 Bước 2: Khảo Sát & Phỏng Vấn Nghiệp Vụ (Phase 1)](#-bước-2-khảo-sát--phỏng-vấn-nghiệp-vụ-phase-1-ba-pipeline)
   - [🔹 Bước 3: Đặc Tả Kỹ Thuật & Lập Kế Hoạch (Phase 2-4)](#-bước-3-đặc-tả-kỹ-thuật--lập-kế-hoạch-phase-2-4-speckit-planning)
+  - [🔹 Bước 3.5: Dựng Khung Kiến Trúc Hệ Thống (P3→P5 Bridge)](#-bước-35-dựng-khung-kiến-trúc-hệ-thống-p3p5-bridge-scaffold-architecture)
   - [🔹 Bước 4: Lập Trình Chuẩn TDD Theo Lát Cắt (Phase 5)](#-bước-4-lập-trình-chuẩn-tdd-theo-lát-cắt-phase-5-implementation)
   - [🔹 Bước 5: Phản Biện Chất Lượng Độc Lập (Phase 6A)](#-bước-5-phản-biện-chất-lượng-độc-lập-phase-6a-dual-pass-review)
   - [🔹 Bước 6: Biên Soạn Tài Liệu & Hướng Dẫn Kèm Ảnh Thật (Phase 6B)](#-bước-6-biên-soạn-tài-liệu--hướng-dẫn-kèm-ảnh-thật-phase-6b-delivery)
@@ -136,6 +138,39 @@ Cả 2 cách trên đều hiển thị menu tương tác để bạn chọn **Ch
 
 > [!IMPORTANT]
 > **Nguyên tắc "Scan First - Zero Clutter"**: Bộ khung **KHÔNG BAO GIỜ** copy thư mục chứa toàn bộ ngôn ngữ thừa (`optional-stack-skills`) vào dự án của bạn. Script sẽ quét codebase trước, nếu là dự án Swift/iOS thì giữ sạch 100%; nếu là Go/Python/TypeScript thì chỉ copy duy nhất kỹ năng của ngôn ngữ đó vào `.agents/skills/engineering/`!
+
+---
+
+### 🔄 Cập Nhật Bộ Khung Lên Bản Mới Nhất (Update / Upgrade)
+
+Khi **Universal Agents Workflow** có bản cập nhật mới (ví dụ: thêm kỹ năng mới `scaffold-architecture`, gói ngôn ngữ Flutter, cải tiến prompt agent, cập nhật catalog...), bạn có thể cập nhật cho dự án đang làm chỉ trong vài giây:
+
+#### ⚡ 1. Mở Terminal ngay tại thư mục dự án và chạy lại lệnh One-Liner:
+
+- **🍎 macOS / 🐧 Linux / 🪟 Windows (Git Bash)**:
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh | bash
+  ```
+- **🪟 Windows (PowerShell)**:
+  ```powershell
+  irm https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.ps1 | iex
+  ```
+
+> **🛡️ Cơ chế cập nhật an toàn:**
+>
+> 1. Tự động đồng bộ và làm mới toàn bộ động cơ `.agents/` (chứa các Agent system prompts, catalog, và kỹ năng mới nhất).
+> 2. Chạy lại **Smart Stack Scan** để tự động nhận diện và đề xuất nạp thêm các gói kỹ năng mới phù hợp với codebase hiện tại của bạn.
+> 3. Giữ nguyên 100% mã nguồn dự án (`src/`, `lib/`, `tests/`...) và bảo toàn chế độ Git Tracking (`local`, `team`, `stealth`, `hybrid`) bạn đã cấu hình trước đó.
+
+#### 🎮 2. Kích hoạt kỹ năng mới trong AI Editor:
+
+Sau khi script hoàn tất, mở AI Editor và gõ vào ô chat:
+
+```text
+/skill-setup
+```
+
+AI Agent sẽ tự động nạp các quy tắc và kỹ năng tương thích mới nhất vào phiên làm việc!
 
 ---
 
@@ -400,6 +435,23 @@ flowchart TD
 
 ---
 
+### 🔹 Bước 3.5: Dựng Khung Kiến Trúc Hệ Thống (P3→P5 Bridge: Scaffold Architecture)
+
+- **Thao tác của bạn**: Sau khi phê duyệt `plan.md`, ra lệnh: _"Dựng khung thư mục và kiến trúc cho feature này"_.
+- **Kỹ năng AI kích hoạt**: [`scaffold-architecture`](.agents/skills/engineering/scaffold-architecture/SKILL.md).
+- **Hành động cụ thể của AI**:
+  1. Đọc `CONTEXT.md`, `plan.md`, `data-model.md` để hiểu stack và domain.
+  2. **🛑 Hỏi user xác nhận blueprint** — luôn hỏi, không tự chọn:
+     - **A — C4 Layered** (`controllers/ → services/ → repositories/`): REST APIs, backend TypeScript/Go/Python.
+     - **B — Hexagonal / Ports & Adapters** (`domain/ → ports/ → adapters/`): Microservices, domain-first, Rust/Java.
+     - **C — Feature-Based Modules** (`features/<name>/`): Flutter, React Native, fullstack apps.
+  3. Sinh thư mục và seed các file nền (`shared/types/`, `shared/errors/`, entry index).
+  4. Ghi `adr/ADR-ARCH-001-architecture-blueprint.md` (nếu chưa tồn tại).
+  5. Cập nhật **Module Map** trong `CONTEXT.md`.
+- **Kết quả**: `backend-developer` và `frontend-developer` có sẵn scaffold để điền code — không bắt đầu từ màn hình trắng.
+
+---
+
 ### 🔹 Bước 4: Lập Trình Chuẩn TDD Theo Lát Cắt (Phase 5: Implementation)
 
 - **Thao tác của bạn**: Ra lệnh: _"Bắt đầu code theo task"_ (hoặc gõ `/command-continue-project` nếu làm theo roadmap).
@@ -509,12 +561,13 @@ flowchart TD
 
 ### 🏗️ 3. Đặc Tả Kỹ Thuật & Kiến Trúc (Phase 2-4: SpecKit Planning)
 
-| Kỹ Năng               | Ý Nghĩa Ngắn Gọn & Giá Trị Thực Tế                                                          | Khi Nào Sử Dụng?                                              |
-| :-------------------- | :------------------------------------------------------------------------------------------ | :------------------------------------------------------------ |
-| **`speckit-specify`** | Chuyển đổi baseline nghiệp vụ đã ký duyệt thành đặc tả kỹ thuật chi tiết (`spec.md`).       | Phase 2: Xác định rõ ràng các API contracts và luồng dữ liệu. |
-| **`speckit-plan`**    | Lập kế hoạch kiến trúc sâu (`plan.md`), thiết kế DTO contracts và cấu trúc bảng dữ liệu.    | Phase 3: Thiết kế cấu trúc hệ thống trước khi chia nhỏ việc.  |
-| **`speckit-tasks`**   | Phân rã kế hoạch thành danh sách tác vụ (`tasks.md`) theo thứ tự độc lập và ranh giới seam. | Phase 4: Lập danh sách công việc sẵn sàng để thực thi TDD.    |
-| **`speckit-analyze`** | Đối chiếu chéo spec, plan và tasks để đảm bảo không sót yêu cầu nào từ baseline.            | Trước khi bắt đầu viết mã để loại bỏ rủi ro sai lệch.         |
+| Kỹ Năng                     | Ý Nghĩa Ngắn Gọn & Giá Trị Thực Tế                                                                           | Khi Nào Sử Dụng?                                                            |
+| :-------------------------- | :----------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| **`speckit-specify`**       | Chuyển đổi baseline nghiệp vụ đã ký duyệt thành đặc tả kỹ thuật chi tiết (`spec.md`).                        | Phase 2: Xác định rõ ràng các API contracts và luồng dữ liệu.               |
+| **`speckit-plan`**          | Lập kế hoạch kiến trúc sâu (`plan.md` với **C4 diagrams + Module Boundary Map**), DTO contracts, data model. | Phase 3: Thiết kế cấu trúc hệ thống và visual architecture trước khi code.  |
+| **`speckit-tasks`**         | Phân rã kế hoạch thành danh sách tác vụ (`tasks.md`) theo thứ tự độc lập và ranh giới seam.                  | Phase 4: Lập danh sách công việc sẵn sàng để thực thi TDD.                  |
+| **`scaffold-architecture`** | Dựng khung thư mục, seed base files, ghi ADR-ARCH-001, cập nhật Module Map. Luôn hỏi user chọn blueprint.    | **Phase 3.5 (P3→P5 Bridge)**: Sau plan, trước code — tạo nền cho subagents. |
+| **`speckit-analyze`**       | Đối chiếu chéo spec, plan và tasks để đảm bảo không sót yêu cầu nào từ baseline.                             | Trước khi bắt đầu viết mã để loại bỏ rủi ro sai lệch.                       |
 
 ---
 
