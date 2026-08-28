@@ -1,14 +1,50 @@
 # 🌐 Universal Agentic Development Framework
 
-[![Language Agnostic](https://img.shields.io/badge/Language-Polyglot-blue.svg)](#-t%E1%BB%95ng-quan--%C3%BD-ngh%C4%A9a-d%E1%BB%B1-%C3%A1n)
-[![Multi-AI Support](https://img.shields.io/badge/AI_Harness-Claude%20%7C%20Cursor%20%7C%20Windsurf%20%7C%20Copilot%20%7C%20Gemini-success.svg)](#-t%C3%ADnh-t%C6%B0%C6%A1ng-th%C3%ADch-%C4%91a-n%E1%BB%81n-t%E1%BA%A3ng-ai-multi-ai-universal-support)
-[![Language Extension Standard](https://img.shields.io/badge/Language%20Pack-The%20Language%20Quad-yellowgreen.svg)](#-chu%E1%BA%A9n-h%C3%B3a-g%C3%B3i-m%E1%BB%9F-r%E1%BB%99ng-ng%C3%B4n-ng%E1%BB%AF-language-pack-standard)
-[![Zero Hallucination](https://img.shields.io/badge/Requirements-IREB%2FBABOK-green.svg)](#-v%C3%B2ng-%C4%91%E1%BB%9Di-ph%C3%A1t-tri%E1%BB%83n-chu%E1%BA%A9n-7-b%C6%B0%E1%BB%9Bc)
-[![Deep Modules](https://img.shields.io/badge/Architecture-Ousterhout%20Seams-orange.svg)](#-tri%E1%BA%BFt-l%C3%BD-ki%E1%BA%BFn-tr%C3%BAc-c%E1%BB%91t-l%C3%B5i)
-[![Anti-AI-Slop](https://img.shields.io/badge/Design-Anti--AI--Slop-purple.svg)](#-tri%E1%BA%BFt-l%C3%BD-ki%E1%BA%BFn-tr%C3%BAc-c%E1%BB%91t-l%C3%B5i)
-[![Git Guardrails](https://img.shields.io/badge/Git-Hardware%20Locks-red.svg)](#-kh%C3%B3a-b%E1%BA%A3o-v%E1%BB%87-git-guardrails)
+[![Language Agnostic](https://img.shields.io/badge/Language-Polyglot-blue.svg)](#-ý-nghĩa-cốt-lõi-của-dự-án)
+[![Multi-AI Support](https://img.shields.io/badge/AI_Harness-Claude%20%7C%20Cursor%20%7C%20Windsurf%20%7C%20Copilot%20%7C%20Gemini-success.svg)](#-tính-tương-thích-đa-nền-tảng-ai-multi-ai-universal-support)
+[![Language Extension Standard](https://img.shields.io/badge/Language%20Pack-The%20Language%20Quad-yellowgreen.svg)](#-chuẩn-hóa-gói-mở-rộng-ngôn-ngữ-language-pack-standard)
+[![Zero Hallucination](https://img.shields.io/badge/Requirements-IREB%2FBABOK-green.svg)](#-vòng-đời-phát-triển-chuẩn-7-bước-end-to-end-pipeline)
+[![Deep Modules](https://img.shields.io/badge/Architecture-Ousterhout%20Seams-orange.svg)](#-4-thực-thi-mã-nguồn-kiến-trúc-sâu--gỡ-lỗi-phase-5-implementation)
+[![Anti-AI-Slop](https://img.shields.io/badge/Design-Anti--AI--Slop-purple.svg)](#-5-thiết-kế-uiux--tiêu-chuẩn-anti-ai-slop-frontend-design)
+[![Git Guardrails](https://img.shields.io/badge/Git-Hardware%20Locks-red.svg)](#-khóa-bảo-vệ-git-guardrails)
 
 > **Bộ khung quy trình Multi-Agent & Kỹ năng AI cấp doanh nghiệp, hoạt động độc lập với mọi ngôn ngữ lập trình và tương thích với toàn bộ AI Editor hiện đại (Antigravity IDE, Cursor, Claude Code, Windsurf, Copilot).**
+
+---
+
+## 📑 Mục Lục (Table of Contents)
+
+- [🎯 Ý Nghĩa Cốt Lõi Của Dự Án](#-ý-nghĩa-cốt-lõi-của-dự-án)
+- [🚀 Hướng Dẫn Bắt Đầu Nhanh (Quickstart)](#-hướng-dẫn-bắt-đầu-nhanh-quickstart)
+  - [Phương Án 1: Tích Hợp Vào Dự Án Đang Có (Brownfield)](#phương-án-1-tích-hợp-vào-dự-án-đang-có-brownfield---khuyên-dùng)
+  - [Phương Án 2: Khởi Tạo Dự Án Mới Toanh (Greenfield)](#phương-án-2-khởi-tạo-dự-án-mới-toanh-greenfield)
+- [🎮 Cách Sử Dụng Bộ Kỹ Năng Trong AI Editor](#-cách-sử-dụng-bộ-kỹ-năng-trong-ai-editor)
+- [🎯 2 Kịch Bản Vận Hành Thực Tế: Doanh Nghiệp vs Dự Án Cá Nhân](#-2-kịch-bản-vận-hành-thực-tế-doanh-nghiệp-vs-dự-án-cá-nhân)
+  - [🏢 Kịch Bản 1: Doanh Nghiệp (Task Lẻ từ Jira/Linear)](#-kịch-bản-1-doanh-nghiệp-nhận-từng-taskticket-lẻ-từ-jira-linear)
+  - [🚀 Kịch Bản 2: Dự Án Cá Nhân (Xây dựng theo Roadmap)](#-kịch-bản-2-dự-án-cá-nhân-xây-dựng-từ-đầu-theo-roadmap)
+- [🌐 Tính Tương Thích Đa Nền Tảng AI (Multi-AI Universal Support)](#-tính-tương-thích-đa-nền-tảng-ai-multi-ai-universal-support)
+- [🧩 Chuẩn Hóa Gói Mở Rộng Ngôn Ngữ (Language Pack Standard)](#-chuẩn-hóa-gói-mở-rộng-ngôn-ngữ-language-pack-standard)
+- [🔄 Vòng Đời Phát Triển Chuẩn 7 Bước (End-to-End Pipeline)](#-vòng-đời-phát-triển-chuẩn-7-bước-end-to-end-pipeline)
+- [🛠️ Quy Trình Làm Việc Từng Bước 1 Một Với Các Skill](#️-quy-trình-làm-việc-từng-bước-1-một-với-các-skill-step-by-step-practical-workflow)
+  - [🔹 Bước 1: Khởi Tạo & Onboarding Dự Án](#-bước-1-khởi-tạo--onboarding-dự-án-onboard--detect-stack)
+  - [🔹 Bước 2: Khảo Sát & Phỏng Vấn Nghiệp Vụ (Phase 1)](#-bước-2-khảo-sát--phỏng-vấn-nghiệp-vụ-phase-1-ba-pipeline)
+  - [🔹 Bước 3: Đặc Tả Kỹ Thuật & Lập Kế Hoạch (Phase 2-4)](#-bước-3-đặc-tả-kỹ-thuật--lập-kế-hoạch-phase-2-4-speckit-planning)
+  - [🔹 Bước 4: Lập Trình Chuẩn TDD Theo Lát Cắt (Phase 5)](#-bước-4-lập-trình-chuẩn-tdd-theo-lát-cắt-phase-5-implementation)
+  - [🔹 Bước 5: Phản Biện Chất Lượng Độc Lập (Phase 6A)](#-bước-5-phản-biện-chất-lượng-độc-lập-phase-6a-dual-pass-review)
+  - [🔹 Bước 6: Biên Soạn Tài Liệu & Hướng Dẫn Kèm Ảnh Thật (Phase 6B)](#-bước-6-biên-soạn-tài-liệu--hướng-dẫn-kèm-ảnh-thật-phase-6b-delivery)
+  - [🔹 Bước 7: Đóng Gói Modular Commits & Đẩy Lên Git](#-bước-7-đóng-gói-modular-commits--đẩy-lên-git-ship-it)
+  - [💡 Hộp Công Cụ Hỗ Trợ & Cứu Hộ Khi Gặp Khúc Mắc](#-hộp-công-cụ-hỗ-trợ--cứu-hộ-khi-gặp-khúc-mắc)
+- [📋 Bảng Tra Cứu Toàn Bộ Kỹ Năng Mặc Định (Cheatsheet)](#-bảng-tra-cứu-toàn-bộ-kỹ-năng-mặc-định-default-skills-cheatsheet)
+  - [⚡ 1. Lệnh Tự Động Hóa (Commands)](#-1-lệnh-tự-động-hóa-commands)
+  - [🍉 2. Phân Tích Nghiệp Vụ (Phase 1: BA Skill Pack)](#-2-phân-tích-nghiệp-vụ-phase-1-ba-skill-pack)
+  - [🏗️ 3. Đặc Tả Kỹ Thuật & Kiến Trúc (Phase 2-4: SpecKit Planning)](#️-3-đặc-tả-kỹ-thuật--kiến-trúc-phase-2-4-speckit-planning)
+  - [⚡ 4. Thực Thi Mã Nguồn, Kiến Trúc Sâu & Gỡ Lỗi (Phase 5)](#-4-thực-thi-mã-nguồn-kiến-trúc-sâu--gỡ-lỗi-phase-5-implementation)
+  - [🎨 5. Thiết Kế UI/UX & Tiêu Chuẩn Anti-AI-Slop (Frontend Design)](#-5-thiết-kế-uiux--tiêu-chuẩn-anti-ai-slop-frontend-design)
+  - [📚 6. Phản Biện Chất Lượng, Tài Liệu & Đóng Gói (Phase 6)](#-6-phản-biện-chất-lượng-tài-liệu--đóng-gói-phase-6-delivery)
+  - [🧠 7. Giao Tiếp, Phỏng Vấn & Năng Suất (Productivity)](#-7-giao-tiếp-phỏng-vấn--năng-suất-productivity--collaboration)
+- [🔒 Khóa Bảo Vệ Git (Guardrails)](#-khóa-bảo-vệ-git-guardrails)
+- [📁 Cấu Trúc Thư Mục Chuẩn](#-cấu-trúc-thư-mục-chuẩn)
+- [🤝 Đóng Góp & Giấy Phép](#-đóng-góp--giấy-phép)
 
 ---
 
@@ -196,13 +232,13 @@ Khi xây dựng sản phẩm cá nhân hoặc MVP từ đầu, bạn làm chủ 
    /generate-backlog "Ứng dụng flashcard học từ vựng SRS có AI chấm phát âm"
    ```
    - AI thực hiện phỏng vấn nhanh 6 câu qua 2 đợt (Platform, Auth, Content, Scale, Scope).
-   - Tự động sinh file `docs/PRODUCT_BACKLOG_ROADMAP.md` chuẩn schema v1.1 với YAML frontmatter tech-stack, danh mục Won't-Have (scope fence), chuỗi phụ thuộc (`Depends-on`), và độ phức tạp (`Effort: S/M/L/XL`).
+   - Tự động sinh file `docs/PRODUCT_BACKLOG_ROADMAP.md` chuẩn schema v1.2 với YAML frontmatter tech-stack, danh mục Won't-Have (scope fence), ma trận MoSCoW & RICE Score, sơ đồ ASCII roadmap, phân rã `Tasks: Backend / Frontend`, chuỗi phụ thuộc (`Depends-on`), độ phức tạp (`Effort: S/M/L/XL`), và Pre-Deploy Hardening checklist.
 
 2. **Kích hoạt tự động hóa toàn diện**: Gõ lệnh `/command-continue-project` (hoặc `/continue`, `/next`).
 3. **AI tự động vận hành trọn gói**:
-   - Quét roadmap, nạp `$TECH_CONTEXT`, kiểm tra Dependency Gate để bảo đảm không làm tính năng bị khóa.
+   - Quét roadmap, nạp `$TECH_CONTEXT`, kiểm tra Blocked Gate (`[!]`) và Dependency Gate để bảo đảm không làm tính năng bị khóa/vướng mắc. Nếu gặp story bị chặn `[!]`, AI chủ động đề xuất kích hoạt phiên phỏng vấn `grilling` để tháo gỡ điểm nghẽn ngay.
    - Tự động định tuyến (Auto-routing): Story nhỏ chạy Fast-Track, Story vừa chạy Bounded BA, Story lớn kích hoạt `wayfinder`.
-   - Chạy đầy đủ vòng đời: Phỏng vấn nghiệp vụ $\rightarrow$ Đặc tả SpecKit $\rightarrow$ TDD Implementation $\rightarrow$ Khởi chạy Playwright chụp ảnh màn hình thật lưu vào `docs/user-guides/`.
+   - Vận hành quy trình phỏng vấn chuẩn `grilling` lấy Acceptance Criteria (AC) trong roadmap làm anchor để đào sâu 6 trụ cột (không hỏi lại những gì đã chốt) $\rightarrow$ Đặc tả SpecKit $\rightarrow$ TDD Implementation $\rightarrow$ Khởi chạy Playwright chụp ảnh màn hình thật lưu vào `docs/user-guides/`.
    - Tự động đánh dấu `[x]` vào User Story vừa hoàn tất và thông báo kết quả.
 4. **Đẩy mã nguồn an toàn**: Gõ lệnh `/command-git-push` (hoặc `/push`) để tự động tách modular commits (Spec $\rightarrow$ Backend $\rightarrow$ Frontend $\rightarrow$ Docs) và đẩy lên remote.
 
@@ -446,13 +482,13 @@ flowchart TD
 
 ### ⚡ 1. Lệnh Tự Động Hóa (Commands)
 
-| Lệnh / Trigger                  | Bí Danh (Aliases)                      | Ý Nghĩa & Giá Trị Thực Tế                                                            | Khi Nào Sử Dụng?                                         |
-| :------------------------------ | :------------------------------------- | :----------------------------------------------------------------------------------- | :------------------------------------------------------- |
-| **`/skill-setup`**              | `/setup`, `/setup-workspace`           | Quét manifest dự án, đối chiếu `catalog.json` và tự động nạp kỹ năng phù hợp.        | Khi mới tích hợp workflow vào dự án hoặc đổi tech stack. |
-| **`/command-generate-backlog`** | `/generate-backlog`, `/create-roadmap` | Phỏng vấn nghiệp vụ 6 câu và tự sinh roadmap chuẩn schema v1.1 chống hallucination.  | Bắt đầu dự án mới hoặc khi có ý tưởng sản phẩm từ đầu.   |
-| **`/command-continue-project`** | `/continue`, `/next`                   | Quét `PRODUCT_BACKLOG_ROADMAP.md` và kích hoạt chu trình làm tính năng tiếp theo.    | Trong dự án cá nhân/greenfield phát triển theo roadmap.  |
-| **`/command-git-push`**         | `/push`, `/ship`                       | Kiểm tra cổng tài liệu, phân tách commit theo tầng (Modular Commit) và push an toàn. | Khi hoàn thành tính năng hoặc sửa lỗi cần đẩy lên Git.   |
-| **`/command-user-guide`**       | `/user-guide`, `/guide`                | Khởi chạy Playwright chụp ảnh giao diện thực tế và viết tài liệu hướng dẫn.          | Sau khi hoàn thiện giao diện người dùng.                 |
+| Lệnh / Trigger                  | Bí Danh (Aliases)                      | Ý Nghĩa & Giá Trị Thực Tế                                                                                                | Khi Nào Sử Dụng?                                         |
+| :------------------------------ | :------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------- |
+| **`/skill-setup`**              | `/setup`, `/setup-workspace`           | Quét manifest dự án, đối chiếu `catalog.json` và tự động nạp kỹ năng phù hợp.                                            | Khi mới tích hợp workflow vào dự án hoặc đổi tech stack. |
+| **`/command-generate-backlog`** | `/generate-backlog`, `/create-roadmap` | Phỏng vấn nghiệp vụ 6 câu và tự sinh roadmap chuẩn schema v1.1 chống hallucination.                                      | Bắt đầu dự án mới hoặc khi có ý tưởng sản phẩm từ đầu.   |
+| **`/command-continue-project`** | `/continue`, `/next`                   | Quét `PRODUCT_BACKLOG_ROADMAP.md`, phỏng vấn `grilling` gỡ blocker `[!]` và kích hoạt chu trình làm tính năng tiếp theo. | Trong dự án cá nhân/greenfield phát triển theo roadmap.  |
+| **`/command-git-push`**         | `/push`, `/ship`                       | Kiểm tra cổng tài liệu, phân tách commit theo tầng (Modular Commit) và push an toàn.                                     | Khi hoàn thành tính năng hoặc sửa lỗi cần đẩy lên Git.   |
+| **`/command-user-guide`**       | `/user-guide`, `/guide`                | Khởi chạy Playwright chụp ảnh giao diện thực tế và viết tài liệu hướng dẫn.                                              | Sau khi hoàn thiện giao diện người dùng.                 |
 
 ---
 
