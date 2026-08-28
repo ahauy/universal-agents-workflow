@@ -22,7 +22,7 @@ schema-version: "1.2"
 > - `[x]` **Hoàn thành (Done)** — Đã hoàn thiện code, test pass và tài liệu kỹ thuật/hướng dẫn đầy đủ.
 > - `[/]` **Đang triển khai (In Progress)** — `/continue` sẽ ưu tiên tiếp tục xử lý cho xong.
 > - `[ ]` **Chưa triển khai (To Do / Backlog)** — Đã có đặc tả, sẵn sàng bốc theo thứ tự từ trên xuống.
-> - `[!]` **Bị chặn / Cần làm rõ (Blocked / Review Needed)** — Cần quyết định kiến trúc hoặc phụ thuộc module khác; `/continue` sẽ dừng lại cảnh báo.
+> - `[!]` **Bị chặn / Cần làm rõ (Blocked / Review Needed)** — Cần quyết định kiến trúc hoặc phụ thuộc module khác; `/continue` sẽ dừng lại cảnh báo và đề xuất phiên `grilling` để tháo gỡ điểm nghẽn.
 > - `[~]` **Dự kiến dài hạn (Deferred / Future Phase)** — Tính năng đã ghi nhận nhưng chủ động hoãn lại sang phiên bản sau.
 
 ---
@@ -261,7 +261,7 @@ VITE_API_URL="https://<your-backend-domain>"
 1. **Step 1**: Đọc `tech-stack` từ YAML frontmatter → paste vào system prompt của mọi subagent.
 2. **Step 2**: Tìm story `[/]` trước (ưu tiên tuyệt đối), sau đó `[ ]` đầu tiên từ trên xuống.
 3. **Step 3 (Blocked Gate)**:
-   - Nếu story tiếp theo mang nhãn `[!]`: **DỪNG LẠI**, cảnh báo người dùng về vướng mắc/quyết định kiến trúc, không tự ý làm tiếp.
+   - Nếu story tiếp theo mang nhãn `[!]`: **DỪNG LẠI**, cảnh báo người dùng về vướng mắc/quyết định kiến trúc; chủ động đề xuất kích hoạt phiên `grilling` để làm rõ và gỡ block trước khi tiếp tục.
    - Bỏ qua các mục mang nhãn `[~]` (Deferred).
 4. **Step 4 (Dependency Gate)**: Kiểm tra `Depends-on` — nếu dependency chưa `[x]`, **từ chối làm story này**, báo blocked và đề xuất làm dependency trước.
 5. **Step 5 (Effort & Budget Routing)**:
