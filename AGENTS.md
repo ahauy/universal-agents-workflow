@@ -188,6 +188,7 @@ When encountering friction or uncertainty, look up the symptom below to immediat
 | **Technical Specification (equiv. to-spec)**               | `speckit-specify`                                            | `engineering/speckit-specify`               |
 | **Architecture Plan & Contract DTOs**                      | `speckit-plan`                                               | `engineering/speckit-plan`                  |
 | **Granular Task Decomposition**                            | `speckit-tasks`                                              | `engineering/speckit-tasks`                 |
+| **Architecture Scaffolding (P3→P5 Bridge)**                | `scaffold-architecture`                                      | `engineering/scaffold-architecture`         |
 | **Session retrospective & environment tuning**             | `retro`                                                      | `productivity/retro`                        |
 | **Decision tickets map for large ambiguous efforts**       | `wayfinder`                                                  | `engineering/wayfinder`                     |
 | **Automated deep module & seam enforcement (Polyglot)**    | `setup-deep-modules`                                         | `engineering/setup-deep-modules`            |
