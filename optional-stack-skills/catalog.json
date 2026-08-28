@@ -401,6 +401,83 @@
       "recommendation": "recommended"
     },
     {
+      "id": "flutter-patterns",
+      "name": "Flutter & Dart Modern Architecture & Deep Modules",
+      "category": "Language",
+      "short_description": "Clean Architecture layer seams, Dart 3 sealed classes/pattern matching, widget decomposition, 60fps render performance, and anti-AI-slop design standards.",
+      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "source_path": "optional-stack-skills/languages/flutter/flutter-patterns",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/flutter-patterns",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "flutter-state-management",
+      "name": "Flutter Production State Management (Riverpod & BLoC)",
+      "category": "Frontend",
+      "short_description": "Production state architecture using Riverpod (AsyncNotifier, autoDispose) and BLoC/Cubit (sealed events/states, BlocBuilder) with strict immutability and lifecycle disposal.",
+      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "source_path": "optional-stack-skills/languages/flutter/flutter-state-management",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/flutter-state-management",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "flutter-testing",
+      "name": "Flutter & Dart Comprehensive Testing Suite",
+      "category": "Testing",
+      "short_description": "Comprehensive Flutter testing patterns: fast unit tests with mocktail, widget tests with WidgetTester, golden UI pixel regression tests, and integration tests.",
+      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "source_path": "optional-stack-skills/languages/flutter/flutter-testing",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/flutter-testing",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "flutter-networking-storage",
+      "name": "Flutter Resilient Networking & Local Persistence",
+      "category": "Database",
+      "short_description": "Resilient Dio networking with JWT refresh interceptors, exponential backoff retry, and offline-first storage with Drift/SQLite, Hive, and flutter_secure_storage.",
+      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "source_path": "optional-stack-skills/languages/flutter/flutter-networking-storage",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/flutter-networking-storage",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "flutter-rules",
+      "name": "Flutter & Dart Coding Style & Best Practices",
+      "category": "Language",
+      "short_description": "Effective Dart standards, const widget discipline, context.mounted async safety, pure domain layer separation, and resource disposal.",
+      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "source_path": "optional-stack-skills/languages/flutter/rules/coding-style.md",
+      "target_type": "rule",
+      "target_path": ".agents/rules/flutter-coding-style.md",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "flutter-lint-config",
+      "name": "Flutter Strict Analysis Options Boundary Linter",
+      "category": "Boundary Enforcement",
+      "short_description": "Strict static analysis rules enforcing sound null-safety, strict-casts, unawaited futures prevention, subscription cancellation, and const constructors.",
+      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "source_path": "optional-stack-skills/languages/flutter/linters/analysis_options.yaml",
+      "target_type": "config",
+      "target_path": "analysis_options.yaml",
+      "recommendation": "recommended"
+    },
+    {
+      "id": "flutter-agents",
+      "name": "Flutter Specialized Subagents (Reviewer & Build Resolver)",
+      "category": "Subagent",
+      "short_description": "Dedicated Flutter subagents: flutter-reviewer (widget health, memory disposal, async mounted guard, anti-AI-slop) and flutter-build-resolver (flutter analyze, dart fix, build fixer).",
+      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "source_path": "optional-stack-skills/languages/flutter/agents",
+      "target_type": "agent",
+      "target_path": ".agents/agents",
+      "recommendation": "recommended"
+    },
+    {
       "id": "code-review-graph",
       "name": "Code-Review-Graph Local MCP Intelligence Server",
       "category": "Intelligence (MCP)",
