@@ -92,7 +92,7 @@ Before touching any `.tsx`, `.jsx`, `.css`, or UI mockup, the AI MUST:
 Whenever a subagent is dispatched (e.g. for adversarial UI review, technical documentation, slice implementation, or browser automation):
 
 - The agent MUST explicitly display a notification card in chat.
-- It MUST indicate the **Subagent Name**, the **Active Model Name** (e.g. `Gemini 3.7 Flash`), the **Goal**, and the **Final Artifact/Report Link**.
+- It MUST indicate the **Subagent Name**, the **Active Model Name** (the model actually serving this session, e.g. the model shown in the IDE status bar), the **Goal**, and the **Final Artifact/Report Link**.
 
 ## 7. Mandatory Automatic Subagent Delegation Protocol
 
@@ -102,20 +102,20 @@ The primary orchestrator agent MUST strictly follow the standard multi-agent exe
 ```mermaid
 graph TD
     subgraph P1 ["PHASE 1: BA & Domain Elicitation"]
-        BA["🍉 business-analyst (claude-opus-4.6 / inherit)"]
+        BA["🍉 business-analyst (model: inherit)"]
     end
 
     subgraph P2 ["PHASE 2-4: Tech Spec & Architecture Planning"]
-        SA["🏗️ system-architect (claude-sonnet-4.6 / inherit)"]
+        SA["🏗️ system-architect (model: inherit)"]
     end
 
     subgraph P5 ["PHASE 5: Fullstack Implementation & TDD"]
-        CE["🔍 code-explorer (gemini-3.7-flash)"]
-        BE["⚙️ backend-developer (gemini-3.7-flash)"]
-        FE["🎨 frontend-developer (gemini-3.7-flash)"]
-        SI["⚡ slice-implementer (gemini-3.7-flash)"]
-        BR["🔧 build-resolver (gemini-3.7-flash)"]
-        E2E["🧪 e2e-runner (gemini-3.7-flash)"]
+        CE["🔍 code-explorer (model: inherit)"]
+        BE["⚙️ backend-developer (model: inherit)"]
+        FE["🎨 frontend-developer (model: inherit)"]
+        SI["⚡ slice-implementer (model: inherit)"]
+        BR["🔧 build-resolver (model: inherit)"]
+        E2E["🧪 e2e-runner (model: inherit)"]
 
         CE --> BE
         CE --> FE
@@ -126,14 +126,14 @@ graph TD
     end
 
     subgraph P6A ["PHASE 6A: Adversarial Quality Review"]
-        CR["🛡️ code-reviewer (claude-sonnet-4.6 / inherit)"]
-        UR["👁️ ui-ux-reviewer (gemini-3.7-flash)"]
+        CR["🛡️ code-reviewer (model: inherit)"]
+        UR["👁️ ui-ux-reviewer (model: inherit)"]
     end
 
     subgraph P6B ["PHASE 6B: Standard Documentation"]
-        TD["📚 tech-doc-architect (gemini-3.7-flash)"]
-        UG["💼 user-guide-creator (gemini-3.7-flash)"]
-        AE["⚖️ agent-evaluator (claude-sonnet-4.6 / inherit)"]
+        TD["📚 tech-doc-architect (model: inherit)"]
+        UG["💼 user-guide-creator (model: inherit)"]
+        AE["⚖️ agent-evaluator (model: inherit)"]
     end
 
     BA --> SA
@@ -152,10 +152,10 @@ graph TD
 
 - **Zero Direct Feature Coding by Orchestrator**: The primary orchestrator agent is **STRICTLY PROHIBITED** from calling `write_to_file` or `replace_file_content` directly for any feature code, specifications, database schemas, or unit/E2E test files.
 - **Mandatory Delegation via `invoke_subagent`**: All domain elicitation, architecture planning, backend/frontend implementation, code review, and user guide generation MUST be delegated to dedicated subagents spawned via `invoke_subagent`.
-- **Model Allocation Matrix**:
-  - `Model: "claude-opus-4.6" / "inherit"` (Deep Domain Elicitation): `business-analyst`.
-  - `Model: "claude-sonnet-4.6" / "inherit"` (Architecture & Adversarial Review): `system-architect`, `code-reviewer`, `agent-evaluator`.
-  - `Model: "gemini-3.7-flash"` (Fast Execution & Testing): `code-explorer`, `backend-developer`, `frontend-developer`, `slice-implementer`, `build-resolver`, `ui-ux-reviewer`, `tech-doc-architect`, `user-guide-creator`.
+- **Model Allocation Matrix**: All subagents declare `model: inherit` and therefore run on the model selected for the current session. Override `model:` in an agent file only with an ID that this harness actually serves, and keep every agent in one phase chain on a reachable model.
+  - Deep Domain Elicitation: `business-analyst`.
+  - Architecture & Adversarial Review: `system-architect`, `code-reviewer`, `agent-evaluator`.
+  - Fast Execution & Testing: `code-explorer`, `backend-developer`, `frontend-developer`, `slice-implementer`, `build-resolver`, `ui-ux-reviewer`, `tech-doc-architect`, `user-guide-creator`.
 - **Language Specialization (Zero Conflict / Dynamic Dispatch)**: When specialized stack subagents are present in `.agents/agents/` (e.g., `swift-reviewer`, `swift-build-resolver`, `go-reviewer`, `rust-reviewer`):
   - In **Phase 5**, the orchestrator delegates compilation and build resolution to `<lang>-build-resolver`.
   - In **Phase 6A**, the orchestrator delegates adversarial code inspection to `<lang>-reviewer`.
@@ -171,20 +171,20 @@ graph TD
      - **Strict No-Hallucination Policy**: AI is STRICTLY FORBIDDEN from inventing business rules, error behaviors, default parameters, or edge cases. If anything is unknown or ambiguous, AI MUST ask the customer directly. Silent auto-generation of unconfirmed `ASM-` assumptions without user interaction is strictly prohibited.
    - **Stage 3–8 (Domain Modeling to Handover)**: Only after the user confirms elicitation answers, `business-analyst` executes gap analysis, domain modeling, risk scanning, spec writing, IEEE 29148 validation, and handover brief to produce `baseline.md`.
    - **🛑 Confirmation Gate 1**: Present Domain Baseline summary to User for sign-off.
-2. **Phase 2–4 (Spec & Architecture)**: Auto-dispatch `system-architect` (`claude-sonnet-4.6` / `inherit`) to produce `spec.md`, `plan.md`, `data-model.md`, `contracts/`, and `tasks.md`. Present Confirmation Gate 2 to User.
+2. **Phase 2–4 (Spec & Architecture)**: Auto-dispatch `system-architect` to produce `spec.md`, `plan.md`, `data-model.md`, `contracts/`, and `tasks.md`. Present Confirmation Gate 2 to User.
 3. **Phase 5 (Fullstack Implementation & TDD)**:
-   - Auto-dispatch `code-explorer` (`gemini-3.7-flash`) to inspect existing patterns.
-   - Auto-dispatch `backend-developer` (`gemini-3.7-flash`) & `frontend-developer` (`gemini-3.7-flash`) in parallel or sequenced slices.
-   - Auto-dispatch `slice-implementer` (`gemini-3.7-flash`) to wire integration.
-   - Auto-dispatch `build-resolver` (`gemini-3.7-flash`) to eliminate type/lint build errors.
-   - Auto-dispatch `e2e-runner` (`gemini-3.7-flash`) to verify test suites.
+   - Auto-dispatch `code-explorer` to inspect existing patterns.
+   - Auto-dispatch `backend-developer` & `frontend-developer` in parallel or sequenced slices.
+   - Auto-dispatch `slice-implementer` to wire integration.
+   - Auto-dispatch `build-resolver` to eliminate type/lint build errors.
+   - Auto-dispatch `e2e-runner` to verify test suites.
 4. **Phase 6A (Adversarial Review)**:
-   - Auto-dispatch `code-reviewer` (`claude-sonnet-4.6` / `inherit`) for adversarial code quality & security review.
-   - Auto-dispatch `ui-ux-reviewer` (`gemini-3.7-flash`) for Anti-AI-Slop, `DESIGN.md`, `MEMORY.md`, and WCAG AA verification.
+   - Auto-dispatch `code-reviewer` for adversarial code quality & security review.
+   - Auto-dispatch `ui-ux-reviewer` for Anti-AI-Slop, `DESIGN.md`, `MEMORY.md`, and WCAG AA verification.
 5. **Phase 6B (Documentation & Sign-off)**:
-   - Auto-dispatch `tech-doc-architect` (`gemini-3.7-flash`) (`docs/features/<slug>/README.md`).
-   - Auto-dispatch `user-guide-creator` (`gemini-3.7-flash`) (`docs/user-guides/<slug>.md`).
-   - Auto-dispatch `agent-evaluator` (`claude-sonnet-4.6` / `inherit`) (Final DoD & Quality Scorecard).
+   - Auto-dispatch `tech-doc-architect` (`docs/features/<slug>/README.md`).
+   - Auto-dispatch `user-guide-creator` (`docs/user-guides/<slug>.md`).
+   - Auto-dispatch `agent-evaluator` (Final DoD & Quality Scorecard).
 
 ---
 

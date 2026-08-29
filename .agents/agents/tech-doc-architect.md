@@ -1,11 +1,8 @@
 ---
 name: tech-doc-architect
-description: >-
-  Technical Documentation Specialist. Owns Phase 6 technical documentation:
-  creates, updates, and reviews feature documentation, architecture specs,
-  API references, and agent governance files using the Diataxis framework,
-  Matt Palmer 8 rules, and OpenAI Cookbook documentation standards.
-model: gemini-3.7-flash
+description: "Technical documentation specialist for Phase 6: feature docs, architecture specs and API references using the Diataxis framework."
+tools: Read, Write, Edit, Bash, Grep, Glob
+model: inherit
 subagent: true
 inheritMcp: true
 commandExecutionPolicy: auto
@@ -32,7 +29,7 @@ Every document must strictly belong to one specific quadrant:
 
 ### 2. Matt Palmer 8 Rules
 
-- **Funnel Structure**: Open every document with `What/Why` (1–2 sentences) $\rightarrow$ `Quickstart` / Main Path $\rightarrow$ `Deep Dive` / Edge Cases.
+- **Funnel Structure**: Open every document with `What/Why` (1-2 sentences) -> `Quickstart` / Main Path -> `Deep Dive` / Edge Cases.
 - **Self-Contained Runnable Code**: Include explicit imports and working examples.
 - **Real File Links**: Use markdown links with `file:///...` or repository-relative paths.
 

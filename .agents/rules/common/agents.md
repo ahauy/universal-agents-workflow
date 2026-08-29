@@ -9,28 +9,32 @@ See `.agents/AGENTS.md` for the unified pipeline and mandatory quality gates.
 
 ## Universal Subagent Persona Catalog
 
-| Subagent                 | Role                                                                            |   Lifecycle Phase   | Model               |
-| :----------------------- | :------------------------------------------------------------------------------ | :-----------------: | :------------------ |
-| **`business-analyst`**   | 8-Stage BA Pipeline, IEEE 29148, BR- rules, SRS/US, Baseline Sign-off           |     **Phase 1**     | `claude-opus-4.6`   |
-| **`system-architect`**   | Speckit Specify/Plan/Tasks, API DTO contracts, Database migrations, ADRs        |    **Phase 2–4**    | `claude-sonnet-4.6` |
-| **`code-explorer`**      | Read-only codebase research, execution path tracing, dependency mapping         |     **Phase 5**     | `gemini-3.7-flash`  |
-| **`backend-developer`**  | Polyglot backend, API DTOs, database schema migrations, unit/integration tests  |     **Phase 5**     | `gemini-3.7-flash`  |
-| **`frontend-developer`** | Polyglot frontend UI, design tokens, 4 UX states, WCAG AA a11y, component tests |     **Phase 5**     | `gemini-3.7-flash`  |
-| **`slice-implementer`**  | Fullstack vertical slice orchestrator & cross-layer TDD integration             |     **Phase 5**     | `gemini-3.7-flash`  |
-| **`build-resolver`**     | Polyglot typecheck, compile, dependency resolution & compiler error fixes       |     **Phase 5**     | `gemini-3.7-flash`  |
-| **`e2e-runner`**         | Playwright E2E test journeys & critical flow verification                       |     **Phase 5**     | `gemini-3.7-flash`  |
-| **`code-reviewer`**      | Adversarial dual-pass code review (Standards & Spec fidelity)                   |    **Phase 6A**     | `claude-sonnet-4.6` |
-| **`ui-ux-reviewer`**     | Adversarial UI/UX review (Anti-AI-slop, 4 UX states, WCAG AA, motion)           |    **Phase 6A**     | `gemini-3.7-flash`  |
-| **`tech-doc-architect`** | Diataxis technical docs, feature READMEs, Architecture/Algorithm sync           |    **Phase 6B**     | `gemini-3.7-flash`  |
-| **`user-guide-creator`** | End-user guides with browser screenshots & Red Callout boxes (#EF4444)          |    **Phase 6B**     | `gemini-3.7-flash`  |
-| **`agent-evaluator`**    | 5-axis agent quality evaluation, session friction & rule refinement             | **Phase 6B / Meta** | `claude-sonnet-4.6` |
+| Subagent                  | Role                                                                              |   Lifecycle Phase   | Model     |
+|:--------------------------|:----------------------------------------------------------------------------------| :------------------: |-----------|
+| **`business-analyst`**    | 8-Stage BA Pipeline, IEEE 29148, BR- rules, SRS/US, Baseline Sign-off             |     **Phase 1**     | `inherit` |
+| **`system-architect`**    | Speckit Specify/Plan/Tasks, API DTO contracts, Database migrations, ADRs          |    **Phase 2-4**    | `inherit` |
+| **`code-explorer`**       | Read-only codebase research, execution path tracing, dependency mapping           |     **Phase 5**     | `inherit` |
+| **`backend-developer`**   | Polyglot backend, API DTOs, database schema migrations, unit/integration tests    |     **Phase 5**     | `inherit` |
+| **`frontend-developer`**  | Polyglot frontend UI, design tokens, 4 UX states, WCAG AA a11y, component tests   |     **Phase 5**     | `inherit` |
+| **`slice-implementer`**   | Fullstack vertical slice orchestrator & cross-layer TDD integration               |     **Phase 5**     | `inherit` |
+| **`build-resolver`**      | Polyglot typecheck, compile, dependency resolution & compiler error fixes         |     **Phase 5**     | `inherit` |
+| **`e2e-runner`**          | Playwright E2E test journeys & critical flow verification                         |     **Phase 5**     | `inherit` |
+| **`code-reviewer`**       | Adversarial dual-pass code review (Standards & Spec fidelity)                     |     **Phase 6A**    | `inherit` |
+| **`ui-ux-reviewer`**      | Adversarial UI/UX review (Anti-AI-slop, 4 UX states, WCAG AA, motion)             |     **Phase 6A**    | `inherit` |
+| **`tech-doc-architect`**  | Diataxis technical docs, feature READMEs, Architecture/Algorithm sync             |     **Phase 6B**    | `inherit` |
+| **`user-guide-creator`**  | End-user guides with browser screenshots & Red Callout boxes (#EF4444)            |     **Phase 6B**    | `inherit` |
+| **`agent-evaluator`**     | 5-axis agent quality evaluation, session friction & rule refinement               | **Phase 6B / Meta** | `inherit` |
 
 ---
 
 ## Model Allocation Policy
 
-- **Deep Reasoning, Analysis & System Design** (`Phase 1–4`): Prioritize `claude-opus-4.6` or `claude-sonnet-4.6` for multi-step domain modeling, risk scanning, architectural trade-offs, and contract design.
-- **Fast Execution, Coding, Review & Docs** (`Phase 5–6`): Prioritize `gemini-3.7-flash` for high-throughput TDD iteration, diagnostic commands, multi-lane checklist reviews, and screenshot/documentation generation.
+Every agent ships with `model: inherit`, so subagents run on whatever model the user selected for the session. This keeps the workflow harness-agnostic (Claude, Gemini, GLM, Qwen, DeepSeek, local models) and avoids hard failures from model IDs that do not exist on the active endpoint.
+
+- **Default**: leave `model: inherit` in the agent frontmatter.
+- **Opt-in override**: set `model:` only to an ID the *current* harness actually serves (Claude Code accepts `sonnet`, `opus`, `haiku`; other harnesses use their own catalog). Never commit a vendor-specific ID that is not resolvable in the active session.
+- **Capability guidance**: phases 1-4 (domain modeling, risk scanning, architectural trade-offs, contract design) benefit from the strongest reasoning model available. Phases 5-6 (TDD iteration, diagnostics, checklist reviews, documentation) tolerate a faster, cheaper model.
+- **Consistency check**: when overriding, keep every agent in the same phase chain on a reachable model, otherwise delegation fails mid-pipeline.
 
 ---
 
@@ -53,6 +57,15 @@ First agent 1, then agent 2, then agent 3
 ```
 
 ---
+
+## Dispatch Resilience (Weak-Model Safe)
+
+Subagent dispatch is the most fragile call in the pipeline: the `task` argument is a JSON string, and models with weaker tool-call formatting (GLM, Qwen, DeepSeek, small local models) break on unescaped quotes, newlines, or very long strings inside it.
+
+- **Keep `task` short and boring**: under 400 characters, single line, plain ASCII. No double quotes, no LaTeX math markers, no emoji, no Markdown tables, no pasted file contents.
+- **Reference, don't paste**: pass artifact paths (`.specify/features/<slug>/00-intake.md`) and let the subagent read them.
+- **Persona lives in the file**: never re-inject the agent's own description into the `task` string; the harness already loads it.
+- **Two-strike fallback**: after two syntax failures or one artifact-less completion, stop retrying and run the stage inline, then report the bypass to the user.
 
 ## Delegation Completion Contract
 

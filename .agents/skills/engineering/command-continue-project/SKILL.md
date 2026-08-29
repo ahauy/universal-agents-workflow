@@ -49,8 +49,10 @@ Before starting analysis or code, ensure the working environment is synced with 
 
 2. **Extract YAML Frontmatter** (schema-version 1.1+ / 1.2):
    - Read `tech-stack` block (language, backend, frontend, database, infra, test).
-   - Store as `$TECH_CONTEXT` — this MUST be injected into the system prompt of every subagent
-     dispatched in this session (business-analyst, system-architect, backend-developer, frontend-developer).
+   - Store as `$TECH_CONTEXT` and write it once to `.specify/features/<slug>/00-tech-context.md`.
+     Every subagent dispatched in this session (business-analyst, system-architect,
+     backend-developer, frontend-developer) reads that file first - do not paste the blob into
+     the `task` argument (see the Safe `task` argument rule below).
    - If YAML frontmatter is missing → STOP. Instruct user: _"File chưa đúng schema v1.1+. Chạy
      `/generate-backlog` để tạo file chuẩn."_
 
@@ -108,9 +110,23 @@ Before starting analysis or code, ensure the working environment is synced with 
 | L      | multi-session  | Full Feature (all 8 stages)                        | ✅ Yes — invoke `wayfinder` before BA |
 | XL     | multi-session  | Full Feature (all 8 stages)                        | ✅ Yes — invoke `wayfinder` before BA |
 
-> **Tech Context Injection (MANDATORY):** Every `invoke_subagent` call in Steps A–D MUST
-> include `$TECH_CONTEXT` from Step 1 in the subagent's system prompt. This eliminates
-> tech stack hallucination across all phases.
+> **Tech Context Injection (MANDATORY):** Every subagent dispatched in Steps A-D MUST work
+> from the same tech stack facts, otherwise it will hallucinate a stack. Pass those facts by
+> **reference, not by copy**: write `$TECH_CONTEXT` once to
+> `.specify/features/<slug>/00-tech-context.md` in Step 1, and have each subagent read that
+> file as its first action. Never paste the full context blob into the `task` argument.
+>
+> **Safe `task` argument (MANDATORY):** The `task` string is serialized as a JSON value, and
+> weaker models (GLM, Qwen, DeepSeek, small local models) break on unescaped quotes, newlines
+> or very long strings. Keep it under 400 characters, single line, plain ASCII: no double
+> quotes, no LaTeX math markers, no emoji, no Markdown tables, no pasted file contents.
+> Reference artifacts by path and let the subagent open them. The agent persona already lives
+> in `.agents/agents/<name>.md` - do not restate it inside `task`.
+>
+> **Two-strike fallback (MANDATORY):** If a dispatch fails twice with a tool-call/argument
+> syntax error, or a subagent reports completion without producing its declared artifacts,
+> stop retrying, run that step inline in the primary context, verify the artifacts exist, and
+> tell the user which subagent was bypassed and why. Delegation must never dead-lock the run.
 
 #### Case A: No Domain Baseline (Net-New Feature)
 
@@ -120,8 +136,9 @@ Before starting analysis or code, ensure the working environment is synced with 
 
 - **MANDATORY AUTOMATIC SUBAGENT DELEGATION**:
   - The Orchestrator MUST NEVER run BA stages directly on the primary context.
-  - **Step 1 (Intake)**: Dispatch `business-analyst` via `invoke_subagent` (`claude-opus-4.6` / `inherit`)
-    with `$TECH_CONTEXT` in system prompt. Run `intake-classifier` and create `.specify/features/<slug>/`.
+  - **Step 1 (Intake)**: Dispatch `business-analyst` via `invoke_subagent` with a short task
+    such as: `Read .specify/features/<slug>/00-tech-context.md and 00-intake.md, then run intake-classifier.`
+    Run `intake-classifier` and create `.specify/features/<slug>/`.
   - Override classification to match roadmap Effort field: `S`→Micro-Task, `M`→Bounded, `L|XL`→Full Feature.
 
 - **🛑 INTERACTIVE ELICITATION INTERVIEW GATE (Stage 2 — MANDATORY CUSTOMER INTERVIEW)**:
@@ -171,7 +188,7 @@ Before starting analysis or code, ensure the working environment is synced with 
 #### Case B: Domain Baseline SIGNED-OFF but Technical Plan Missing
 
 - **MANDATORY AUTOMATIC SUBAGENT DELEGATION**:
-  - Dispatch `system-architect` via `invoke_subagent` (`claude-sonnet-4.6` / `inherit`) to run the Speckit Pipeline:
+  - Dispatch `system-architect` via `invoke_subagent` to run the Speckit Pipeline:
     - Run `speckit-specify` -> create `spec.md`.
     - Run `speckit-plan` -> create `plan.md`, `data-model.md`, `contracts/`.
     - Run `speckit-tasks` -> create `tasks.md`.
@@ -200,21 +217,21 @@ Before starting analysis or code, ensure the working environment is synced with 
   - The Orchestrator is **STRICTLY PROHIBITED** from coding directly.
   - Create `test-plan.md` mapping User Stories to `TC-###` test cases.
   - **Task Checklist Delegation** (schema 1.2+):
-    - Pass `Tasks (Backend)` checklist directly to `backend-developer` (`gemini-3.7-flash`).
-    - Pass `Tasks (Frontend)` checklist directly to `frontend-developer` (`gemini-3.7-flash`).
+    - Pass `Tasks (Backend)` checklist directly to `backend-developer`.
+    - Pass `Tasks (Frontend)` checklist directly to `frontend-developer`.
   - Dispatch `backend-developer` via `invoke_subagent` for Backend API, DTOs, Services, and Unit/Integration tests.
   - Dispatch `frontend-developer` via `invoke_subagent` for UI components, state stores, pages, and tests.
-  - Dispatch `slice-implementer` (`gemini-3.7-flash`) to wire fullstack integration.
-  - Dispatch `build-resolver` (`gemini-3.7-flash`) to fix any compilation / lint errors.
+  - Dispatch `slice-implementer` to wire fullstack integration.
+  - Dispatch `build-resolver` to fix any compilation / lint errors.
   - Follow TDD cycle in each slice: Write failing tests (Red) -> Implement minimal passing code (Green) -> Refactor.
 
 #### Case D: Implementation Finished, Final Review & Documentation
 
 - **MANDATORY AUTOMATIC SUBAGENT DELEGATION**:
-  - Dispatch `code-reviewer` (`claude-sonnet-4.6` / `inherit`) via `invoke_subagent` for adversarial code quality & security audit.
-  - Dispatch `ui-ux-reviewer` (`gemini-3.7-flash`) via `invoke_subagent` for adversarial UI, anti-slop, and WCAG AA review.
-  - Dispatch `user-guide-creator` (`gemini-3.7-flash`) via `invoke_subagent` to generate [docs/user-guides/<slug>.md](../../docs/user-guides/) with real Playwright screenshots.
-  - Dispatch `tech-doc-architect` (`gemini-3.7-flash`) via `invoke_subagent` to update [docs/features/<slug>/README.md](../../docs/features/).
+  - Dispatch `code-reviewer` via `invoke_subagent` for adversarial code quality & security audit.
+  - Dispatch `ui-ux-reviewer` via `invoke_subagent` for adversarial UI, anti-slop, and WCAG AA review.
+  - Dispatch `user-guide-creator` via `invoke_subagent` to generate [docs/user-guides/<slug>.md](../../docs/user-guides/) with real Playwright screenshots.
+  - Dispatch `tech-doc-architect` via `invoke_subagent` to update [docs/features/<slug>/README.md](../../docs/features/).
   - Run full test suites (`pnpm test`).
   - Mark the User Story as `[x]` in `docs/PRODUCT_BACKLOG_ROADMAP.md`.
 

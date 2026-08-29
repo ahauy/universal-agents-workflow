@@ -1,5 +1,19 @@
 # Multi-Harness Agent Metadata Catalog
 # Compatible with OpenAI Codex, Claude Code, and Antigravity multi-agent systems.
+#
+# NOTE ON `default_model`:
+#   The agent definition files (.agents/agents/*.md) all ship with
+#   `model: inherit`, so subagents run on the model selected for the current
+#   session. That is the portable default and it is what every harness should
+#   rely on.
+#
+#   The `default_model` values below are OPTIONAL provider-side overrides for
+#   harnesses that read this catalog (e.g. OpenAI Codex CLI). They are only
+#   meaningful if the model ID actually resolves in that provider's catalog.
+#   Never copy these IDs into an agent's frontmatter for a different harness -
+#   an unresolvable ID makes the dispatch fail (silently on some models, loudly
+#   on others). If your harness does not read this file, ignore it and leave
+#   `model: inherit` in the agent definition.
 
 version: "1.0"
 agents:
