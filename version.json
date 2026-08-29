@@ -1,6 +1,6 @@
 {
-  "version": "1.1.0",
-  "releaseDate": "2026-08-28",
-  "highlights": "Scaffold-Architecture skill, Flutter Pack, 3-Way Hash Smart Update Engine & In-Chat /update command",
+  "version": "1.2.0",
+  "releaseDate": "2026-08-29",
+  "highlights": "Agent/tool-call contract validator, multi-harness hook sync (Antigravity + Claude Code), single-source version resolution & safe-sync guard",
   "changelogUrl": "https://github.com/ahauy/universal-agents-workflow/releases"
 }

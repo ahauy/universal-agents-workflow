@@ -262,6 +262,35 @@ PROTECTED_DATA_PATHS=(
   "src"
 )
 
+# Top-level assets this workflow owns. If ANY of them already exists in the
+# target, the target is not a clean slate and we must not blind-copy over it.
+WORKFLOW_ASSETS=(
+  ".agents"
+  ".specify"
+  "adr"
+  "docs/architecture"
+  "CONTEXT.md"
+  "AGENTS.md"
+  "GEMINI.md"
+  "CLAUDE.md"
+  ".cursorrules"
+  ".windsurfrules"
+  ".github/copilot-instructions.md"
+)
+
+# A target counts as "already carrying content" when it holds a previous
+# install marker OR any asset we are about to write. AGENTS.md in particular is
+# a cross-tool standard: another agent framework may own it, and silently
+# replacing it would destroy the user's instructions.
+target_needs_safe_sync() {
+  [ -f "$TARGET_DIR/.agents/workflow-source.json" ] && return 0
+  local asset
+  for asset in "${WORKFLOW_ASSETS[@]}"; do
+    [ -e "$TARGET_DIR/$asset" ] && return 0
+  done
+  return 1
+}
+
 is_project_data() {
   local dest_rel="${1#$TARGET_DIR/}"
   for protected in "${PROTECTED_DATA_PATHS[@]}"; do
@@ -309,33 +338,57 @@ copy_item() {
   fi
 }
 
-copy_item "$SOURCE_DIR/.agents" "$TARGET_DIR/.agents" ".agents/"
-copy_item "$SOURCE_DIR/.specify" "$TARGET_DIR/.specify" ".specify/"
-copy_item "$SOURCE_DIR/adr" "$TARGET_DIR/adr" "adr/"
-copy_item "$SOURCE_DIR/CONTEXT.md" "$TARGET_DIR/CONTEXT.md" "CONTEXT.md"
-copy_item "$SOURCE_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md" "AGENTS.md"
-copy_item "$SOURCE_DIR/GEMINI.md" "$TARGET_DIR/GEMINI.md" "GEMINI.md"
-copy_item "$SOURCE_DIR/CLAUDE.md" "$TARGET_DIR/CLAUDE.md" "CLAUDE.md"
-copy_item "$SOURCE_DIR/.cursorrules" "$TARGET_DIR/.cursorrules" ".cursorrules"
-copy_item "$SOURCE_DIR/.windsurfrules" "$TARGET_DIR/.windsurfrules" ".windsurfrules"
-copy_item "$SOURCE_DIR/.github/copilot-instructions.md" "$TARGET_DIR/.github/copilot-instructions.md" ".github/copilot-instructions.md"
-
-# ── Smart Update Mode: delegate to Python engine if --update was passed ──────
+# ── Smart Update Mode: delegate to the Python engine, then stop ──────────────
+# --apply clones the remote repo and 3-way-merges it into the target, so it
+# must NOT be preceded by a local copy: that copy would already have clobbered
+# the user's files before the engine got a chance to compare them.
 if [ "$UPDATE_MODE" = true ]; then
-  if command -v python3 >/dev/null 2>&1 && [ -f "$TARGET_DIR/.agents/scripts/update-engine.py" ]; then
+  ENGINE_SRC="$SOURCE_DIR/.agents/scripts/update-engine.py"
+  if command -v python3 >/dev/null 2>&1 && [ -f "$ENGINE_SRC" ]; then
     echo -e "\n🔄 ${BOLD}Chạy Smart Update Engine (3-Way Hash)...${NC}"
-    python3 "$TARGET_DIR/.agents/scripts/update-engine.py" --apply --target "$TARGET_DIR"
-    exit $?
-  elif command -v python3 >/dev/null 2>&1; then
-    # Engine not present yet — copy it first then run
-    mkdir -p "$TARGET_DIR/.agents/scripts"
-    cp "$SOURCE_DIR/.agents/scripts/update-engine.py" "$TARGET_DIR/.agents/scripts/update-engine.py"
-    echo -e "\n🔄 ${BOLD}Chạy Smart Update Engine (3-Way Hash)...${NC}"
-    python3 "$TARGET_DIR/.agents/scripts/update-engine.py" --apply --target "$TARGET_DIR"
+    APPLY_ARGS=(--apply --target "$TARGET_DIR")
+    [ "$NON_INTERACTIVE" = true ] && APPLY_ARGS+=(--yes)
+    python3 "$ENGINE_SRC" "${APPLY_ARGS[@]}"
     exit $?
   else
-    echo -e "${YELLOW}⚠️ Python 3 không có sẵn. Tiến hành cài đặt bình thường (không có 3-way hash).${NC}"
+    echo -e "${YELLOW}⚠️ Python 3 hoặc update engine không có sẵn.${NC}"
+    echo -e "   Không thể chạy Smart Update. Hủy bỏ để tránh ghi đè dữ liệu dự án."
+    exit 1
   fi
+fi
+
+# ── Fresh install: safe sync when the target already carries content ─────────
+# A clean target gets a plain copy. Anything else — a previous install, or
+# another framework's AGENTS.md — goes through the engine's 3-way-hash sync,
+# which never overwrites user content without asking. copy_item() cannot make
+# that distinction: it blind-copies over whatever is there.
+ENGINE_SRC="$SOURCE_DIR/.agents/scripts/update-engine.py"
+SAFE_SYNC_DONE=false
+
+if target_needs_safe_sync && command -v python3 >/dev/null 2>&1 && [ -f "$ENGINE_SRC" ]; then
+  echo -e "  🛡️  ${YELLOW}Dự án đích đã có nội dung — dùng Safe Sync (3-way hash) thay vì chép đè.${NC}"
+  SYNC_ARGS=(--sync --source "$SOURCE_DIR" --target "$TARGET_DIR" --git-mode "$MODE")
+  [ "$NON_INTERACTIVE" = true ] && SYNC_ARGS+=(--yes)
+  if python3 "$ENGINE_SRC" "${SYNC_ARGS[@]}"; then
+    SAFE_SYNC_DONE=true
+  else
+    echo -e "  ${RED}Safe Sync thất bại — dừng lại, không sao chép đè mù.${NC}"
+    echo -e "  ${DIM}   Sửa lỗi trên rồi chạy lại, hoặc dùng --update cho chế độ 3-way hash.${NC}"
+    exit 1
+  fi
+fi
+
+if [ "$SAFE_SYNC_DONE" != true ]; then
+  copy_item "$SOURCE_DIR/.agents" "$TARGET_DIR/.agents" ".agents/"
+  copy_item "$SOURCE_DIR/.specify" "$TARGET_DIR/.specify" ".specify/"
+  copy_item "$SOURCE_DIR/adr" "$TARGET_DIR/adr" "adr/"
+  copy_item "$SOURCE_DIR/CONTEXT.md" "$TARGET_DIR/CONTEXT.md" "CONTEXT.md"
+  copy_item "$SOURCE_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md" "AGENTS.md"
+  copy_item "$SOURCE_DIR/GEMINI.md" "$TARGET_DIR/GEMINI.md" "GEMINI.md"
+  copy_item "$SOURCE_DIR/CLAUDE.md" "$TARGET_DIR/CLAUDE.md" "CLAUDE.md"
+  copy_item "$SOURCE_DIR/.cursorrules" "$TARGET_DIR/.cursorrules" ".cursorrules"
+  copy_item "$SOURCE_DIR/.windsurfrules" "$TARGET_DIR/.windsurfrules" ".windsurfrules"
+  copy_item "$SOURCE_DIR/.github/copilot-instructions.md" "$TARGET_DIR/.github/copilot-instructions.md" ".github/copilot-instructions.md"
 fi
 
 # ==============================================================================
@@ -382,12 +435,39 @@ elif [ -f "$HOOK_SCRIPT" ]; then
 fi
 
 # Record workflow source repository metadata (with full protectedPaths)
+#
+# Skipped when Safe Sync already ran: the engine wrote this file itself, with a
+# populated manifest that is the baseline for every future 3-way-hash update.
+# Rewriting it here would blank the manifest and silently authorise overwriting
+# user files on the next --update.
+#
+# Version comes from version.json in the source tree — the single source of
+# truth shared with the update engine — so a fresh install can never record a
+# version that drifted from the files actually copied. Falls back to the last
+# known good value only if the file is missing or unparseable.
+resolve_version() {
+  local vf="$SOURCE_DIR/version.json"
+  local v=""
+  if [ -f "$vf" ]; then
+    if command -v python3 >/dev/null 2>&1; then
+      v="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("version",""))' "$vf" 2>/dev/null || true)"
+    fi
+    if [ -z "$v" ]; then
+      v="$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$vf" | head -1 | sed 's/.*:[[:space:]]*"\(.*\)"/\1/' || true)"
+    fi
+  fi
+  [ -n "$v" ] || v="1.2.0"
+  printf '%s' "$v"
+}
+WORKFLOW_VERSION="$(resolve_version)"
+
+if [ "$SAFE_SYNC_DONE" != true ]; then
 INSTALL_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 cat > "$TARGET_DIR/.agents/workflow-source.json" << EOF
 {
   "sourceRepo": "https://github.com/ahauy/universal-agents-workflow.git",
   "sourcePath": "$SOURCE_DIR",
-  "version": "1.1.0",
+  "version": "$WORKFLOW_VERSION",
   "gitMode": "$MODE",
   "installedAt": "$INSTALL_DATE",
   "lastCheckedAt": "$INSTALL_DATE",
@@ -412,6 +492,7 @@ cat > "$TARGET_DIR/.agents/workflow-source.json" << EOF
   "manifest": {}
 }
 EOF
+fi
 
 # Ensure catalog.json exists inside .agents/
 if [ -f "$SOURCE_DIR/optional-stack-skills/catalog.json" ] && [ ! -f "$TARGET_DIR/.agents/catalog.json" ]; then
