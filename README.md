@@ -42,7 +42,7 @@ Trong phát triển phần mềm với AI, các lập trình viên thường đ�
 
 **Universal Agents Workflow** giải quyết triệt để các vấn đề trên bằng mô hình **Hai Mặt Phẳng (Two-Plane Architecture)**:
 
-- **Control Plane (Quản trị Vòng đời)**: Ép AI tuân thủ quy trình công nghiệp nghiêm ngặt: _Khảo sát nghiệp vụ IREB (BA Pipeline) $\rightarrow$ Đặc tả kỹ thuật (SpecKit) $\rightarrow$ Lập trình kiểm thử trước (TDD) $\rightarrow$ Phản biện độc lập kép (Dual-Pass Review) $\rightarrow$ Đóng gói Modular Commit_.
+- **Control Plane (Quản trị Vòng đời)**: Ép AI tuân thủ quy trình công nghiệp nghiêm ngặt: _Khảo sát nghiệp vụ IREB (BA Pipeline) → Đặc tả kỹ thuật (SpecKit) → Lập trình kiểm thử trước (TDD) → Phản biện độc lập kép (Dual-Pass Review) → Đóng gói Modular Commit_.
 - **Data Plane (Ngữ cảnh & Tri thức)**: Duy trì từ điển thuật ngữ nhất quán ([CONTEXT.md](CONTEXT.md)), ghi vết quyết định kiến trúc bất biến ([adr/](adr/)), và cơ chế **Scan First** — tự động quét tech stack để chỉ nạp đúng kỹ năng cần thiết, tuyệt đối không làm rác dự án.
 
 ---
@@ -110,15 +110,15 @@ graph LR
 ```
 
 1. **Gõ lệnh trực tiếp vào khung chat**:
-   - `/skill-setup` $\rightarrow$ Quét Tech Stack và nạp bộ kỹ năng phù hợp.
-   - `/generate-backlog` $\rightarrow$ Phỏng vấn 6 câu và tự sinh Roadmap chuẩn v1.1 từ ý tưởng thô.
-   - `/command-continue-project` $\rightarrow$ Quét Roadmap và tự động làm tiếp User Story kế tiếp.
-   - `/command-git-push` $\rightarrow$ Tự động kiểm tra chất lượng, chia Modular Commits và push an toàn.
-   - `/update` $\rightarrow$ Nâng cấp framework an toàn với động cơ 3-Way Hash.
+   - `/skill-setup` → Quét Tech Stack và nạp bộ kỹ năng phù hợp.
+   - `/generate-backlog` → Phỏng vấn 6 câu và tự sinh Roadmap chuẩn v1.1 từ ý tưởng thô.
+   - `/command-continue-project` → Quét Roadmap và tự động làm tiếp User Story kế tiếp.
+   - `/command-git-push` → Tự động kiểm tra chất lượng, chia Modular Commits và push an toàn.
+   - `/update` → Nâng cấp framework an toàn với động cơ 3-Way Hash.
 2. **Kích hoạt tự nhiên (Model-Invoked)**:
-   - _"Thiết kế API thanh toán qua Stripe"_ $\rightarrow$ Tự nạp `api-design`.
-   - _"Hàm này bị crash khi concurrency, tìm nguyên nhân"_ $\rightarrow$ Tự nạp `diagnosing-bugs`.
-   - _"Giao diện này nhìn ổn chưa?"_ $\rightarrow$ Tự nạp `ui-design-review`.
+   - _"Thiết kế API thanh toán qua Stripe"_ → Tự nạp `api-design`.
+   - _"Hàm này bị crash khi concurrency, tìm nguyên nhân"_ → Tự nạp `diagnosing-bugs`.
+   - _"Giao diện này nhìn ổn chưa?"_ → Tự nạp `ui-design-review`.
 3. **Gọi đích danh kỹ năng**:
    - _"Dùng skill `grilling` để phỏng vấn sâu tôi về tính năng này trước khi code."_
    - _"Chạy `setup-deep-modules` để thiết lập linter ranh giới module."_
@@ -143,13 +143,13 @@ graph TD
     Roadmap --> Auto["🤖 Chạy lệnh /continue (/command-continue-project)<br/>Tự động quét [ ] -> Làm trọn vẹn -> Tích [x]"]
 ```
 
-| Tiêu Chí           | 🏢 Doanh Nghiệp (Task Lẻ)                                       | 🚀 Dự Án Cá Nhân (Roadmap)                                                       |
-| :----------------- | :-------------------------------------------------------------- | :------------------------------------------------------------------------------- |
-| **Nguồn yêu cầu**  | Ticket từ Jira / Linear / Redmine / Asana.                      | File `docs/PRODUCT_BACKLOG_ROADMAP.md`.                                          |
-| **Cách kích hoạt** | Paste nội dung Ticket vào chat kèm mã task.                     | 1. `/generate-backlog` $\rightarrow$ 2. `/continue` $\rightarrow$ 3. `/push`.    |
-| **Thủ tục**        | Tối giản, ưu tiên **Fast-Track** để giải quyết nhanh.           | Đầy đủ từ A đến Z (BA $\rightarrow$ Spec $\rightarrow$ TDD $\rightarrow$ Guide). |
-| **Chế độ Git**     | Dùng **`local`** hoặc **`stealth`** (giấu sạch file AI).        | Dùng **`team`** (theo dõi cả roadmap & spec trên Git).                           |
-| **Commit Message** | Gắn Ticket ID: `fix(invoice): handle null customer (JIRA-892)`. | Gắn Story ID: `feat(auth): implement US-002 login JWT`.                          |
+| Tiêu Chí           | 🏢 Doanh Nghiệp (Task Lẻ)                                       | 🚀 Dự Án Cá Nhân (Roadmap)                              |
+| :----------------- | :-------------------------------------------------------------- | :------------------------------------------------------ |
+| **Nguồn yêu cầu**  | Ticket từ Jira / Linear / Redmine / Asana.                      | File `docs/PRODUCT_BACKLOG_ROADMAP.md`.                 |
+| **Cách kích hoạt** | Paste nội dung Ticket vào chat kèm mã task.                     | 1. `/generate-backlog` → 2. `/continue` → 3. `/push`.   |
+| **Thủ tục**        | Tối giản, ưu tiên **Fast-Track** để giải quyết nhanh.           | Đầy đủ từ A đến Z (BA → Spec → TDD → Guide).            |
+| **Chế độ Git**     | Dùng **`local`** hoặc **`stealth`** (giấu sạch file AI).        | Dùng **`team`** (theo dõi cả roadmap & spec trên Git).  |
+| **Commit Message** | Gắn Ticket ID: `fix(invoice): handle null customer (JIRA-892)`. | Gắn Story ID: `feat(auth): implement US-002 login JWT`. |
 
 ---
 
@@ -166,6 +166,15 @@ Thư mục dự án đích
 ├── .github/copilot-instructions.md    # Cầu nối tự động cho GitHub Copilot
 └── GEMINI.md                          # Đồng bộ trọn vẹn cho Google Antigravity / Gemini CLI
 ```
+
+### 🛡️ Chuẩn Hóa Hợp Đồng Gọi Tool & Tương Thích Mọi Dòng LLM
+
+Framework áp dụng bộ chuẩn hóa 3 tầng theo [docs/architecture/MODEL_AND_TOOLCALL_CONTRACT.md](docs/architecture/MODEL_AND_TOOLCALL_CONTRACT.md):
+
+- **Tương thích 100% LLMs**: Hoạt động mượt mà từ Frontier Models (Claude 3.7 Sonnet/Opus, GPT-4o, Gemini 2.0/3.7) đến các Open-Source / Local LLMs (Qwen 2.5 Coder, GLM-4, DeepSeek-V3/R1).
+- **Quyền hạn Tools rõ ràng**: Khai báo minh bạch `tools:` (Read-only vs Read-write) ở từng agent để ngăn chặn triệt để tình trạng subagent báo hoàn thành ảo mà không tạo file.
+- **Two-Strike Dispatch Fallback**: Tự động chuyển sang thực thi inline an toàn nếu việc điều phối subagent gặp lỗi cú pháp 2 lần, chặn đứng nguy cơ deadlock/retry loop.
+- **Đồng bộ Hooks Đa Nền Tảng**: Tự động nhận diện và chuyển đổi hooks tương thích cả **Google Antigravity** (`.agents/hooks.json`) và **Claude Code** (`.claude/settings.json`).
 
 ---
 
@@ -194,15 +203,15 @@ flowchart TD
     S6 --> S7["7. /command-git-push<br/>(Modular Commits chuẩn Conventional)"]
 ```
 
-| Bước  | Tên Giai Đoạn               | Kỹ Năng / Subagent Đảm Nhiệm                               | Đầu Ra Bắt Buộc (Artifacts)                                      |
-| :---: | :-------------------------- | :--------------------------------------------------------- | :--------------------------------------------------------------- |
-| **1** | **Onboarding Stack**        | `/skill-setup`, `setup-workspace`                          | `.agents/catalog.json`, skills, rules & subagents theo stack.    |
-| **2** | **Nghiệp Vụ (BA Pipeline)** | `intake-classifier`, `elicitation-interview`, `grilling`   | `.specify/features/<slug>/baseline.md` (**Ký duyệt v1.0**).      |
-| **3** | **Đặc Tả & Thiết Kế**       | `speckit-specify`, `speckit-plan`, `speckit-tasks`         | `spec.md`, `plan.md`, `data-model.md`, `tasks.md`.               |
-| **4** | **Lập Trình TDD**           | `code-explorer`, `backend-developer`, `frontend-developer` | `test-plan.md`, Unit Tests đỏ $\rightarrow$ xanh, Code tối giản. |
-| **5** | **Phản Biện Độc Lập**       | `code-reviewer`, `ui-design-review`                        | Báo cáo kiểm tra chuẩn bảo mật, spec fidelity & Anti-AI-Slop.    |
-| **6** | **Tài Liệu Hóa**            | `tech-doc-architect`, `command-user-guide`                 | `docs/features/<slug>/README.md`, `docs/user-guides/<slug>.md`.  |
-| **7** | **Đóng Gói & Đẩy Mã**       | `/command-git-push`                                        | Tự động chia Modular Commits theo tầng và push an toàn.          |
+| Bước  | Tên Giai Đoạn               | Kỹ Năng / Subagent Đảm Nhiệm                               | Đầu Ra Bắt Buộc (Artifacts)                                     |
+| :---: | :-------------------------- | :--------------------------------------------------------- | :-------------------------------------------------------------- |
+| **1** | **Onboarding Stack**        | `/skill-setup`, `setup-workspace`                          | `.agents/catalog.json`, skills, rules & subagents theo stack.   |
+| **2** | **Nghiệp Vụ (BA Pipeline)** | `intake-classifier`, `elicitation-interview`, `grilling`   | `.specify/features/<slug>/baseline.md` (**Ký duyệt v1.0**).     |
+| **3** | **Đặc Tả & Thiết Kế**       | `speckit-specify`, `speckit-plan`, `speckit-tasks`         | `spec.md`, `plan.md`, `data-model.md`, `tasks.md`.              |
+| **4** | **Lập Trình TDD**           | `code-explorer`, `backend-developer`, `frontend-developer` | `test-plan.md`, Unit Tests đỏ → xanh, Code tối giản.            |
+| **5** | **Phản Biện Độc Lập**       | `code-reviewer`, `ui-design-review`                        | Báo cáo kiểm tra chuẩn bảo mật, spec fidelity & Anti-AI-Slop.   |
+| **6** | **Tài Liệu Hóa**            | `tech-doc-architect`, `command-user-guide`                 | `docs/features/<slug>/README.md`, `docs/user-guides/<slug>.md`. |
+| **7** | **Đóng Gói & Đẩy Mã**       | `/command-git-push`                                        | Tự động chia Modular Commits theo tầng và push an toàn.         |
 
 > 📖 **Xem hướng dẫn thao tác chi tiết từng bước 1 tại**: [📘 .agents/docs/workflow-step-by-step.md](.agents/docs/workflow-step-by-step.md)
 
@@ -262,7 +271,7 @@ Hệ thống cập nhật thông minh giải quyết triệt để bài toán **
 ```text
 Thư mục dự án:
 ├── docs/                               # 🟢 100% TÀI LIỆU HỆ THỐNG DỰ ÁN CỦA BẠN (Diataxis)
-│   ├── architecture/                   # Kiến trúc hệ thống, ERD, spec dự án
+│   ├── architecture/                   # Kiến trúc hệ thống, ERD, Language Pack & Model Contracts
 │   ├── features/                       # Tài liệu kỹ thuật từng tính năng sản phẩm
 │   ├── user-guides/                    # Hướng dẫn sử dụng app có ảnh chụp thật
 │   └── PRODUCT_BACKLOG_ROADMAP.md      # Roadmap phát triển sản phẩm (dự án cá nhân)
@@ -276,13 +285,19 @@ Thư mục dự án:
 │   ├── skills/                         # Kỹ năng Engineering & Productivity
 │   ├── agents/                         # Danh mục subagents chuyên môn hóa
 │   ├── rules/                          # Quy chuẩn coding style theo ngôn ngữ
-│   └── scripts/hooks/                  # Các khóa bảo vệ Git cơ học
+│   ├── hooks.json                      # Cấu hình khóa bảo vệ Git & an toàn dữ liệu
+│   └── scripts/                        # Bộ công cụ validation, harness adapter & hooks
+│       ├── validate-agents.py          # Kiểm định chuẩn hóa tool-call & model contract
+│       ├── install-hooks.js            # Tự động đăng ký hooks cho Antigravity & Claude Code
+│       ├── update-engine.py            # Động cơ nâng cấp an toàn 3-Way Hash
+│       └── hooks/                      # Các khóa bảo vệ cơ học
 │
 ├── .specify/                           # Thư mục chứa đặc tả & hồ sơ BA của các tính năng
 ├── adr/                                # Hồ sơ lưu vết các quyết định kiến trúc bất biến
 ├── CONTEXT.md                          # Từ điển thuật ngữ chung (Ubiquitous Language)
 ├── AGENTS.md                           # ⭐️ Single Source of Truth cho AI Agents
 ├── GEMINI.md / CLAUDE.md               # Cầu nối đồng bộ cho các AI Editor
+├── version.json                        # Nguồn sự thật duy nhất về phiên bản (v1.2.0)
 └── install.sh / install.ps1            # Bộ cài đặt & cập nhật tự động (Registry-Driven)
 ```
 
