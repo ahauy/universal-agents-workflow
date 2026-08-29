@@ -17,7 +17,6 @@
 - [🎯 Ý Nghĩa Cốt Lõi Của Dự Án](#-ý-nghĩa-cốt-lõi-của-dự-án)
 - [🚀 Hướng Dẫn Bắt Đầu Nhanh (Quickstart)](#-hướng-dẫn-bắt-đầu-nhanh-quickstart)
   - [Phương Án 1: Tích Hợp Vào Dự Án Đang Có (Brownfield)](#phương-án-1-tích-hợp-vào-dự-án-đang-có-brownfield---khuyên-dùng)
-  - [🔄 Cập Nhật Bộ Khung Lên Bản Mới Nhất (Update / Upgrade)](#-cập-nhật-bộ-khung-lên-bản-mới-nhất-update--upgrade)
   - [Phương Án 2: Khởi Tạo Dự Án Mới Toanh (Greenfield)](#phương-án-2-khởi-tạo-dự-án-mới-toanh-greenfield)
 - [🎮 Cách Sử Dụng Bộ Kỹ Năng Trong AI Editor](#-cách-sử-dụng-bộ-kỹ-năng-trong-ai-editor)
 - [🎯 2 Kịch Bản Vận Hành Thực Tế: Doanh Nghiệp vs Dự Án Cá Nhân](#-2-kịch-bản-vận-hành-thực-tế-doanh-nghiệp-vs-dự-án-cá-nhân)
@@ -45,6 +44,7 @@
   - [📚 6. Phản Biện Chất Lượng, Tài Liệu & Đóng Gói (Phase 6)](#-6-phản-biện-chất-lượng-tài-liệu--đóng-gói-phase-6-delivery)
   - [🧠 7. Giao Tiếp, Phỏng Vấn & Năng Suất (Productivity)](#-7-giao-tiếp-phỏng-vấn--năng-suất-productivity--collaboration)
 - [🔒 Khóa Bảo Vệ Git (Guardrails)](#-khóa-bảo-vệ-git-guardrails)
+- [🔄 Cập Nhật & Nâng Cấp Thông Minh (Smart Update & 3-Way Hash Engine)](#-cập-nhật--nâng-cấp-thông-minh-smart-update--3-way-hash-engine)
 - [📁 Cấu Trúc Thư Mục Chuẩn](#-cấu-trúc-thư-mục-chuẩn)
 - [🤝 Đóng Góp & Giấy Phép](#-đóng-góp--giấy-phép)
 
@@ -139,38 +139,9 @@ Cả 2 cách trên đều hiển thị menu tương tác để bạn chọn **Ch
 > [!IMPORTANT]
 > **Nguyên tắc "Scan First - Zero Clutter"**: Bộ khung **KHÔNG BAO GIỜ** copy thư mục chứa toàn bộ ngôn ngữ thừa (`optional-stack-skills`) vào dự án của bạn. Script sẽ quét codebase trước, nếu là dự án Swift/iOS thì giữ sạch 100%; nếu là Go/Python/TypeScript thì chỉ copy duy nhất kỹ năng của ngôn ngữ đó vào `.agents/skills/engineering/`!
 
----
-
-### 🔄 Cập Nhật Bộ Khung Lên Bản Mới Nhất (Update / Upgrade)
-
-Khi **Universal Agents Workflow** có bản cập nhật mới (ví dụ: thêm kỹ năng mới `scaffold-architecture`, gói ngôn ngữ Flutter, cải tiến prompt agent, cập nhật catalog...), bạn có thể cập nhật cho dự án đang làm chỉ trong vài giây:
-
-#### ⚡ 1. Mở Terminal ngay tại thư mục dự án và chạy lại lệnh One-Liner:
-
-- **🍎 macOS / 🐧 Linux / 🪟 Windows (Git Bash)**:
-  ```bash
-  curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh | bash
-  ```
-- **🪟 Windows (PowerShell)**:
-  ```powershell
-  irm https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.ps1 | iex
-  ```
-
-> **🛡️ Cơ chế cập nhật an toàn:**
->
-> 1. Tự động đồng bộ và làm mới toàn bộ động cơ `.agents/` (chứa các Agent system prompts, catalog, và kỹ năng mới nhất).
-> 2. Chạy lại **Smart Stack Scan** để tự động nhận diện và đề xuất nạp thêm các gói kỹ năng mới phù hợp với codebase hiện tại của bạn.
-> 3. Giữ nguyên 100% mã nguồn dự án (`src/`, `lib/`, `tests/`...) và bảo toàn chế độ Git Tracking (`local`, `team`, `stealth`, `hybrid`) bạn đã cấu hình trước đó.
-
-#### 🎮 2. Kích hoạt kỹ năng mới trong AI Editor:
-
-Sau khi script hoàn tất, mở AI Editor và gõ vào ô chat:
-
-```text
-/skill-setup
-```
-
-AI Agent sẽ tự động nạp các quy tắc và kỹ năng tương thích mới nhất vào phiên làm việc!
+> [!TIP]
+> **Đã tích hợp và muốn cập nhật lên bản mới nhất?**
+> Bạn không cần cài lại từ đầu! Bộ khung có cơ chế **Smart Update & 3-Way Hash** tự động nâng cấp an toàn, giữ trọn vẹn 100% dữ liệu và mã nguồn dự án. Xem chi tiết tại mục [🔄 Cập Nhật & Nâng Cấp Thông Minh](#-cập-nhật--nâng-cấp-thông-minh-smart-update--3-way-hash-engine).
 
 ---
 
@@ -665,20 +636,33 @@ flowchart TD
     Conflict --> Opt3["[D]iff: Tải bản .upstream để tự merge"]
 ```
 
-### 3 Cách Kích Hoạt Cập Nhật:
+### 3 Cách Kích Hoạt Cập Nhật Nhanh Chóng:
 
-1. **Trực tiếp trong AI Editor (Khuyên dùng)**:
+1. **Trực tiếp trong AI Editor (Khuyên dùng & Tiện nhất)**:
+   Mở khung chat trong AI Editor (Antigravity IDE, Cursor, Claude Code, Windsurf) và gõ:
+
    ```text
    /update
    ```
-2. **Qua dòng lệnh CLI (macOS / Linux)**:
+
+   AI Agent sẽ tự động đối chiếu checksum, đồng bộ engine `.agents/` và nạp bộ quy tắc mới nhất.
+
+2. **Qua dòng lệnh Terminal One-Liner (macOS / Linux / Git Bash)**:
+   Mở terminal ngay tại thư mục dự án và chạy lệnh:
+
    ```bash
    curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh | bash -s -- --update
    ```
+
+   _(Hoặc chạy `./install.sh --update` nếu chạy trực tiếp từ thư mục mã nguồn tool cục bộ)._
+
 3. **Qua PowerShell (Windows)**:
    ```powershell
    irm https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.ps1 | iex -ArgumentList "-Update"
    ```
+
+> [!NOTE]
+> Sau khi cập nhật qua CLI / PowerShell, bạn chỉ cần mở AI Editor và gõ `/skill-setup` để đồng bộ lại toàn bộ kỹ năng tương thích mới nhất vào phiên làm việc!
 
 ### Bảng Phân Định Ranh Giới Dữ Liệu:
 
