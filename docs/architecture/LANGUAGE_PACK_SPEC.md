@@ -33,13 +33,13 @@ Mỗi subagent phải có frontmatter YAML chuẩn xác:
 
 1. **Reviewer (`<lang>-reviewer.md`)**:
    - **Vai trò**: Đảm nhiệm Phase 6A (Dual-Pass Adversarial Review).
-   - **Model**: `inherit` hoặc `claude-sonnet-4.6` (Ưu tiên khả năng phản biện logic và rà soát lỗ hổng).
+   - **Model**: `inherit` (mặc định bắt buộc). Chỉ override bằng model ID mà harness đang dùng thực sự cung cấp.
    - **Tools**: `Read, Grep, Glob, Bash` (Nghiêm cấm quyền Write/Edit để đảm bảo tính khách quan read-only).
    - **Nhiệm vụ bắt buộc**: Chạy lệnh diff (`git diff HEAD~1`), linter của ngôn ngữ, kiểm tra an toàn bộ nhớ (memory leaks, race conditions, dangling pointers, unhandled exceptions) và Anti-AI-Slop.
 
 2. **Build Resolver (`<lang>-build-resolver.md`)**:
    - **Vai trò**: Đảm nhiệm Phase 5 (Fullstack Implementation & TDD).
-   - **Model**: `gemini-3.7-flash` hoặc `inherit` (Tối ưu tốc độ, phản hồi nhanh).
+   - **Model**: `inherit` (mặc định bắt buộc). Chỉ override bằng model ID mà harness đang dùng thực sự cung cấp.
    - **Tools**: `Read, Write, Edit, Bash, Grep, Glob`.
    - **Nhiệm vụ bắt buộc**: Chẩn đoán lỗi biên dịch bằng lệnh chính thống (ví dụ: `cargo check`, `go build`, `swift build`, `mvn compile`), thực hiện **chỉnh sửa tối thiểu (surgical edit)** để hết lỗi, tuyệt đối không refactor lan sang các file không liên quan.
 
@@ -106,4 +106,33 @@ Khi muốn bổ sung một ngôn ngữ mới vào Universal Agents Workflow:
 2. **Bước 2**: Tạo các kỹ năng trong `skills/`, quy tắc trong `rules/`, rào chắn trong `linters/`.
 3. **Bước 3**: Tạo 2 subagent `<lang>-reviewer.md` và `<lang>-build-resolver.md` trong `agents/`.
 4. **Bước 4**: Khai báo danh mục vào `optional-stack-skills/catalog.json` (và đồng bộ sang `.agents/catalog.json`).
-5. **Bước 5**: Kiểm tra bằng lệnh quét `/skill-setup` hoặc `./install.sh --dry-run`.
+5. **Bước 5**: Kiểm tra bằng lệnh quét `/skill-setup`, sau đó chạy
+   `python3 .agents/scripts/validate-agents.py --root .` để xác minh cả hai lớp hợp đồng
+   (model availability và tool-call hygiene). Xem
+   `docs/architecture/MODEL_AND_TOOLCALL_CONTRACT.md`.
+
+---
+
+## 6. Quy Tắc Phân Bổ Model (Bắt Buộc)
+
+`model: inherit` là giá trị mặc định và là giá trị duy nhất được khuyến nghị
+cho mọi subagent trong kho này, kể cả agent do language pack cung cấp.
+
+Lý do là cơ chế phân bổ model nằm ở tầng harness, không phải tầng nội dung:
+
+1. Harness đọc frontmatter khi nạp agent. Nếu `model` là một ID mà harness
+   không cung cấp, agent bị loại khỏi danh sách *trước khi* phiên chạy bắt đầu
+   (báo lỗi dạng "Requested model X is not available").
+2. Nếu `model` bị bỏ trống hoặc để `inherit`, harness dùng model của phiên
+   hiện tại. Đây là hành vi đúng cho mọi harness được hỗ trợ.
+3. Khi cùng một kho chạy trên nhiều harness khác nhau (Claude Code, Codex,
+   Qwen Code, OpenCode, ...), một ID hardcode hợp lệ trên harness này gần như
+   chắc chắn vô hiệu trên harness khác.
+
+Vì vậy:
+
+- Không hardcode model ID vào `<lang>-reviewer.md` / `<lang>-build-resolver.md`.
+- Không đề xuất model ID cụ thể trong tài liệu hướng dẫn tạo agent.
+- Nếu thật sự cần model khác cho một agent, hãy để `inherit` và cấu hình ở tầng
+  harness (ví dụ `.agents/agents/openai.yaml`), nơi người dùng có thể sửa mà
+  không đụng tới file agent.
