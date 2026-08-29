@@ -3,11 +3,14 @@
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
+const harness = require("./harness");
 
 const MAX_STDIN = 2 * 1024 * 1024; // 2MB
 
 /**
  * Read and parse JSON from stdin with timeout/safety.
+ * The payload is normalized across harnesses (Antigravity / Claude Code) so
+ * hooks can always read `input.toolCall.name` and `input.toolCall.args`.
  */
 function readStdinJson(maxBytes = MAX_STDIN) {
   return new Promise((resolve) => {
@@ -28,11 +31,11 @@ function readStdinJson(maxBytes = MAX_STDIN) {
 
     process.stdin.on("end", () => {
       if (!data.trim()) {
-        return resolve({});
+        return resolve(harness.normalizeInput({}));
       }
       try {
         const parsed = JSON.parse(data);
-        resolve(parsed);
+        resolve(harness.normalizeInput(parsed));
       } catch (err) {
         resolve({
           _raw: data,
@@ -49,10 +52,22 @@ function readStdinJson(maxBytes = MAX_STDIN) {
 }
 
 /**
- * Write JSON object to stdout.
+ * Write JSON object to stdout, translated for the detected harness.
+ *
+ * A hook emits the Antigravity-native `{ decision, reason }` shape; this
+ * function rewrites it into the contract the active harness enforces and sets
+ * the exit code accordingly (Claude Code blocks PostToolUse via exit code 2).
+ * Informational payloads (no `decision` key) pass through untouched.
  */
 function outputJson(data) {
-  process.stdout.write(JSON.stringify(data, null, 2) + "\n");
+  const { payload, exitCode, stderr } = harness.translateOutput(data);
+  process.stdout.write(JSON.stringify(payload, null, 2) + "\n");
+  if (stderr) {
+    process.stderr.write(stderr + "\n");
+  }
+  if (exitCode !== 0) {
+    process.exit(exitCode);
+  }
 }
 
 /**
@@ -196,7 +211,8 @@ function extractCommandLine(input) {
 }
 
 /**
- * Extract content payload from Antigravity write/replace tool calls.
+ * Extract content payload from write/replace tool calls.
+ * Handles Antigravity field names plus Claude Code (content / new_string).
  */
 function extractToolContent(input) {
   const toolCall = input?.toolCall || {};
@@ -208,6 +224,17 @@ function extractToolContent(input) {
   if (Array.isArray(args.ReplacementChunks)) {
     for (const chunk of args.ReplacementChunks) {
       if (chunk.ReplacementContent) content += chunk.ReplacementContent + "\n";
+    }
+  }
+  // Lowercase aliases (Antigravity variants / hand-written payloads)
+  if (args.code_content) content += args.code_content + "\n";
+  if (args.replacement_content) content += args.replacement_content + "\n";
+  // Claude Code: Write -> args.content, Edit -> args.new_string
+  if (args.content) content += args.content + "\n";
+  if (args.new_string) content += args.new_string + "\n";
+  if (Array.isArray(args.edits)) {
+    for (const edit of args.edits) {
+      if (edit.new_string) content += edit.new_string + "\n";
     }
   }
 

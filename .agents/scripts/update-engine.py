@@ -201,6 +201,39 @@ def collect_framework_files(source_dir: Path) -> dict[str, Path]:
     return result
 
 
+def sync_hooks(target_dir: Path) -> None:
+    """Re-register harness hooks after framework files were updated.
+
+    .agents/hooks.json is the single source of truth (Antigravity dialect).
+    Claude Code needs the same hooks mirrored into .claude/settings.json, so
+    any update that touched hooks.json or the hook scripts must regenerate it.
+    Best-effort: a missing Node.js runtime must never fail the update.
+    """
+    installer = target_dir / ".agents" / "scripts" / "install-hooks.js"
+    if not installer.is_file():
+        return
+    if shutil.which("node") is None:
+        print("  ⚠️  Node.js not found - skipped hook re-registration.")
+        print("     Run manually after installing Node: node .agents/scripts/install-hooks.js --target .")
+        return
+
+    import subprocess
+
+    try:
+        proc = subprocess.run(
+            ["node", str(installer), "--target", str(target_dir), "--harness", "auto"],
+            capture_output=True, text=True, timeout=60,
+        )
+        out = (proc.stdout or "").strip()
+        if proc.returncode == 0:
+            print(f"  🪝  Hooks: {out or 'in sync'}")
+        else:
+            err = (proc.stderr or out or "").strip().splitlines()
+            print(f"  ⚠️  Hook re-registration failed: {err[-1] if err else proc.returncode}")
+    except Exception as exc:  # pragma: no cover - defensive
+        print(f"  ⚠️  Hook re-registration error: {exc}")
+
+
 def cmd_apply(target_dir: Path, non_interactive: bool = False) -> int:
     """Apply update from a fresh clone of the remote repo."""
     ws_data = load_workflow_source(target_dir)
@@ -333,6 +366,9 @@ def cmd_apply(target_dir: Path, non_interactive: bool = False) -> int:
             "manifest": new_manifest,
         })
         save_workflow_source(target_dir, ws_data)
+
+        # 5.5 Re-register harness hooks (Claude Code mirror of .agents/hooks.json)
+        sync_hooks(target_dir)
 
         # 6. Summary report
         print()

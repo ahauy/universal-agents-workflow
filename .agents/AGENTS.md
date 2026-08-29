@@ -14,20 +14,20 @@
 ```mermaid
 graph TD
     subgraph P1 ["PHASE 1: BA & Domain Elicitation"]
-        BA["🍉 business-analyst (claude-opus-4.6 / inherit)"]
+        BA["🍉 business-analyst (model: inherit)"]
     end
 
     subgraph P2 ["PHASE 2-4: Tech Spec & Architecture Planning"]
-        SA["🏗️ system-architect (claude-sonnet-4.6 / inherit)"]
+        SA["🏗️ system-architect (model: inherit)"]
     end
 
     subgraph P5 ["PHASE 5: Fullstack Implementation & TDD"]
-        CE["🔍 code-explorer (gemini-3.7-flash)"]
-        BE["⚙️ backend-developer (gemini-3.7-flash)"]
-        FE["🎨 frontend-developer (gemini-3.7-flash)"]
-        SI["⚡ slice-implementer (gemini-3.7-flash)"]
-        BR["🔧 build-resolver (gemini-3.7-flash)"]
-        E2E["🧪 e2e-runner (gemini-3.7-flash)"]
+        CE["🔍 code-explorer (model: inherit)"]
+        BE["⚙️ backend-developer (model: inherit)"]
+        FE["🎨 frontend-developer (model: inherit)"]
+        SI["⚡ slice-implementer (model: inherit)"]
+        BR["🔧 build-resolver (model: inherit)"]
+        E2E["🧪 e2e-runner (model: inherit)"]
 
         CE --> BE
         CE --> FE
@@ -38,14 +38,14 @@ graph TD
     end
 
     subgraph P6A ["PHASE 6A: Adversarial Quality Review"]
-        CR["🛡️ code-reviewer (claude-sonnet-4.6 / inherit)"]
-        UR["👁️ ui-ux-reviewer (gemini-3.7-flash)"]
+        CR["🛡️ code-reviewer (model: inherit)"]
+        UR["👁️ ui-ux-reviewer (model: inherit)"]
     end
 
     subgraph P6B ["PHASE 6B: Standard Documentation"]
-        TD["📚 tech-doc-architect (gemini-3.7-flash)"]
-        UG["💼 user-guide-creator (gemini-3.7-flash)"]
-        AE["⚖️ agent-evaluator (claude-sonnet-4.6 / inherit)"]
+        TD["📚 tech-doc-architect (model: inherit)"]
+        UG["💼 user-guide-creator (model: inherit)"]
+        AE["⚖️ agent-evaluator (model: inherit)"]
     end
 
     BA --> SA
@@ -221,6 +221,10 @@ When encountering friction or uncertainty, look up the symptom below to immediat
 - **Zero Code Before Approved Spec**: Never write code or create mockups without an approved domain baseline and specification.
 - **Mandatory Automatic Subagent Delegation (STRICT)**: The orchestrator AI MUST NOT execute implementation slices or documentation directly in the primary context. Once Gate 2 (Technical Plan & Tasks) is approved, the orchestrator MUST automatically decompose tasks and dispatch dedicated subagents (`backend-developer`, `frontend-developer`, `ui-ux-reviewer`, `tech-doc-architect`, `user-guide-creator`) via `invoke_subagent`.
 - **Subagent Transparency & Notification Protocol (MANDATORY)**: Whenever a subagent is dispatched or finishes, the AI MUST explicitly notify the user in chat with a clear announcement block specifying: (1) Subagent Name & Role, (2) Active Model Name, (3) Exact Task Scope, and (4) Output Artifact / Report Link.
+- **Subagent Dispatch Resilience & Fallback (MANDATORY)**: Delegation is required, but it must never dead-lock the workflow.
+  - **Safe `task` Argument Contract**: Keep every dispatch `task` string short (under 400 characters), single-line, and plain ASCII. Never embed double quotes, LaTeX math markers, emoji, Markdown tables, or file contents inside it. Reference artifacts by path only (e.g. `.specify/features/<slug>/00-intake.md`) and let the subagent read them. Persona and behavior live in the agent definition file, never re-injected into the `task` string.
+  - **Two-Strike Fallback**: If a dispatch fails twice with a tool-call or argument syntax error, or the subagent returns without producing its declared artifacts, STOP retrying. Execute that stage inline in the primary context, then notify the user which subagent was bypassed, why, and what was produced.
+  - **Artifact Verification**: After every subagent run, confirm the expected files exist and are non-empty before marking the stage complete. A completion claim without artifacts counts as a failure, not as a pass.
 - **Design System & Anti-AI-Slop Gate (STRICT)**: All UI must strictly adhere to clean design geometry, intentional palettes, 1px hairline borders, explicit typography hierarchy, and stable outer anchor hover physics. Generic AI slop (unrequested multi-color gradients, floating blurred neon orbs, heavy glassmorphism, fake pricing tiers) is strictly forbidden.
 - **Dual-Pass Adversarial Review Gate**:
   - Code review must run dual independent passes: (Pass A: Standards & Security; Pass B: Spec & Acceptance Criteria Fidelity).

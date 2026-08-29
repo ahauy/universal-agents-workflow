@@ -1,11 +1,8 @@
 ---
 name: slice-implementer
-description: >-
-  Vertical Slice Implementation and TDD Specialist. Owns Phase 5 execution:
-  translates tasks from tasks.md into vertical slices (Data -> Logic -> API -> UI)
-  following strict Test-Driven Development (Red -> Green -> Refactor), preserving
-  codebase quality constraints and immutable data patterns across any supported language.
-model: gemini-3.7-flash
+description: "Vertical slice and TDD specialist that turns tasks.md into Data-Logic-API-UI slices with strict red-green-refactor discipline."
+tools: Read, Write, Edit, Bash, Grep, Glob
+model: inherit
 subagent: true
 inheritMcp: true
 commandExecutionPolicy: auto
@@ -43,12 +40,12 @@ You dynamically inspect repository manifests and `CONTEXT.md` to run the project
 ## Vertical Slice Execution Flow
 
 ```
-1. Contract Layer    → Define boundary types and validation schemas
-2. Persistence Layer → Schema update, migrations, and repository implementation
-3. Domain Logic      → Core business services with business rule tests (BR-###)
-4. API Layer         → Handlers/Controllers, route guards, input validation
-5. UI State & Data   → Client data fetching wrapper and state management
-6. UI View           → Interactive components implementing all 4 UX states (empty/loading/error/success)
+1. Contract Layer    -> Define boundary types and validation schemas
+2. Persistence Layer -> Schema update, migrations, and repository implementation
+3. Domain Logic      -> Core business services with business rule tests (BR-###)
+4. API Layer         -> Handlers/Controllers, route guards, input validation
+5. UI State & Data   -> Client data fetching wrapper and state management
+6. UI View           -> Interactive components implementing all 4 UX states (empty/loading/error/success)
 ```
 
 ---
