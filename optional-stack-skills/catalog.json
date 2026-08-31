@@ -492,6 +492,21 @@
         "type": "stdio"
       },
       "recommendation": "optional"
+    },
+    {
+      "id": "archify",
+      "name": "Archify Interactive Architecture & Flow Visualizer",
+      "category": "Visualization",
+      "short_description": "Generates verified, interactive HTML/SVG architecture maps, sequence flows, state lifecycles, and 1200x630 share cards from typed JSON IR. Requires separate CLI install: npx -y skills add tt-a1i/archify --skill archify --global --copy --yes",
+      "detection_markers": ["AGENTS.md"],
+      "source_path": "optional-stack-skills/tools/archify",
+      "target_type": "skill",
+      "target_path": ".agents/skills/engineering/archify",
+      "install_command": "npx -y skills add tt-a1i/archify --skill archify --global --copy --yes",
+      "runtime_check": "node ~/.agents/skills/archify/bin/archify.mjs doctor",
+      "runtime_path": "~/.agents/skills/archify/bin/archify.mjs",
+      "recommendation": "optional",
+      "note": "Archify is an external CLI tool installed globally to ~/.agents/skills/archify/. It is NOT bundled in this repo. Agents fall back to Mermaid diagrams when Archify is not installed."
     }
   ]
 }
