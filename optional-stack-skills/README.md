@@ -89,6 +89,7 @@ Tất cả kỹ năng đều được định nghĩa chi tiết trong [catalog.j
 | **`postgres-patterns`**          | Database     | Recommended    | Tối ưu cơ sở dữ liệu: chiến lược composite index, truy vấn JSONB hiệu năng cao, optimistic locking và connection pool.                                             |
 | **`docker-patterns`**            | DevOps       | Recommended    | Tiêu chuẩn container production: distroless base image, non-root user, multi-stage caching và healthcheck.                                                         |
 | **`code-review-graph`**          | Intelligence | Optional (MCP) | Dựng đồ thị Tree-sitter + SQLite cục bộ cho phép subagent (`code-explorer`, `code-reviewer`) tra cứu caller/callee và blast-radius với chi phí token giảm tới 26x. |
+| **`archify`**                    | Visual/Arch  | Recommended    | Biên dịch sơ đồ tương tác (Architecture, Workflow, Sequence, Data-flow, Lifecycle) từ JSON IR, hỗ trợ Before/After diffing và xuất 1200x630 share card chuẩn.      |
 
 ---
 

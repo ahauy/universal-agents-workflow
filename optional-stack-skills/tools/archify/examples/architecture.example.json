@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Universal Agent Workflow Architecture",
+    "output": "docs/architecture/universal-agent-workflow.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "feature-lifecycle",
+        "label": "New feature lifecycle",
+        "focus": [
+          "user",
+          "ba-agent",
+          "sa-agent",
+          "dev-agents",
+          "quality-gate",
+          "doc-agent"
+        ],
+        "note": "Follow a feature from stakeholder request through elicitation, spec, implementation, and documentation delivery."
+      },
+      {
+        "id": "governance-plane",
+        "label": "Governance & sign-off gates",
+        "focus": ["user", "ba-agent", "sa-agent", "quality-gate"],
+        "note": "Isolate the human-in-the-loop and adversarial review gates that enforce zero-code-before-spec."
+      },
+      {
+        "id": "execution-plane",
+        "label": "Implementation & delivery",
+        "focus": ["sa-agent", "dev-agents", "quality-gate", "doc-agent"],
+        "note": "See the subagent execution chain: backend, frontend, slice, build-resolver, e2e, reviewer, tech-doc."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "User / Product Owner",
+      "sublabel": "Stakeholder",
+      "pos": [40, 340],
+      "size": [140, 60],
+      "tag": "Human-in-the-Loop"
+    },
+    {
+      "id": "ba-agent",
+      "type": "security",
+      "label": "business-analyst",
+      "sublabel": "8-Stage BA Pipeline",
+      "pos": [280, 120],
+      "size": [150, 60],
+      "tag": "Phase 1"
+    },
+    {
+      "id": "sa-agent",
+      "type": "backend",
+      "label": "system-architect",
+      "sublabel": "Spec + Plan + Tasks",
+      "pos": [280, 340],
+      "size": [150, 60],
+      "tag": "Phase 2-4"
+    },
+    {
+      "id": "dev-agents",
+      "type": "backend",
+      "label": "Fullstack Developers",
+      "sublabel": "backend + frontend + e2e",
+      "pos": [530, 340],
+      "size": [160, 60],
+      "tag": "Phase 5 TDD"
+    },
+    {
+      "id": "quality-gate",
+      "type": "security",
+      "label": "Adversarial Reviewers",
+      "sublabel": "code-reviewer + ui-ux-reviewer",
+      "pos": [790, 340],
+      "size": [160, 60],
+      "tag": "Phase 6A Dual Pass"
+    },
+    {
+      "id": "doc-agent",
+      "type": "backend",
+      "label": "tech-doc-architect",
+      "sublabel": "Diataxis + Share Cards",
+      "pos": [790, 120],
+      "size": [160, 60],
+      "tag": "Phase 6B"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Controlled Pipeline: Zero Code Before Signed-off Baseline",
+      "wraps": [
+        "ba-agent",
+        "sa-agent",
+        "dev-agents",
+        "quality-gate",
+        "doc-agent"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "user-to-ba",
+      "from": "user",
+      "to": "ba-agent",
+      "label": "Feature Request",
+      "variant": "emphasis",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "ba-to-sa",
+      "from": "ba-agent",
+      "to": "sa-agent",
+      "label": "Signed-off baseline.md",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [355, 300]
+    },
+    {
+      "id": "sa-to-dev",
+      "from": "sa-agent",
+      "to": "dev-agents",
+      "label": "plan.md + tasks.md",
+      "labelDy": -24
+    },
+    {
+      "id": "dev-to-qa",
+      "from": "dev-agents",
+      "to": "quality-gate",
+      "label": "Implementation + Test Proof",
+      "labelDy": -24
+    },
+    {
+      "id": "qa-to-doc",
+      "from": "quality-gate",
+      "to": "doc-agent",
+      "label": "Verified Code + ADR",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "doc-to-user",
+      "from": "doc-agent",
+      "to": "user",
+      "label": "Docs Delivery",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [
+        [870, 40],
+        [110, 40]
+      ],
+      "labelAt": [490, 40]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Phase Gate Protocol",
+      "items": [
+        "8-Stage BA Pipeline enforces zero-hallucination elicitation",
+        "system-architect produces spec.md, plan.md, data-model.md, tasks.md",
+        "Subagents run in isolated contexts via invoke_subagent"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Adversarial Review Gates",
+      "items": [
+        "code-reviewer: dual pass — Standards+Security, Spec+Domain Fidelity",
+        "ui-ux-reviewer: Anti-AI-Slop + WCAG AA verification",
+        "Zero Critical bugs permitted before release"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Documentation Delivery",
+      "items": [
+        "tech-doc-architect produces docs/features/<slug>/README.md",
+        "user-guide-creator generates real Playwright screenshots",
+        "1200x630 share cards embedded via Archify"
+      ]
+    }
+  ]
+}

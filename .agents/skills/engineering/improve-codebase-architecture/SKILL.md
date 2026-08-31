@@ -88,7 +88,7 @@ Generate a standalone, interactive visual report saved to the operating system's
    - Output the absolute path clearly to the user.
 
 2. **Report Design & Layout**:
-   - **Tech Stack**: Tailwind CSS CDN + Mermaid JS CDN (ESM import).
+   - **Tech Stack**: Tailwind CSS CDN + Mermaid JS CDN / Archify HTML Engine.
    - **Structure**:
      - **Header**: Repository name, scan timestamp, and visual legend (Solid box = Module, Dashed line = Seam, Red line = Leakage, Dark card = Deep Module).
      - **Candidate Cards**: One `<article>` per candidate containing:
@@ -98,11 +98,11 @@ Generate a standalone, interactive visual report saved to the operating system's
        - **Problem**: 1–2 sentences pinpointing the exact architectural friction.
        - **Solution**: 1–2 sentences defining the proposed deepened interface.
        - **Wins**: Crisp bullet points highlighting **Leverage**, **Locality**, and interface simplification.
-       - **Before / After Diagram**: Side-by-side visual comparison (Mermaid flowchart/sequence or custom CSS boxes).
+       - **Before / After Diagram**: Side-by-side visual comparison or Archify **Before / Delta / After Snapshot Diff** (`npx archify diff --before v1.json --after v2.json`).
        - **ADR Callout**: Warning notice if the proposal revisits an existing ADR, stating why it is now justified.
      - **Top Recommendation**: Prominent card highlighting the highest-leverage candidate to tackle first.
 
-3. **Guidance Reference**: Consult [HTML-REPORT.md](HTML-REPORT.md) for complete HTML templates, CSS classes, badge color schemes, and Mermaid diagram templates.
+3. **Guidance Reference**: Consult [HTML-REPORT.md](HTML-REPORT.md) and [`archify`](file:///Users/vutuanhau/Documents/PROJECT/Universal-Agents-Workflow/.agents/skills/engineering/archify/SKILL.md) for complete HTML templates, CSS classes, badge color schemes, and snapshot diffing.
 
 4. **Done Criteria**: HTML report generated, opened in default browser, and prompt user: _"Which candidate would you like to explore?"_
 

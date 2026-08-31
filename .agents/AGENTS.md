@@ -157,6 +157,7 @@ When encountering friction or uncertainty, look up the symptom below to immediat
 | _"Starting a new repo or onboarding project from scratch"_          | Manual configuration burden     | `/skill-setup` (`engineering/command-skill-setup` / `setup-workspace`) |
 | _"Upgrading framework or syncing upstream changes safely"_          | Framework evolution & drift     | `/command-update` (`engineering/command-update`)                       |
 | _"Reviewing code or catching regressions before merge"_             | Unstructured code review        | `code-reviewer` (dual pass: Standards + Spec)                          |
+| _"Need interactive architecture maps, lifecycle FSMs, share cards"_ | Visual architecture clarity     | `archify` (`engineering/archify`)                                      |
 
 ---
 
@@ -169,6 +170,7 @@ When encountering friction or uncertainty, look up the symptom below to immediat
 | **Project Shared Language (Ubiquitous Language)**          | `CONTEXT.md` (MUST read before any work)                     | Root `CONTEXT.md`                           |
 | **Architecture Decisions & Enduring Constraints**          | `adr/` (MUST read before proposing architectures)            | Root `adr/`                                 |
 | **Project Design System & Tokens**                         | Project design documentation (e.g. `DESIGN.md` / tokens)     | Target Project UI Root                      |
+| **Interactive Architecture, Sequence & State Lifecycle**   | `archify` (renders verified HTML & 1200x630 share cards)     | `engineering/archify`                       |
 | **New feature intake & complexity classification**         | `intake-classifier`                                          | `engineering/intake-classifier`             |
 | **Business value & 6-pillar domain elicitation**           | `elicitation-interview` (delegates to `grilling`)            | `engineering/elicitation-interview`         |
 | **Deep interactive interview primitive**                   | `grilling`                                                   | `productivity/grilling`                     |

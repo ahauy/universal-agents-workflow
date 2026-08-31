@@ -1,0 +1,283 @@
+{
+  "schema_version": 1,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "BA Elicitation Pipeline",
+    "output": "docs/architecture/ba-pipeline-workflow.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "ba-stages",
+        "label": "8-stage BA pipeline",
+        "focus": [
+          "intake",
+          "elicitation",
+          "gap-analysis",
+          "domain-modeling",
+          "risk-scan",
+          "spec-writer",
+          "spec-validator",
+          "handover"
+        ],
+        "note": "Follow all 8 BA stages from intake to signed-off baseline."
+      },
+      {
+        "id": "interview-gate",
+        "label": "Elicitation interview gate",
+        "focus": [
+          "intake",
+          "elicitation",
+          "user-interview",
+          "spec-writer",
+          "handover"
+        ],
+        "note": "Isolate the mandatory human interview gate that blocks all downstream stages."
+      },
+      {
+        "id": "fast-track",
+        "label": "Micro-task fast-track",
+        "focus": ["intake", "micro-fast-track", "code-fix", "verify"],
+        "note": "See the bypass route for surgical changes under 30 lines."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "ba-core", "label": "BA Pipeline" },
+    { "id": "human", "label": "Human Interaction" },
+    { "id": "artifacts", "label": "Output Artifacts" },
+    { "id": "fast-track-lane", "label": "Micro-Task Fast-Track" }
+  ],
+  "phases": [
+    { "id": "phase1", "label": "Classification", "fromCol": 0, "toCol": 0 },
+    {
+      "id": "phase2",
+      "label": "Elicitation & Modeling",
+      "fromCol": 1,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "phase3",
+      "label": "Spec & Validation",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "mainPath": [
+    "intake",
+    "elicitation",
+    "gap-analysis",
+    "domain-modeling",
+    "risk-scan",
+    "spec-writer",
+    "spec-validator",
+    "handover"
+  ],
+  "nodes": [
+    {
+      "id": "intake",
+      "lane": "ba-core",
+      "col": 0,
+      "type": "security",
+      "label": "Intake Classifier",
+      "sublabel": "classify complexity",
+      "tag": "Stage 1"
+    },
+    {
+      "id": "elicitation",
+      "lane": "ba-core",
+      "col": 1,
+      "type": "security",
+      "label": "Elicitation Interview",
+      "sublabel": "MANDATORY GATE",
+      "tag": "Stage 2"
+    },
+    {
+      "id": "user-interview",
+      "lane": "human",
+      "col": 1,
+      "type": "external",
+      "label": "Customer Interview",
+      "sublabel": "2-3 questions per batch"
+    },
+    {
+      "id": "gap-analysis",
+      "lane": "ba-core",
+      "col": 2,
+      "type": "backend",
+      "label": "Gap Analysis",
+      "sublabel": "AS-IS / TO-BE",
+      "tag": "Stage 3 Full only"
+    },
+    {
+      "id": "domain-modeling",
+      "lane": "ba-core",
+      "col": 3,
+      "type": "backend",
+      "label": "Domain Modeling",
+      "sublabel": "RBAC + FSM + ERD",
+      "tag": "Stage 4"
+    },
+    {
+      "id": "risk-scan",
+      "lane": "ba-core",
+      "col": 3,
+      "type": "security",
+      "label": "Risk Scanner",
+      "sublabel": "MoSCoW + RISK-",
+      "tag": "Stage 5"
+    },
+    {
+      "id": "spec-writer",
+      "lane": "ba-core",
+      "col": 4,
+      "type": "backend",
+      "label": "Spec Writer",
+      "sublabel": "BRD/PRD/SRS/Stories",
+      "tag": "Stage 6"
+    },
+    {
+      "id": "spec-validator",
+      "lane": "ba-core",
+      "col": 5,
+      "type": "security",
+      "label": "Spec Validator",
+      "sublabel": "IEEE 29148",
+      "tag": "Stage 7"
+    },
+    {
+      "id": "handover",
+      "lane": "ba-core",
+      "col": 5,
+      "type": "cloud",
+      "label": "Handover",
+      "sublabel": "baseline.md SIGNED-OFF",
+      "tag": "Stage 8"
+    },
+    {
+      "id": "context-artifact",
+      "lane": "artifacts",
+      "col": 3,
+      "type": "database",
+      "label": "CONTEXT.md",
+      "sublabel": "ubiquitous language"
+    },
+    {
+      "id": "micro-fast-track",
+      "lane": "fast-track-lane",
+      "col": 0,
+      "type": "messagebus",
+      "label": "Micro-Task",
+      "sublabel": "< 30 lines"
+    },
+    {
+      "id": "code-fix",
+      "lane": "fast-track-lane",
+      "col": 1,
+      "type": "backend",
+      "label": "Surgical Fix",
+      "sublabel": "Reproduce -> Test -> Fix"
+    },
+    {
+      "id": "verify",
+      "lane": "fast-track-lane",
+      "col": 2,
+      "type": "cloud",
+      "label": "Verify",
+      "sublabel": "Conventional Commit"
+    }
+  ],
+  "edges": [
+    {
+      "from": "intake",
+      "to": "elicitation",
+      "label": "Bounded/Full Feature",
+      "variant": "emphasis"
+    },
+    {
+      "from": "intake",
+      "to": "micro-fast-track",
+      "label": "Micro-Task",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    { "from": "micro-fast-track", "to": "code-fix" },
+    { "from": "code-fix", "to": "verify" },
+    {
+      "from": "elicitation",
+      "to": "user-interview",
+      "label": "grilling 2-3 Qs",
+      "variant": "security",
+      "route": "drop",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "user-interview",
+      "to": "elicitation",
+      "label": "confirmed answers",
+      "variant": "default",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    { "from": "elicitation", "to": "gap-analysis" },
+    { "from": "gap-analysis", "to": "domain-modeling" },
+    {
+      "from": "domain-modeling",
+      "to": "context-artifact",
+      "label": "inline update",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    { "from": "domain-modeling", "to": "risk-scan" },
+    { "from": "risk-scan", "to": "spec-writer" },
+    { "from": "spec-writer", "to": "spec-validator" },
+    {
+      "from": "spec-validator",
+      "to": "handover",
+      "label": "IEEE 29148 pass",
+      "variant": "emphasis"
+    },
+    {
+      "from": "spec-validator",
+      "to": "spec-writer",
+      "label": "loop on failure",
+      "variant": "security",
+      "route": "outside-right",
+      "fromSide": "bottom",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Zero-Hallucination Policy",
+      "items": [
+        "AI MUST pause at Stage 2 for live customer interview",
+        "Strictly forbidden from inventing business rules",
+        "All ASM- assumptions must be confirmed by user"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Routing by Complexity",
+      "items": [
+        "Micro-Task: bypass BA ceremony, direct to TDD fast-track",
+        "Bounded Task: Stages 1,2,4,5,6,7,8 (skip gap analysis)",
+        "Full Feature/Epic: all 8 stages at full depth"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Artifacts Produced",
+      "items": [
+        "CONTEXT.md updated with confirmed terminology",
+        "adr/ records load-bearing architectural decisions",
+        "baseline.md SIGNED-OFF v1.0 gates all downstream work"
+      ]
+    }
+  ]
+}

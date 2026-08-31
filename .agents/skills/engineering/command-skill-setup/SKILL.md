@@ -101,7 +101,17 @@ The Agent pauses and asks the user using direct questions or interactive chat:
    - The user can accept all, or request to drop/add specific skills from the catalog.
 2. **Activate `code-review-graph` MCP Server**:
    - Ask user: _"Would you like to activate the `code-review-graph` MCP Server to enable subagents to analyze function/class call graphs and reduce token usage during reviews?"_
-3. **Git Management Mode for Universal Agents Workflow in this project**:
+3. **Install `Archify` CLI (optional external tool)**:
+   - First, check if Archify is already installed:
+     ```bash
+     node ~/.agents/skills/archify/bin/archify.mjs doctor 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
+     ```
+   - If **INSTALLED**: Inform user Archify is already available — no action needed.
+   - If **NOT_INSTALLED**: Ask user:
+     _"Would you like to install **Archify** — an interactive architecture diagram tool that generates validated HTML maps and 1200×630 share cards from typed JSON IR? It installs globally to `~/.agents/skills/archify/`. Without it, agents fall back to standard Mermaid diagrams."_
+     - If Yes → run in Step 4: `npx -y skills add tt-a1i/archify --skill archify --global --copy --yes`
+     - If No → agents will use Mermaid fallback automatically (no action needed)
+4. **Git Management Mode for Universal Agents Workflow in this project**:
    - Ask user how they wish Git to handle the workflow files:
      - **🌐 1) Team Mode (Shared)**: Track all in Git to share rules, skills, and configs with the team on GitHub/GitLab (no additions to `.gitignore`).
      - **🔒 2) Local-Only Mode (Private)**: Automatically add `.agents/`, `.specify/`, `CONTEXT.md`, and rules to `.gitignore` to keep the remote repo 100% clean.
@@ -120,7 +130,18 @@ Once confirmed by the user, the agent performs automated setup:
    - Copy rule files to `.agents/rules/<rule-id>.md`.
    - Copy linter configuration files (`depguard.yaml`, `.importlinter.ini`, `dependency-cruiser.config.cjs`) to workspace root if not already present.
    - **Important**: The target repository NEVER contains an `optional-stack-skills/` directory. All activated skills live cleanly inside `.agents/skills/engineering/`.
-2. **Automated Setup for `code-review-graph` MCP (if selected Yes)**:
+2. **Install Archify CLI (if user selected Yes in Step 3)**:
+   - Run the official install command:
+     ```bash
+     npx -y skills add tt-a1i/archify --skill archify --global --copy --yes
+     ```
+   - Verify installation succeeded:
+     ```bash
+     node ~/.agents/skills/archify/bin/archify.mjs doctor
+     ```
+   - Report to user: ✅ Archify installed at `~/.agents/skills/archify/` — use `node bin/archify.mjs` from that directory.
+   - If install fails: Report failure clearly and inform user they can retry manually. Agents will use Mermaid fallback in the meantime.
+3. **Automated Setup for `code-review-graph` MCP (if selected Yes)**:
    - **Prerequisite Check**: Check if Astral's `uv` / `uvx` is installed:
      ```bash
      which uvx || which uv
@@ -151,7 +172,7 @@ Once confirmed by the user, the agent performs automated setup:
        }
      }
      ```
-3. **Configure Git Tracking Mode (based on Step 3 selection)**:
+4. **Configure Git Tracking Mode (based on Step 3 selection)**:
    - **Local-Only Mode**: Append the following block to `.gitignore`:
      ```gitignore
      # --- Universal Agents Workflow (Local-Only Mode) ---
@@ -177,9 +198,9 @@ Once confirmed by the user, the agent performs automated setup:
      .windsurfrules
      ```
    - **Team Mode**: Only ignore temporary log files: `.agents/scripts/hooks/*.log`.
-4. **Update `CONTEXT.md`**:
+5. **Update `CONTEXT.md`**:
    - Populate detected tech stack, frameworks, and package managers in the **Components & Services Overview** table in `CONTEXT.md`.
-5. **Completion Notification**:
+6. **Completion Notification**:
    - Report the list of successfully activated skills.
    - Report the applied Git tracking mode.
    - Suggest the next action (e.g., run `/continue` or initiate Phase 1 BA pipeline via `intake-classifier`).
