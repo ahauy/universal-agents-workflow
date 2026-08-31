@@ -1,0 +1,250 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Multi-Agent Feature Sequence",
+    "output": "docs/architecture/agent-sequence.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "spec-handover",
+        "label": "BA to architect handover",
+        "focus": ["user", "ba", "orchestrator", "sa"],
+        "note": "Follow the signed-off baseline from BA elicitation to system-architect planning."
+      },
+      {
+        "id": "subagent-dispatch",
+        "label": "Implementation dispatch",
+        "focus": ["orchestrator", "backend", "frontend", "e2e"],
+        "note": "See how the orchestrator dispatches parallel subagents via invoke_subagent."
+      },
+      {
+        "id": "review-delivery",
+        "label": "Review and documentation",
+        "focus": ["e2e", "reviewer", "doc", "user"],
+        "note": "Trace from passing tests through adversarial review to final documentation delivery."
+      }
+    ]
+  },
+  "participants": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "User",
+      "sublabel": "Product Owner"
+    },
+    {
+      "id": "orchestrator",
+      "type": "backend",
+      "label": "Orchestrator",
+      "sublabel": "primary agent"
+    },
+    {
+      "id": "ba",
+      "type": "security",
+      "label": "BA Agent",
+      "sublabel": "Phase 1"
+    },
+    {
+      "id": "sa",
+      "type": "backend",
+      "label": "Architect",
+      "sublabel": "Phase 2-4"
+    },
+    {
+      "id": "backend",
+      "type": "backend",
+      "label": "Backend Dev",
+      "sublabel": "Phase 5"
+    },
+    {
+      "id": "frontend",
+      "type": "frontend",
+      "label": "Frontend Dev",
+      "sublabel": "Phase 5"
+    },
+    {
+      "id": "e2e",
+      "type": "cloud",
+      "label": "E2E Runner",
+      "sublabel": "Phase 5"
+    },
+    {
+      "id": "reviewer",
+      "type": "security",
+      "label": "Reviewer",
+      "sublabel": "Phase 6A"
+    },
+    {
+      "id": "doc",
+      "type": "backend",
+      "label": "Doc Architect",
+      "sublabel": "Phase 6B"
+    }
+  ],
+  "segments": [
+    { "from": 200, "to": 420, "label": "Phase 1: BA Elicitation" },
+    { "from": 450, "to": 600, "label": "Phase 2-4: Spec & Plan" },
+    { "from": 630, "to": 830, "label": "Phase 5: Implementation" },
+    { "from": 860, "to": 1020, "label": "Phase 6: Review & Docs" }
+  ],
+  "messages": [
+    {
+      "from": "user",
+      "to": "orchestrator",
+      "y": 220,
+      "label": "Feature request",
+      "variant": "emphasis"
+    },
+    {
+      "from": "orchestrator",
+      "to": "ba",
+      "y": 260,
+      "label": "invoke_subagent: ba",
+      "variant": "emphasis"
+    },
+    {
+      "from": "ba",
+      "to": "user",
+      "y": 300,
+      "label": "Elicitation questions",
+      "variant": "default"
+    },
+    {
+      "from": "user",
+      "to": "ba",
+      "y": 340,
+      "label": "Confirmed answers",
+      "variant": "return"
+    },
+    {
+      "from": "ba",
+      "to": "orchestrator",
+      "y": 400,
+      "label": "baseline.md SIGNED-OFF",
+      "variant": "return"
+    },
+    {
+      "from": "orchestrator",
+      "to": "sa",
+      "y": 470,
+      "label": "invoke_subagent: architect",
+      "variant": "emphasis"
+    },
+    {
+      "from": "sa",
+      "to": "orchestrator",
+      "y": 580,
+      "label": "spec + plan + tasks",
+      "variant": "return"
+    },
+    {
+      "from": "orchestrator",
+      "to": "backend",
+      "y": 650,
+      "label": "invoke: backend-dev",
+      "variant": "emphasis"
+    },
+    {
+      "from": "orchestrator",
+      "to": "frontend",
+      "y": 670,
+      "label": "invoke: frontend-dev",
+      "variant": "emphasis"
+    },
+    {
+      "from": "backend",
+      "to": "orchestrator",
+      "y": 740,
+      "label": "API + tests done",
+      "variant": "return"
+    },
+    {
+      "from": "frontend",
+      "to": "orchestrator",
+      "y": 760,
+      "label": "UI + tests done",
+      "variant": "return"
+    },
+    {
+      "from": "orchestrator",
+      "to": "e2e",
+      "y": 800,
+      "label": "invoke: e2e-runner",
+      "variant": "emphasis"
+    },
+    {
+      "from": "e2e",
+      "to": "orchestrator",
+      "y": 840,
+      "label": "All tests passing",
+      "variant": "return"
+    },
+    {
+      "from": "orchestrator",
+      "to": "reviewer",
+      "y": 880,
+      "label": "invoke: code-reviewer",
+      "variant": "emphasis"
+    },
+    {
+      "from": "reviewer",
+      "to": "orchestrator",
+      "y": 950,
+      "label": "Dual pass: zero Critical",
+      "variant": "return"
+    },
+    {
+      "from": "orchestrator",
+      "to": "doc",
+      "y": 980,
+      "label": "invoke: tech-doc-architect",
+      "variant": "emphasis"
+    },
+    {
+      "from": "doc",
+      "to": "user",
+      "y": 1010,
+      "label": "docs + share cards",
+      "variant": "dashed"
+    }
+  ],
+  "activations": [
+    { "participant": "ba", "from": 254, "to": 406, "type": "security" },
+    { "participant": "sa", "from": 464, "to": 586, "type": "backend" },
+    { "participant": "backend", "from": 644, "to": 746, "type": "backend" },
+    { "participant": "frontend", "from": 664, "to": 766, "type": "frontend" },
+    { "participant": "e2e", "from": 794, "to": 846, "type": "cloud" },
+    { "participant": "reviewer", "from": 874, "to": 956, "type": "security" },
+    { "participant": "doc", "from": 974, "to": 1016, "type": "backend" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Strict Delegation Protocol",
+      "items": [
+        "Orchestrator never writes feature code directly",
+        "All phases dispatch dedicated subagents via invoke_subagent",
+        "Subagents run in isolated contexts with no cross-contamination"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Mandatory Human Gates",
+      "items": [
+        "BA elicitation requires user interaction before proceeding",
+        "Zero Critical bugs required before Phase 6B delivery",
+        "Plan approval confirmed before implementation begins"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Parallel Execution",
+      "items": [
+        "backend-dev and frontend-dev dispatch simultaneously",
+        "e2e-runner validates integration after both complete",
+        "code-reviewer operates independently of implementer reasoning"
+      ]
+    }
+  ]
+}

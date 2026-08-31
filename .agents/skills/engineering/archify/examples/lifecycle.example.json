@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Feature Lifecycle State Machine",
+    "output": "docs/architecture/feature-lifecycle.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "main-flow",
+        "label": "Main lifecycle path",
+        "focus": [
+          "intake",
+          "elicitation",
+          "planning",
+          "implementation",
+          "review",
+          "delivered"
+        ],
+        "note": "Follow a feature from intake through the 6-phase pipeline to delivery."
+      },
+      {
+        "id": "gates-and-holds",
+        "label": "Human gates & holds",
+        "focus": ["elicitation", "gate1", "gate2", "blocked"],
+        "note": "Isolate the mandatory human-in-the-loop confirmation gates."
+      },
+      {
+        "id": "failure-paths",
+        "label": "Failure & rework paths",
+        "focus": ["implementation", "review", "rework", "blocked"],
+        "note": "See how critical bugs trigger rework without bypassing the review gate."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "control", "label": "Control Plane" },
+    { "id": "execution", "label": "Execution" },
+    { "id": "gates", "label": "Human Gates" },
+    { "id": "terminal", "label": "Terminal" }
+  ],
+  "states": [
+    {
+      "id": "intake",
+      "type": "start",
+      "label": "Intake",
+      "sublabel": "intake-classifier",
+      "lane": "control",
+      "col": 0,
+      "step": "01",
+      "tag": "Phase 1"
+    },
+    {
+      "id": "elicitation",
+      "type": "active",
+      "label": "Elicitation",
+      "sublabel": "8-Stage BA Pipeline",
+      "lane": "control",
+      "col": 1,
+      "step": "02",
+      "tag": "Phase 1"
+    },
+    {
+      "id": "gate1",
+      "type": "decision",
+      "label": "Baseline Sign-off",
+      "sublabel": "human confirms",
+      "lane": "gates",
+      "col": 1,
+      "tag": "MANDATORY GATE"
+    },
+    {
+      "id": "planning",
+      "type": "active",
+      "label": "Spec & Plan",
+      "sublabel": "system-architect",
+      "lane": "control",
+      "col": 2,
+      "step": "03",
+      "tag": "Phase 2-4"
+    },
+    {
+      "id": "gate2",
+      "type": "decision",
+      "label": "Plan Approval",
+      "sublabel": "human confirms",
+      "lane": "gates",
+      "col": 2,
+      "tag": "MANDATORY GATE"
+    },
+    {
+      "id": "implementation",
+      "type": "active",
+      "label": "Implementation",
+      "sublabel": "TDD vertical slices",
+      "lane": "execution",
+      "col": 3,
+      "step": "04",
+      "tag": "Phase 5"
+    },
+    {
+      "id": "review",
+      "type": "decision",
+      "label": "Adversarial Review",
+      "sublabel": "Dual Pass: code + UI",
+      "lane": "execution",
+      "col": 4,
+      "step": "05",
+      "tag": "Phase 6A"
+    },
+    {
+      "id": "delivered",
+      "type": "success",
+      "label": "Delivered",
+      "sublabel": "docs + share cards",
+      "lane": "execution",
+      "col": 4,
+      "yOffset": 90,
+      "step": "06",
+      "tag": "Phase 6B"
+    },
+    {
+      "id": "blocked",
+      "type": "waiting",
+      "label": "Blocked",
+      "sublabel": "awaiting user input",
+      "lane": "gates",
+      "col": 0,
+      "tag": "hold"
+    },
+    {
+      "id": "rework",
+      "type": "failure",
+      "label": "Rework",
+      "sublabel": "critical bug found",
+      "lane": "execution",
+      "col": 3,
+      "yOffset": 90,
+      "tag": "retryable"
+    },
+    {
+      "id": "abandoned",
+      "type": "failure",
+      "label": "Abandoned",
+      "sublabel": "out of scope",
+      "lane": "terminal",
+      "col": 1,
+      "tag": "terminal"
+    }
+  ],
+  "transitions": [
+    { "id": "intake-to-elicitation", "from": "intake", "to": "elicitation" },
+    {
+      "id": "elicitation-to-gate1",
+      "from": "elicitation",
+      "to": "gate1",
+      "variant": "security",
+      "route": "drop",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "gate1-approved",
+      "from": "gate1",
+      "to": "planning",
+      "label": "SIGNED-OFF",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "planning-to-gate2",
+      "from": "planning",
+      "to": "gate2",
+      "variant": "security",
+      "route": "drop",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "gate2-approved",
+      "from": "gate2",
+      "to": "implementation",
+      "label": "approved",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    { "id": "impl-to-review", "from": "implementation", "to": "review" },
+    {
+      "id": "review-pass",
+      "from": "review",
+      "to": "delivered",
+      "label": "zero critical bugs",
+      "variant": "emphasis"
+    },
+    {
+      "id": "review-fail",
+      "from": "review",
+      "to": "rework",
+      "label": "critical bug",
+      "variant": "security",
+      "route": "drop",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "rework-to-impl",
+      "from": "rework",
+      "to": "implementation",
+      "label": "fix applied",
+      "variant": "dashed"
+    },
+    {
+      "id": "elicitation-blocked",
+      "from": "elicitation",
+      "to": "blocked",
+      "label": "missing info",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "right"
+    },
+    {
+      "id": "blocked-resume",
+      "from": "blocked",
+      "to": "elicitation",
+      "label": "user responds",
+      "variant": "dashed"
+    },
+    {
+      "id": "gate1-rejected",
+      "from": "gate1",
+      "to": "abandoned",
+      "label": "out of scope",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Governance Gates",
+      "items": [
+        "Baseline Sign-off blocks all code — zero-code-before-spec rule",
+        "Plan Approval confirms architecture before implementation",
+        "Both gates require explicit human confirmation"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Failure Handling",
+      "items": [
+        "Critical bugs trigger Rework state — never silent fixes",
+        "Rework loops back through implementation + review",
+        "Blocked state handles missing user information gracefully"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Terminal States",
+      "items": [
+        "Abandoned when scope is explicitly Won't-Have",
+        "Delivered only after Phase 6B docs + share cards complete",
+        "Rework is recoverable — Abandoned is not"
+      ]
+    }
+  ]
+}

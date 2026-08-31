@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Agent Context & Artifact Data Flow",
+    "output": "docs/architecture/agent-dataflow.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "spec-pipeline",
+        "label": "Spec artifact pipeline",
+        "focus": [
+          "user-input",
+          "ba-pipeline",
+          "context-md",
+          "spec-files",
+          "system-architect"
+        ],
+        "note": "Follow how user input becomes signed-off specification artifacts."
+      },
+      {
+        "id": "implementation-flow",
+        "label": "Implementation data flow",
+        "focus": [
+          "spec-files",
+          "system-architect",
+          "tasks-md",
+          "dev-subagents",
+          "test-proof"
+        ],
+        "note": "See how tasks.md drives subagent dispatch and test evidence collection."
+      },
+      {
+        "id": "doc-delivery",
+        "label": "Documentation delivery",
+        "focus": ["test-proof", "code-reviewer", "archify", "user-docs"],
+        "note": "Trace reviewed evidence into Archify share cards and user-facing documentation."
+      }
+    ]
+  },
+  "stages": [
+    { "label": "Input" },
+    { "label": "Analysis" },
+    { "label": "Execution" },
+    { "label": "Review" },
+    { "label": "Delivery" }
+  ],
+  "nodes": [
+    {
+      "id": "user-input",
+      "type": "external",
+      "label": "User Request",
+      "sublabel": "feature description",
+      "stage": 0,
+      "row": 0
+    },
+    {
+      "id": "ba-pipeline",
+      "type": "security",
+      "label": "BA Pipeline",
+      "sublabel": "8-stage elicitation",
+      "stage": 1,
+      "row": 0,
+      "tag": "zero-hallucination"
+    },
+    {
+      "id": "context-md",
+      "type": "database",
+      "label": "CONTEXT.md",
+      "sublabel": "ubiquitous language",
+      "stage": 1,
+      "row": 2,
+      "tag": "append-only"
+    },
+    {
+      "id": "spec-files",
+      "type": "database",
+      "label": "Spec Artifacts",
+      "sublabel": "BRD/PRD/SRS/Stories",
+      "stage": 1,
+      "row": 4,
+      "tag": ".specify/features/"
+    },
+    {
+      "id": "system-architect",
+      "type": "backend",
+      "label": "system-architect",
+      "sublabel": "speckit-plan",
+      "stage": 2,
+      "row": 0,
+      "tag": "Phase 2-4"
+    },
+    {
+      "id": "tasks-md",
+      "type": "database",
+      "label": "tasks.md",
+      "sublabel": "dependency-ordered",
+      "stage": 2,
+      "row": 2
+    },
+    {
+      "id": "dev-subagents",
+      "type": "backend",
+      "label": "Dev Subagents",
+      "sublabel": "backend+frontend+slice",
+      "stage": 2,
+      "row": 4,
+      "tag": "invoke_subagent"
+    },
+    {
+      "id": "test-proof",
+      "type": "database",
+      "label": "Test Evidence",
+      "sublabel": "passing test suites",
+      "stage": 3,
+      "row": 1,
+      "tag": "TDD"
+    },
+    {
+      "id": "code-reviewer",
+      "type": "security",
+      "label": "code-reviewer",
+      "sublabel": "dual adversarial pass",
+      "stage": 3,
+      "row": 3,
+      "tag": "Phase 6A"
+    },
+    {
+      "id": "archify",
+      "type": "cloud",
+      "label": "Archify",
+      "sublabel": "node bin/archify.mjs deliver",
+      "stage": 4,
+      "row": 0,
+      "tag": "v2.16"
+    },
+    {
+      "id": "user-docs",
+      "type": "external",
+      "label": "User Docs",
+      "sublabel": "docs/features/<slug>/",
+      "stage": 4,
+      "row": 3
+    }
+  ],
+  "flows": [
+    {
+      "from": "user-input",
+      "to": "ba-pipeline",
+      "label": "raw request",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "from": "ba-pipeline",
+      "to": "context-md",
+      "label": "terminology updates",
+      "variant": "dashed",
+      "route": "straight"
+    },
+    {
+      "from": "ba-pipeline",
+      "to": "spec-files",
+      "label": "baseline.md SIGNED-OFF",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "from": "context-md",
+      "to": "system-architect",
+      "label": "shared language",
+      "variant": "default",
+      "route": "straight"
+    },
+    {
+      "from": "spec-files",
+      "to": "system-architect",
+      "label": "domain baseline",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "from": "system-architect",
+      "to": "tasks-md",
+      "label": "plan.md + data-model.md",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "from": "tasks-md",
+      "to": "dev-subagents",
+      "label": "task dispatch",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "from": "dev-subagents",
+      "to": "test-proof",
+      "label": "implementation + tests",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "from": "test-proof",
+      "to": "code-reviewer",
+      "label": "review evidence",
+      "variant": "default",
+      "route": "straight"
+    },
+    {
+      "from": "code-reviewer",
+      "to": "archify",
+      "label": "verified artifacts",
+      "variant": "emphasis",
+      "classification": "quality-gated",
+      "route": "straight"
+    },
+    {
+      "from": "archify",
+      "to": "user-docs",
+      "label": "HTML + share cards",
+      "variant": "dashed",
+      "route": "straight"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Zero-Hallucination Policy",
+      "items": [
+        "BA Pipeline enforces strict elicitation before any spec",
+        "CONTEXT.md updated inline with confirmed terminology",
+        "Signed-off baseline.md gates all downstream artifacts"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Subagent Dispatch Pattern",
+      "items": [
+        "tasks.md drives isolated subagent invocation",
+        "Dev subagents have no visibility into BA reasoning",
+        "Test proof is collected independently before review"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Archify Output Layer",
+      "items": [
+        "Archify validates then delivers standalone HTML artifacts",
+        "1200x630 share cards embedded in feature READMEs",
+        "node bin/archify.mjs visual-check verifies containment"
+      ]
+    }
+  ]
+}
