@@ -98,7 +98,7 @@ Generate a standalone, interactive visual report saved to the operating system's
        - **Problem**: 1–2 sentences pinpointing the exact architectural friction.
        - **Solution**: 1–2 sentences defining the proposed deepened interface.
        - **Wins**: Crisp bullet points highlighting **Leverage**, **Locality**, and interface simplification.
-       - **Before / After Diagram**: Side-by-side visual comparison or Archify **Before / Delta / After Snapshot Diff** (`npx archify diff --before v1.json --after v2.json`).
+       - **Before / After Diagram**: Side-by-side visual comparison using Mermaid, or an **Archify Architecture Delta Proof** (`node bin/archify.mjs compare architecture base.json head.json diff.html --json`) showing deterministic `+ / ~ / − / ↔` change classifications.
        - **ADR Callout**: Warning notice if the proposal revisits an existing ADR, stating why it is now justified.
      - **Top Recommendation**: Prominent card highlighting the highest-leverage candidate to tackle first.
 
