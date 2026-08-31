@@ -34,13 +34,14 @@
 
 ## 🏗️ 3. Đặc Tả Kỹ Thuật & Kiến Trúc (Phase 2-4: SpecKit Planning)
 
-| Kỹ Năng                     | Ý Nghĩa Ngắn Gọn & Giá Trị Thực Tế                                                                           | Khi Nào Sử Dụng?                                                            |
-| :-------------------------- | :----------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
-| **`speckit-specify`**       | Chuyển đổi baseline nghiệp vụ đã ký duyệt thành đặc tả kỹ thuật chi tiết (`spec.md`).                        | Phase 2: Xác định rõ ràng các API contracts và luồng dữ liệu.               |
-| **`speckit-plan`**          | Lập kế hoạch kiến trúc sâu (`plan.md` với **C4 diagrams + Module Boundary Map**), DTO contracts, data model. | Phase 3: Thiết kế cấu trúc hệ thống và visual architecture trước khi code.  |
-| **`speckit-tasks`**         | Phân rã kế hoạch thành danh sách tác vụ (`tasks.md`) theo thứ tự độc lập và ranh giới seam.                  | Phase 4: Lập danh sách công việc sẵn sàng để thực thi TDD.                  |
-| **`scaffold-architecture`** | Dựng khung thư mục, seed base files, ghi ADR-ARCH-001, cập nhật Module Map. Luôn hỏi user chọn blueprint.    | **Phase 3.5 (P3→P5 Bridge)**: Sau plan, trước code — tạo nền cho subagents. |
-| **`speckit-analyze`**       | Đối chiếu chéo spec, plan và tasks để đảm bảo không sót yêu cầu nào từ baseline.                             | Trước khi bắt đầu viết mã để loại bỏ rủi ro sai lệch.                       |
+| Kỹ Năng                     | Ý Nghĩa Ngắn Gọn & Giá Trị Thực Tế                                                                                        | Khi Nào Sử Dụng?                                                                |
+| :-------------------------- | :------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------ |
+| **`speckit-specify`**       | Chuyển đổi baseline nghiệp vụ đã ký duyệt thành đặc tả kỹ thuật chi tiết (`spec.md`).                                     | Phase 2: Xác định rõ ràng các API contracts và luồng dữ liệu.                   |
+| **`speckit-plan`**          | Lập kế hoạch kiến trúc sâu (`plan.md` với **C4 diagrams + Module Boundary Map**), DTO contracts, data model.              | Phase 3: Thiết kế cấu trúc hệ thống và visual architecture trước khi code.      |
+| **`speckit-tasks`**         | Phân rã kế hoạch thành danh sách tác vụ (`tasks.md`) theo thứ tự độc lập và ranh giới seam.                               | Phase 4: Lập danh sách công việc sẵn sàng để thực thi TDD.                      |
+| **`scaffold-architecture`** | Dựng khung thư mục, seed base files, ghi ADR-ARCH-001, cập nhật Module Map. Luôn hỏi user chọn blueprint.                 | **Phase 3.5 (P3→P5 Bridge)**: Sau plan, trước code — tạo nền cho subagents.     |
+| **`archify`**               | Biên dịch sơ đồ tương tác (Architecture, Workflow, Sequence, Dataflow, Lifecycle) và ảnh 1200×630 Share Cards từ JSON IR. | Phase 1 (FSM), Phase 2-4 (System Map), Phase 6A (Diff), Phase 6B (Share Cards). |
+| **`speckit-analyze`**       | Đối chiếu chéo spec, plan và tasks để đảm bảo không sót yêu cầu nào từ baseline.                                          | Trước khi bắt đầu viết mã để loại bỏ rủi ro sai lệch.                           |
 
 ---
 
