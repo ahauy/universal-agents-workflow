@@ -158,6 +158,10 @@ When encountering friction or uncertainty, look up the symptom below to immediat
 | _"Upgrading framework or syncing upstream changes safely"_          | Framework evolution & drift     | `/command-update` (`engineering/command-update`)                       |
 | _"Reviewing code or catching regressions before merge"_             | Unstructured code review        | `code-reviewer` (dual pass: Standards + Spec)                          |
 | _"Need interactive architecture maps, lifecycle FSMs, share cards"_ | Visual architecture clarity     | `archify` (`engineering/archify`)                                      |
+| _"AI is adding flatpickr/moment/wrapper class for a date input"_    | Over-engineering / bloat        | `ponytail` (`engineering/ponytail`) — The Ladder                       |
+| _"Agent generated 200+ lines for a task stdlib covers in 5"_        | Unnecessary complexity          | `ponytail-review` (`engineering/ponytail-review`)                      |
+| _"Want to audit the whole codebase for bloat and deletable code"_   | Structural over-engineering     | `ponytail-audit` (`engineering/ponytail-audit`)                        |
+| _"Need to track deliberate shortcuts before they silently rot"_     | Unmanaged technical debt        | `ponytail-debt` (`engineering/ponytail-debt`)                          |
 
 ---
 
@@ -165,56 +169,62 @@ When encountering friction or uncertainty, look up the symptom below to immediat
 
 **CRITICAL: Before writing ANY code or documentation, AI MUST read the corresponding reference BEFORE execution.**
 
-| Context / Area                                             | MANDATORY Skill / Reference                                  | Group / Location                            |
-| ---------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------- |
-| **Project Shared Language (Ubiquitous Language)**          | `CONTEXT.md` (MUST read before any work)                     | Root `CONTEXT.md`                           |
-| **Architecture Decisions & Enduring Constraints**          | `adr/` (MUST read before proposing architectures)            | Root `adr/`                                 |
-| **Project Design System & Tokens**                         | Project design documentation (e.g. `DESIGN.md` / tokens)     | Target Project UI Root                      |
-| **Interactive Architecture, Sequence & State Lifecycle**   | `archify` (renders verified HTML & 1200x630 share cards)     | `engineering/archify`                       |
-| **New feature intake & complexity classification**         | `intake-classifier`                                          | `engineering/intake-classifier`             |
-| **Business value & 6-pillar domain elicitation**           | `elicitation-interview` (delegates to `grilling`)            | `engineering/elicitation-interview`         |
-| **Deep interactive interview primitive**                   | `grilling`                                                   | `productivity/grilling`                     |
-| **Throwaway design & UI prototype exploration**            | `prototype`                                                  | `engineering/prototype`                     |
-| **Async stakeholder questionnaire generation**             | `to-questionnaire`                                           | `productivity/to-questionnaire`             |
-| **Plain-language re-pitch with project vocabulary**        | `wait-what`                                                  | `productivity/wait-what`                    |
-| **Authoring documentation optimized for AI agents**        | `writing-for-agents`                                         | `engineering/writing-for-agents`            |
-| **Session context compaction for agent handoff**           | `handoff` (≠ handover)                                       | `productivity/handoff`                      |
-| **Hunk-by-hunk git conflict resolution by intent**         | `resolving-merge-conflicts`                                  | `engineering/resolving-merge-conflicts`     |
-| **Intelligent skill and workflow router**                  | `route`                                                      | `productivity/route`                        |
-| **One-time repository onboarding & self-configuration**    | `/skill-setup` / `setup-workspace`                           | `engineering/command-skill-setup`           |
-| **AS-IS / TO-BE / gap analysis (Full Feature)**            | `gap-analysis`                                               | `engineering/gap-analysis`                  |
-| **RBAC, state machines, business rules, ERD**              | `domain-modeling` (syncs `CONTEXT.md` & `adr/`)              | `engineering/domain-modeling`               |
-| **Risk register, contradiction scan, MoSCoW**              | `risk-contradiction-scanner`                                 | `engineering/risk-contradiction-scanner`    |
-| **Spec documents (BRD, PRD, SRS, user stories)**           | `spec-writer`                                                | `engineering/spec-writer`                   |
-| **IEEE 29148 quality gate & traceability matrix**          | `spec-validator`                                             | `engineering/spec-validator`                |
-| **Baseline sign-off & dev handover gate**                  | `handover` (≠ handoff)                                       | `engineering/handover`                      |
-| **Technical Specification (equiv. to-spec)**               | `speckit-specify`                                            | `engineering/speckit-specify`               |
-| **Architecture Plan & Contract DTOs**                      | `speckit-plan`                                               | `engineering/speckit-plan`                  |
-| **Granular Task Decomposition**                            | `speckit-tasks`                                              | `engineering/speckit-tasks`                 |
-| **Architecture Scaffolding (P3→P5 Bridge)**                | `scaffold-architecture`                                      | `engineering/scaffold-architecture`         |
-| **Session retrospective & environment tuning**             | `retro`                                                      | `productivity/retro`                        |
-| **Decision tickets map for large ambiguous efforts**       | `wayfinder`                                                  | `engineering/wayfinder`                     |
-| **Automated deep module & seam enforcement (Polyglot)**    | `setup-deep-modules`                                         | `engineering/setup-deep-modules`            |
-| **Module design, service interfaces, seams & leverage**    | `codebase-design`                                            | `engineering/codebase-design`               |
-| **Feature execution, slice delegation & review**           | `implementation-orchestrator`                                | `engineering/implementation-orchestrator`   |
-| **Bug diagnosis, regressions, test failures & anomalies**  | `diagnosing-bugs`                                            | `engineering/diagnosing-bugs`               |
-| **Architectural audit, hotspot scan & visual HTML report** | `improve-codebase-architecture`                              | `engineering/improve-codebase-architecture` |
-| **Environment setup, secrets capture, cloud provisioning** | `wizard`                                                     | `engineering/wizard`                        |
-| **Technical documentation, feature README, architecture**  | `technical-documentation` (Agent: `tech-doc-architect`)      | `engineering/technical-documentation`       |
-| **UI Design: Landing, Marketing, Public surfaces**         | `frontend-design` + `design-taste-frontend` + `ui-taste-pro` | `engineering/`                              |
-| **UI Design: In-App, Dashboard, Data-bearing screens**     | `frontend-design` + `design-taste-product` + `ui-taste-pro`  | `engineering/`                              |
-| **UI Animation, Motion, Micro-interactions**               | `motion-design`                                              | `engineering/motion-design`                 |
-| **UI visual review & component QA (Dual Pass)**            | `ui-design-review`                                           | `engineering/ui-design-review`              |
-| **User guide / end-user docs with real screenshots**       | `user-guide-with-screenshots` (Agent: `user-guide-creator`)  | `engineering/user-guide-with-screenshots`   |
-| **Backend & REST API design patterns**                     | `api-design`                                                 | `engineering/api-design`                    |
-| **E2E test, Playwright test**                              | `e2e-testing`                                                | `engineering/e2e-testing`                   |
-| **Git branch, commit, merge workflow**                     | `git-workflow`                                               | `engineering/git-workflow`                  |
-| **Command: Generate product backlog & roadmap**            | `/command-generate-backlog` (alias: `/generate-backlog`)     | `engineering/command-generate-backlog`      |
-| **Command: Resume project development from roadmap**       | `/command-continue-project`                                  | `engineering/command-continue-project`      |
-| **Command: Automated modular commit & push**               | `/command-git-push`                                          | `engineering/command-git-push`              |
-| **Command: Generate end-user guide with real screenshots** | `/command-user-guide`                                        | `engineering/command-user-guide`            |
-| **Command: Adaptive project onboarding & skill setup**     | `/command-skill-setup` (alias: `/skill-setup`, `/setup`)     | `engineering/command-skill-setup`           |
-| **Command: Smart Framework Update & 3-Way Hash Sync**      | `/command-update` (alias: `/update`, `/upgrade`)             | `engineering/command-update`                |
+| Context / Area                                                               | MANDATORY Skill / Reference                                  | Group / Location                            |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------- |
+| **Project Shared Language (Ubiquitous Language)**                            | `CONTEXT.md` (MUST read before any work)                     | Root `CONTEXT.md`                           |
+| **Architecture Decisions & Enduring Constraints**                            | `adr/` (MUST read before proposing architectures)            | Root `adr/`                                 |
+| **Project Design System & Tokens**                                           | Project design documentation (e.g. `DESIGN.md` / tokens)     | Target Project UI Root                      |
+| **Interactive Architecture, Sequence & State Lifecycle**                     | `archify` (renders verified HTML & 1200x630 share cards)     | `engineering/archify`                       |
+| **New feature intake & complexity classification**                           | `intake-classifier`                                          | `engineering/intake-classifier`             |
+| **Business value & 6-pillar domain elicitation**                             | `elicitation-interview` (delegates to `grilling`)            | `engineering/elicitation-interview`         |
+| **Deep interactive interview primitive**                                     | `grilling`                                                   | `productivity/grilling`                     |
+| **Throwaway design & UI prototype exploration**                              | `prototype`                                                  | `engineering/prototype`                     |
+| **Async stakeholder questionnaire generation**                               | `to-questionnaire`                                           | `productivity/to-questionnaire`             |
+| **Plain-language re-pitch with project vocabulary**                          | `wait-what`                                                  | `productivity/wait-what`                    |
+| **Authoring documentation optimized for AI agents**                          | `writing-for-agents`                                         | `engineering/writing-for-agents`            |
+| **Session context compaction for agent handoff**                             | `handoff` (≠ handover)                                       | `productivity/handoff`                      |
+| **Hunk-by-hunk git conflict resolution by intent**                           | `resolving-merge-conflicts`                                  | `engineering/resolving-merge-conflicts`     |
+| **Intelligent skill and workflow router**                                    | `route`                                                      | `productivity/route`                        |
+| **One-time repository onboarding & self-configuration**                      | `/skill-setup` / `setup-workspace`                           | `engineering/command-skill-setup`           |
+| **AS-IS / TO-BE / gap analysis (Full Feature)**                              | `gap-analysis`                                               | `engineering/gap-analysis`                  |
+| **RBAC, state machines, business rules, ERD**                                | `domain-modeling` (syncs `CONTEXT.md` & `adr/`)              | `engineering/domain-modeling`               |
+| **Risk register, contradiction scan, MoSCoW**                                | `risk-contradiction-scanner`                                 | `engineering/risk-contradiction-scanner`    |
+| **Spec documents (BRD, PRD, SRS, user stories)**                             | `spec-writer`                                                | `engineering/spec-writer`                   |
+| **IEEE 29148 quality gate & traceability matrix**                            | `spec-validator`                                             | `engineering/spec-validator`                |
+| **Baseline sign-off & dev handover gate**                                    | `handover` (≠ handoff)                                       | `engineering/handover`                      |
+| **Technical Specification (equiv. to-spec)**                                 | `speckit-specify`                                            | `engineering/speckit-specify`               |
+| **Architecture Plan & Contract DTOs**                                        | `speckit-plan`                                               | `engineering/speckit-plan`                  |
+| **Granular Task Decomposition**                                              | `speckit-tasks`                                              | `engineering/speckit-tasks`                 |
+| **Architecture Scaffolding (P3→P5 Bridge)**                                  | `scaffold-architecture`                                      | `engineering/scaffold-architecture`         |
+| **Session retrospective & environment tuning**                               | `retro`                                                      | `productivity/retro`                        |
+| **Decision tickets map for large ambiguous efforts**                         | `wayfinder`                                                  | `engineering/wayfinder`                     |
+| **Automated deep module & seam enforcement (Polyglot)**                      | `setup-deep-modules`                                         | `engineering/setup-deep-modules`            |
+| **Module design, service interfaces, seams & leverage**                      | `codebase-design`                                            | `engineering/codebase-design`               |
+| **Feature execution, slice delegation & review**                             | `implementation-orchestrator`                                | `engineering/implementation-orchestrator`   |
+| **Bug diagnosis, regressions, test failures & anomalies**                    | `diagnosing-bugs`                                            | `engineering/diagnosing-bugs`               |
+| **Architectural audit, hotspot scan & visual HTML report**                   | `improve-codebase-architecture`                              | `engineering/improve-codebase-architecture` |
+| **Environment setup, secrets capture, cloud provisioning**                   | `wizard`                                                     | `engineering/wizard`                        |
+| **Technical documentation, feature README, architecture**                    | `technical-documentation` (Agent: `tech-doc-architect`)      | `engineering/technical-documentation`       |
+| **UI Design: Landing, Marketing, Public surfaces**                           | `frontend-design` + `design-taste-frontend` + `ui-taste-pro` | `engineering/`                              |
+| **UI Design: In-App, Dashboard, Data-bearing screens**                       | `frontend-design` + `design-taste-product` + `ui-taste-pro`  | `engineering/`                              |
+| **UI Animation, Motion, Micro-interactions**                                 | `motion-design`                                              | `engineering/motion-design`                 |
+| **UI visual review & component QA (Dual Pass)**                              | `ui-design-review`                                           | `engineering/ui-design-review`              |
+| **User guide / end-user docs with real screenshots**                         | `user-guide-with-screenshots` (Agent: `user-guide-creator`)  | `engineering/user-guide-with-screenshots`   |
+| **Backend & REST API design patterns**                                       | `api-design`                                                 | `engineering/api-design`                    |
+| **E2E test, Playwright test**                                                | `e2e-testing`                                                | `engineering/e2e-testing`                   |
+| **Git branch, commit, merge workflow**                                       | `git-workflow`                                               | `engineering/git-workflow`                  |
+| **Command: Generate product backlog & roadmap**                              | `/command-generate-backlog` (alias: `/generate-backlog`)     | `engineering/command-generate-backlog`      |
+| **Command: Resume project development from roadmap**                         | `/command-continue-project`                                  | `engineering/command-continue-project`      |
+| **Command: Automated modular commit & push**                                 | `/command-git-push`                                          | `engineering/command-git-push`              |
+| **Command: Generate end-user guide with real screenshots**                   | `/command-user-guide`                                        | `engineering/command-user-guide`            |
+| **Command: Adaptive project onboarding & skill setup**                       | `/command-skill-setup` (alias: `/skill-setup`, `/setup`)     | `engineering/command-skill-setup`           |
+| **Command: Smart Framework Update & 3-Way Hash Sync**                        | `/command-update` (alias: `/update`, `/upgrade`)             | `engineering/command-update`                |
+| **Minimal code enforcement — The Ladder (YAGNI→stdlib→native→one-line→min)** | `ponytail` **(always-active, bundled)**                      | `engineering/ponytail`                      |
+| **Over-engineering diff review (delete:/stdlib:/yagni:/shrink:)**            | `ponytail-review`                                            | `engineering/ponytail-review`               |
+| **Whole-repo bloat audit, ranked findings**                                  | `ponytail-audit`                                             | `engineering/ponytail-audit`                |
+| **Deliberate shortcut ledger (`ponytail:` comments)**                        | `ponytail-debt`                                              | `engineering/ponytail-debt`                 |
+| **Ponytail benchmark impact scoreboard**                                     | `ponytail-gain`                                              | `engineering/ponytail-gain`                 |
+| **Ponytail commands quick-reference card**                                   | `ponytail-help`                                              | `engineering/ponytail-help`                 |
 
 ---
 

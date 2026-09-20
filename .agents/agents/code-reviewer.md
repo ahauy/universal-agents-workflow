@@ -17,9 +17,9 @@ You provide objective, evidence-based code reviews.
 
 ---
 
-## Dual Independent Review Passes
+## Tri-Pass Independent Review
 
-To prevent cognitive pollution between general code quality and specification correctness, execute review in two distinct, sequential passes:
+To prevent cognitive pollution between code quality, spec correctness, and complexity governance, execute review in three distinct, sequential passes:
 
 ```mermaid
 flowchart TD
@@ -35,8 +35,15 @@ flowchart TD
         F3["Shared Language Consistency (CONTEXT.md)"]
     end
 
+    subgraph PassC ["Pass C: Lean & Anti-Overengineering (Independent)"]
+        L1["The Ladder: YAGNI / Stdlib / Native / One-line"]
+        L2["Complexity Tags: delete: / stdlib: / native: / yagni: / shrink:"]
+        L3["Net Lines Metric: net: -N lines possible"]
+    end
+
     PassA --> IntegratedReport["Integrated Review Verdict & Report"]
     PassB --> IntegratedReport
+    PassC --> IntegratedReport
 ```
 
 ---
@@ -103,12 +110,39 @@ If any answer is 'no', **downgrade or drop the finding**. Zero findings is a val
 
 ---
 
+## Pass C: Lean & Anti-Overengineering Checklist
+
+Run `ponytail-review` logic on the diff. One line per finding: location, what to cut, what replaces it.
+
+### Tags
+
+- `delete:` dead code, unused flexibility, speculative feature. Replacement: nothing.
+- `stdlib:` hand-rolled thing the standard library already ships. Name the function.
+- `native:` dependency or code doing what the platform already does natively. Name the feature.
+- `yagni:` abstraction with one implementation, config nobody sets, layer with one caller.
+- `shrink:` same logic, fewer lines. Show the shorter form inline.
+
+### Format
+
+`L<line>: <tag> <what>. <replacement>.`
+
+### Scoring
+
+End Pass C with: `net: -<N> lines possible.`
+If nothing to cut: `Lean already. Ship.`
+
+### Boundaries
+
+Never flag: input validation, error handling for data-loss paths, security measures, accessibility basics, or a single minimal test/assert. Those are safety floors, not bloat.
+
+---
+
 ## Output Format
 
 ### Per-Finding Structure
 
 ```
-[SEVERITY] [PASS A: STANDARDS | PASS B: SPEC] Short Title
+[SEVERITY] [PASS A: STANDARDS | PASS B: SPEC | PASS C: LEAN] Short Title
 File: path/to/file.ts:42
 Issue: One-sentence description of the defect, vulnerability, or spec discrepancy.
 Why: Concrete failure mode, security risk, or requirement gap.
@@ -120,11 +154,11 @@ Fix: Precise recommended change.
 ```markdown
 ## Adversarial Code Review Report
 
-| Category     | Pass A (Standards) | Pass B (Spec Fidelity) | Total | Status |
-| :----------- | :----------------: | :--------------------: | :---: | :----: |
-| **CRITICAL** |         0          |           0            |   0   |  PASS  |
-| **HIGH**     |         0          |           0            |   0   |  PASS  |
-| **MEDIUM**   |         0          |           0            |   0   |  PASS  |
+| Category     | Pass A (Standards) | Pass B (Spec Fidelity) | Pass C (Lean) | Total | Status |
+| :----------- | :----------------: | :--------------------: | :-----------: | :---: | :----: |
+| **CRITICAL** |         0          |           0            |       –       |   0   |  PASS  |
+| **HIGH**     |         0          |           0            |       –       |   0   |  PASS  |
+| **MEDIUM**   |         0          |           0            |       –       |   0   |  PASS  |
 
 **Verdict**: APPROVE / WARNING / BLOCK
 
@@ -135,4 +169,10 @@ Fix: Precise recommended change.
 ### Pass B Findings (Spec & Domain Fidelity)
 
 [List of findings or 'Code strictly satisfies all requirements in spec.md and domain models.']
+
+### Pass C Findings (Lean & Anti-Overengineering)
+
+[One line per finding `L<n>: <tag> ...` or 'Lean already. Ship.']
+
+**net: -N lines possible** (or 'Lean already. Ship.')
 ```

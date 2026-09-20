@@ -66,6 +66,7 @@ Every interactive component or view MUST visually implement all 4 states - not j
 
 ## Code Quality Standards
 
+- **The Ladder (Anti-Overengineering for UI)**: Before writing any UI code, stop at the first rung: (1) Does this need to exist? (2) Already in codebase? → reuse. (3) Stdlib/framework utility? → use it. (4) **Native platform feature?** → `<input type="date">` over a date picker lib, CSS `display:grid` over a layout lib, `<dialog>` over a modal wrapper. (5) Installed dep? → use it. (6) One line? → one line. (7) Only then: minimum component code. Mark deliberate shortcuts with `// ponytail: <ceiling>, <upgrade trigger>`.
 - **Component Sizing**: Max 200 lines per component; extract custom hooks or sub-components when larger.
 - **File & Function Limits**: File < 800 lines, function < 50 lines.
 - **Immutable State**: Never mutate state objects or arrays directly.
