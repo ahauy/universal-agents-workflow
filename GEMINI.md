@@ -18,15 +18,24 @@ Before implementing:
 - If a simpler approach exists, say so. Push back when warranted.
 - If something is unclear, stop. Name what's confusing. Ask.
 
-## 2. Simplicity First
+## 2. Simplicity First — The Ladder of Minimal Code
 
-**Minimum code that solves the problem. Nothing speculative.**
+**Before writing any code, stop at the first rung that holds:**
 
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
+1. **Does this need to exist at all?** Speculative future need → skip it, say so in one line. (YAGNI)
+2. **Already in this codebase?** A helper, util, type, or pattern already living here → reuse it. Look before you write.
+3. **Stdlib does it?** Use the standard library (`functools.lru_cache`, `Intl.DateTimeFormat`, `os.path`, etc.).
+4. **Native platform feature covers it?** `<input type="date">` over a picker lib, CSS over JS, DB constraint over app code.
+5. **Already-installed dependency solves it?** Use it. Never add a new one for what a few lines can do.
+6. **Can it be one line?** Write one line.
+7. **Only then:** the minimum code that works and passes the test.
+
+**Anti-overengineering rules:**
+
+- No unrequested abstractions: no interface with one implementation, no factory for one product, no config for a value that never changes.
+- No boilerplate, no scaffolding "for later" — later can scaffold for itself.
 - If you write 200 lines and it could be 50, rewrite it.
+- Mark deliberate simplifications with a `ponytail:` comment naming the ceiling and upgrade path: `# ponytail: global lock, per-account locks if throughput > 1k rps`
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 

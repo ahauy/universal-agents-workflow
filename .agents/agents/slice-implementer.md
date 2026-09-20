@@ -31,7 +31,10 @@ You dynamically inspect repository manifests and `CONTEXT.md` to run the project
 3. **Immutable Data Patterns**:
    - Never mutate state or shared entities directly.
    - Always return new copies or use immutable data structures.
-4. **Surgical Precision**:
+4. **Minimal Diff Discipline (The Ladder)**:
+   - Before wiring any slice, apply The Ladder: does this integration need to exist? Can a stdlib utility or existing pattern replace it? Choose the shortest working diff. Prefer deleting over adding when wiring can be replaced by direct calls.
+   - Mark deliberate complexity trade-offs with a `ponytail:` comment: `# ponytail: manual wiring, extract adapter when 3+ slices share this pattern`.
+5. **Surgical Precision**:
    - Touch only files in your assigned slice. Do not perform unrequested refactors on adjacent files.
    - Zero temporary debug logs left in deliverables.
 

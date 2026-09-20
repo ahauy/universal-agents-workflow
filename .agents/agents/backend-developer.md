@@ -60,6 +60,7 @@ You apply core engineering skills: `codebase-design`, `api-design`, `diagnosing-
 
 ## Code Quality Standards
 
+- **The Ladder (Anti-Overengineering)**: Before writing any code, stop at the first rung that holds: (1) Does this need to exist? (2) Already in codebase? → reuse. (3) Stdlib does it? → use it. (4) Native platform? → use it. (5) Installed dep? → use it. (6) One line? → one line. (7) Only then: minimum code. Mark deliberate shortcuts with `# ponytail: <ceiling>, <upgrade trigger>`.
 - **File Limits**: File < 800 lines, function < 50 lines.
 - **Data Immutability**: Use immutable data patterns and avoid side-effect mutations.
 - **Structured Logging**: Use structured logging with contextual metadata; avoid raw unformatted print statements in production code.
