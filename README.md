@@ -51,9 +51,36 @@ Trong phát triển phần mềm với AI, các lập trình viên thường đ�
 
 ## 🚀 Hướng Dẫn Bắt Đầu Nhanh (Quickstart)
 
-### Phương Án 1: Tích Hợp Vào Dự Án Đang Có (Brownfield - Khuyên dùng)
+### 🌟 Phương Án 0: Tích Hợp Qua Mô Hình MCP (Khuyên dùng — Zero Repo Pollution)
 
-Mở terminal ngay tại thư mục dự án bạn đang làm và chạy 1 dòng lệnh duy nhất:
+Nếu bạn sử dụng các AI Editor hiện đại (Antigravity IDE, Cursor, Windsurf, Claude Code), bạn không cần sao chép hàng trăm file vào repo. Chỉ cần chạy 1 lệnh để cấu hình:
+
+```bash
+npx -y @universal-agents/mcp-server init
+```
+
+Lệnh này sẽ tự động:
+
+1. Tạo file định tuyến tối giản `AGENTS.md` (~25 dòng) và kho lưu trữ tri thức `CONTEXT.md`, `adr/`.
+2. Hướng dẫn thêm cấu hình MCP Server vào AI Editor của bạn:
+   ```json
+   {
+     "mcpServers": {
+       "universal-agents": {
+         "command": "npx",
+         "args": ["-y", "@universal-agents/mcp-server@latest"]
+       }
+     }
+   }
+   ```
+
+Toàn bộ Kỹ năng (Prompts), Công cụ tự động hóa (Tools) và Tri thức mẫu (Resources) sẽ được nạp động thông qua **Model Context Protocol**, giúp repo của bạn luôn sạch 100%.
+
+---
+
+### Phương Án 1: Tích Hợp File-Based Vào Dự Án Đang Có (Brownfield)
+
+Mở terminal ngay tại thư mục dự án bạn đang làm và chạy 1 dòng lệnh:
 
 - **🍎 macOS / 🐧 Linux / 🪟 Windows (Git Bash)**:
   ```bash
