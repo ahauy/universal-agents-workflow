@@ -6,6 +6,7 @@
 [![Zero Hallucination](https://img.shields.io/badge/Requirements-IREB%2FBABOK-green.svg)](#-vòng-đời-phát-triển-chuẩn-7-bước-end-to-end-pipeline)
 [![Deep Modules](https://img.shields.io/badge/Architecture-Ousterhout%20Seams-orange.svg)](#-vòng-đời-phát-triển-chuẩn-7-bước-end-to-end-pipeline)
 [![Anti-AI-Slop](https://img.shields.io/badge/Design-Anti--AI--Slop-purple.svg)](#-vòng-đời-phát-triển-chuẩn-7-bước-end-to-end-pipeline)
+[![Anti-Overengineering](<https://img.shields.io/badge/Code-The%20Ladder%20(Anti--Overengineering)-blueviolet.svg>)](#-tối-giản-hóa-mã-nguồn--the-ladder-anti-overengineering)
 [![Git Guardrails](https://img.shields.io/badge/Git-Hardware%20Locks-red.svg)](#-khóa-bảo-vệ-git-guardrails)
 
 > **Bộ khung quy trình Multi-Agent & Kỹ năng AI cấp doanh nghiệp, hoạt động độc lập với mọi ngôn ngữ lập trình và tương thích với toàn bộ AI Editor hiện đại (Antigravity IDE, Cursor, Claude Code, Windsurf, Copilot).**
@@ -23,6 +24,7 @@
 - [🌐 Tính Tương Thích Đa Nền Tảng AI (Multi-AI Universal Support)](#-tính-tương-thích-đa-nền-tảng-ai-multi-ai-universal-support)
 - [🧩 Chuẩn Hóa Gói Mở Rộng Ngôn Ngữ (Language Pack Standard)](#-chuẩn-hóa-gói-mở-rộng-ngôn-ngữ-language-pack-standard)
 - [🔄 Vòng Đời Phát Triển Chuẩn 7 Bước (End-to-End Pipeline)](#-vòng-đời-phát-triển-chuẩn-7-bước-end-to-end-pipeline)
+- [✂️ Tối Giản Hóa Mã Nguồn & The Ladder (Anti-Overengineering)](#-tối-giản-hóa-mã-nguồn--the-ladder-anti-overengineering)
 - [⚡ Các Lệnh Tự Động Hóa Hay Dùng (Essential Commands)](#-các-lệnh-tự-động-hóa-hay-dùng-essential-commands)
 - [🔒 Khóa Bảo Vệ Git (Guardrails)](#-khóa-bảo-vệ-git-guardrails)
 - [🔄 Cập Nhật & Nâng Cấp Thông Minh (Smart Update & 3-Way Hash Engine)](#-cập-nhật--nâng-cấp-thông-minh-smart-update--3-way-hash-engine)
@@ -198,22 +200,50 @@ flowchart TD
     S1["1. /skill-setup<br/>(Quét Stack & Bơm Skill)"] --> S2["2. Phase 1: BA Pipeline<br/>(Phỏng vấn 6 Trụ cột & Ký duyệt Baseline)"]
     S2 -->|🛑 Gate 1: Baseline Signed-Off| S3["3. Phase 2-4: SpecKit<br/>(spec.md, plan.md, tasks.md)"]
     S3 -->|🛑 Gate 2: Tech Plan Approved| S4["4. Phase 5: TDD Implementation<br/>(Red -> Green -> Refactor theo Slice)"]
-    S4 --> S5["5. Phase 6A: Dual-Pass Review<br/>(Review Code & Anti-AI-Slop Độc lập)"]
+    S4 --> S5["5. Phase 6A: Tri-Pass Review<br/>(Bảo mật, Spec & Tối giản hoá Anti-Overengineering)"]
     S5 --> S6["6. Phase 6B: Docs & User Guide<br/>(Diataxis Docs + Ảnh chụp Playwright thật)"]
     S6 --> S7["7. /command-git-push<br/>(Modular Commits chuẩn Conventional)"]
 ```
 
-| Bước  | Tên Giai Đoạn               | Kỹ Năng / Subagent Đảm Nhiệm                               | Đầu Ra Bắt Buộc (Artifacts)                                                  |
-| :---: | :-------------------------- | :--------------------------------------------------------- | :--------------------------------------------------------------------------- |
-| **1** | **Onboarding Stack**        | `/skill-setup`, `setup-workspace`                          | `.agents/catalog.json`, skills, rules & subagents theo stack.                |
-| **2** | **Nghiệp Vụ (BA Pipeline)** | `intake-classifier`, `elicitation-interview`, `grilling`   | `.specify/features/<slug>/baseline.md` (**Ký duyệt v1.0**).                  |
-| **3** | **Đặc Tả & Thiết Kế**       | `speckit-specify`, `speckit-plan`, `speckit-tasks`         | `spec.md`, `plan.md`, `data-model.md`, `tasks.md`.                           |
-| **4** | **Lập Trình TDD**           | `code-explorer`, `backend-developer`, `frontend-developer` | `test-plan.md`, Unit Tests đỏ → xanh, Code tối giản.                         |
-| **5** | **Phản Biện Độc Lập**       | `code-reviewer`, `ui-design-review`                        | Báo cáo kiểm tra chuẩn bảo mật, spec fidelity & Anti-AI-Slop.                |
-| **6** | **Tài Liệu Hóa**            | `tech-doc-architect`, `command-user-guide`, `archify`      | `docs/features/<slug>/README.md`, `docs/user-guides/<slug>.md`, Share Cards. |
-| **7** | **Đóng Gói & Đẩy Mã**       | `/command-git-push`                                        | Tự động chia Modular Commits theo tầng và push an toàn.                      |
+| Bước  | Tên Giai Đoạn                    | Kỹ Năng / Subagent Đảm Nhiệm                               | Đầu Ra Bắt Buộc (Artifacts)                                                                |
+| :---: | :------------------------------- | :--------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
+| **1** | **Onboarding Stack**             | `/skill-setup`, `setup-workspace`                          | `.agents/catalog.json`, skills, rules & subagents theo stack.                              |
+| **2** | **Nghiệp Vụ (BA Pipeline)**      | `intake-classifier`, `elicitation-interview`, `grilling`   | `.specify/features/<slug>/baseline.md` (**Ký duyệt v1.0**).                                |
+| **3** | **Đặc Tả & Thiết Kế**            | `speckit-specify`, `speckit-plan`, `speckit-tasks`         | `spec.md`, `plan.md`, `data-model.md`, `tasks.md`.                                         |
+| **4** | **Lập Trình TDD**                | `code-explorer`, `backend-developer`, `frontend-developer` | `test-plan.md`, Unit Tests đỏ → xanh, Code tối giản theo The Ladder.                       |
+| **5** | **Phản Biện Độc Lập (Tri-Pass)** | `code-reviewer`, `ui-design-review`, `ponytail-review`     | Báo cáo 3 tầng: Bảo mật, Spec fidelity & Tối giản hoá mã nguồn (`net: -N lines possible`). |
+| **6** | **Tài Liệu Hóa**                 | `tech-doc-architect`, `command-user-guide`, `archify`      | `docs/features/<slug>/README.md`, `docs/user-guides/<slug>.md`, Share Cards.               |
+| **7** | **Đóng Gói & Đẩy Mã**            | `/command-git-push`                                        | Tự động chia Modular Commits theo tầng và push an toàn.                                    |
 
 > 📖 **Xem hướng dẫn thao tác chi tiết từng bước 1 tại**: [📘 .agents/docs/workflow-step-by-step.md](.agents/docs/workflow-step-by-step.md)
+
+---
+
+## ✂️ Tối Giản Hóa Mã Nguồn & The Ladder (Anti-Overengineering)
+
+> _"The best code is the code you never wrote."_ — Triết lý tích hợp từ [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)
+
+Để giải quyết triệt để căn bệnh cố hữu của AI: **thích sinh thêm abstraction, wrapper nông, và kéo thêm thư viện ngoài không cần thiết**, Universal Agents Workflow áp dụng nguyên tắc **The Ladder (Chiếc thang 7 bậc)** xuyên suốt từ khâu thiết kế đến review:
+
+```
+1. Có cần tồn tại không?          → YAGNI (Bỏ qua nếu chỉ là suy đoán tương lai)
+2. Codebase đã có chưa?           → Tái sử dụng helper/util sẵn có
+3. Thư viện chuẩn (Stdlib)?       → Dùng stdlib (lru_cache, DateTimeFormat, os.path...)
+4. Nền tảng Native (Browser/DB)?  → Dùng <input type="date">, <dialog>, DB constraints...
+5. Dependency đã cài đặt?         → Tận dụng, tuyệt đối không cài package mới bừa bãi
+6. Có thể viết trong 1 dòng?      → Viết 1 dòng
+7. Sau cùng mới viết code tối thiểu vừa đủ để pass test.
+```
+
+### 🎯 Các Kỹ Năng & Công Cụ Đi Kèm
+
+- **`ponytail`**: Kích hoạt tư duy tối giản xuyên suốt toàn bộ phiên làm việc (`/ponytail lite|full|ultra`).
+- **`ponytail-review`**: Đánh giá git diff với 5 thẻ chuẩn (`delete:`, `stdlib:`, `native:`, `yagni:`, `shrink:`) và chỉ số định lượng `net: -N lines possible`.
+- **`ponytail-audit`**: Quét toàn bộ repository để tìm mã rác, code phình to cần cắt tỉa.
+- **`ponytail-debt`**: Quét và lập bảng theo dõi vi nợ kỹ thuật từ các comment `// ponytail: <ceiling>, <upgrade-trigger>`.
+- **`ponytail-gain`**: Xem bảng tổng kết định lượng hiệu quả benchmark (-54% LOC, -20% chi phí token, 100% an toàn).
+
+📂 **Xem thư viện ví dụ đối chiếu thực tế (Before & After) tại**: [📑 docs/examples/README.md](docs/examples/README.md)
 
 ---
 
@@ -227,6 +257,10 @@ flowchart TD
 | **`/command-git-push`**   | `/push`, `/ship`  | Kiểm tra cổng tài liệu, phân tách Modular Commits và push an toàn.       |
 | **`/command-user-guide`** | `/guide`          | Mở Playwright chụp ảnh giao diện thật và viết hướng dẫn sử dụng.         |
 | **`/update`**             | `/upgrade`        | Cập nhật framework an toàn với động cơ 3-Way Hash.                       |
+| **`/ponytail`**           | `/be-lazy`        | Kích hoạt tư duy tối giản Senior Dev (chế độ: lite / full / ultra).      |
+| **`/ponytail-review`**    | `/simplify`       | Rà soát và chỉ điểm cắt giảm code thừa trong git diff (Net LOC).         |
+| **`/ponytail-debt`**      | `/debt-ledger`    | Thu hoạch vi nợ kỹ thuật từ các comment ponytail trong codebase.         |
+| **`/ponytail-audit`**     | `/audit-bloat`    | Quét toàn bộ repository tìm mã over-engineering cần loại bỏ.             |
 | **`/route`**              | `bước tiếp theo?` | Trợ lý thông minh định hướng bước đi hoặc lệnh cần chạy tiếp theo.       |
 | **`/wait-what`**          | `nói dễ hiểu hơn` | Yêu cầu AI giải thích lại thuật ngữ bằng ngôn ngữ đời thường.            |
 
