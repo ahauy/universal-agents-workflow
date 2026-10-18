@@ -1,311 +1,140 @@
 ---
-invocation: model
 name: archify
-description: >
-  Generates verified, interactive HTML/SVG architecture maps, sequence flows,
-  state lifecycles, and 1200x630 share cards from typed JSON IR. Use for domain
-  state machines (Phase 1), system architecture mapping (Phase 2-4), Before/Delta/After
-  refactoring diffs (improve-codebase-architecture, Phase 6A), and high-resolution
-  technical documentation share cards (Phase 6B).
+description: "Create polished, validated architecture, workflow, sequence, data-flow, and lifecycle/state diagrams as explorable standalone HTML with inline SVG, dark/light themes, optional trace motion, and PNG/JPEG/WebP/SVG/WebM export. Accept plain-language requirements or pasted Mermaid flowchart, sequenceDiagram, and stateDiagram input; inspect repository evidence when the diagram must reflect real code. Use when the user asks to visualize system architecture, infrastructure, cloud/security/network topology, technical workflows, API call sequences, request lifecycles, data pipelines, ETL/ELT, data lineage, state machines, or to convert/beautify Mermaid. Also use for everyday subjects with steps, parts, relationships, or states: a leave or travel plan, an application or approval process, a back-and-forth such as renting, where money or documents go, or where an application or order stands. Not for numeric charts or dashboards."
+license: MIT
 metadata:
-  origin: "tt-a1i/archify"
-  version: "2.16"
-  install: "npx -y skills add tt-a1i/archify --skill archify --global --copy --yes"
-  runtime: "node bin/archify.mjs (from ~/.agents/skills/archify/)"
-  stack: "Node.js, JSON Schema, SVG, HTML5"
+  version: "3.0.1"
+  author: tt-a1i
+  based_on: Cocoon-AI/architecture-diagram-generator (MIT, v1.0)
 ---
 
-# Archify — Verifiable Interactive Architecture & System Maps
+# Archify
 
-Archify transforms codebase structures, finite state machines, and system descriptions into polished, deterministic, interactive HTML maps and standard 1200×630 share cards.
+> [!IMPORTANT]
+> **Runtime Resolution**:
+> Inside a workspace containing `.agents/skills/archify/`, agents should run the local sandbox-safe runtime:
+> ```bash
+> node .agents/skills/archify/bin/archify.mjs ...
+> ```
+> If the local workspace package is not found, fallback globally to:
+> ```bash
+> node ~/.agents/skills/archify/bin/archify.mjs ...
+> ```
 
-Instead of writing fragile Mermaid syntax or raw HTML/CSS, AI agents emit **typed JSON Intermediate Representation (IR)**. Archify validates this JSON against strict schemas and compiles it into self-contained HTML/SVG artifacts.
+Create an interactive HTML diagram from typed JSON. Static output is the default; enable motion only when requested.
 
-> **CRITICAL:** All CLI commands use `node bin/archify.mjs` from `~/.agents/skills/archify/`.
-> There is NO global `npx archify` command. The `bin/archify.mjs` file is the runtime.
+Run commands from your working directory. Unless the user names another location, give each new diagram request its own folder `.archify/<type>-<slug>-<YYYYMMDD-HHMMSS>/` there (local time, chosen once when the request starts): keep `candidate.json` and `<slug>.html` in it, set `meta.output` to that relative HTML path, and reuse the folder for every repair rerun. A later request gets a new folder, so earlier versions stay intact. Replace `bin/archify.mjs` in the commands below with the installed package's absolute path, or its path relative to your working directory; input and output paths resolve from that working directory.
 
----
+For a real codebase, read [Repository authoring](references/repository-authoring.md) while tracing the requested behavior. A system description uses the steps below; an existing JSON uses the handoff path.
 
-## Availability Check (Run First — Always)
+## Existing candidate handoff
 
-Before using any Archify command, the agent **MUST** check if Archify CLI is installed:
+When the user supplies a frozen candidate, run `finalize` first as one CLI invocation. Its passing receipt completes the automated gates; follow any visual review recommendation under Delivery before claiming visual quality. For repair, follow step 5.
 
-```bash
-node ~/.agents/skills/archify/bin/archify.mjs doctor 2>/dev/null && echo "ARCHIFY_READY" || echo "ARCHIFY_NOT_INSTALLED"
-```
+`finalize` includes a bounded update check in its delivery receipt; see Update awareness.
 
-### If `ARCHIFY_READY`:
+## Fast authoring path
 
-Proceed with the full Archify workflow (validate → deliver → visual-check) as documented below.
+Use this path for ordinary generation. Read branch references only when their stated trigger applies.
 
-### If `ARCHIFY_NOT_INSTALLED` — Graceful Fallback:
+1. Choose `architecture`, `workflow`, `sequence`, `dataflow`, or `lifecycle` from the question.
+2. Use the exact schema and example paths in the Type router without listing their directories. Read [Authoring defaults](references/authoring-defaults.md) and the mode's example in a bounded batch separate from project documents and complete schemas so neither is truncated; recover any missing section before writing. For Architecture, use the matching showcase example. For Sequence, Dataflow, and Lifecycle, also read the mode and common schemas. Read the relevant schema definition before choosing any new field, enum, or constrained text, especially boundary kinds. Examples teach shape, not facts. Use fresh IDs, wording, and layout. Go directly to the candidate without preliminary help, doctor, starter validation, temporary diagrams, or output-path listing. Query brands only for an explicitly requested mark; read [Brand marks](references/brand-marks.md) for an unknown mark with a user-provided URL.
+3. Once the requested scope and, for a real codebase, [source evidence](references/repository-authoring.md) are covered, write the complete candidate directly without planning coordinates in prose. Choose Architecture abstraction and connected placement using Authoring defaults before coordinates: show the main user journey and necessary branches, preserve control roles and behavior-changing conditions, and leave enough room for actual relationship labels. No node, relationship, source, view, card, or boundary count is a target or ceiling. Use automatic routes first; add explicit routing only for necessary branch, return, supplied geometry, or measured repair. Set `meta.quality_profile` to `"showcase"` unless the user requests dense `standard`.
+4. Once the complete first candidate is written, run `finalize` directly. Its first gate is showcase validation; successful first drafts need no separate pre-validation. Keep the candidate unchanged while the command runs:
 
-1. **Inform the user** clearly:
+   ```bash
+   node bin/archify.mjs finalize <type> <candidate.json> <output.html> --quality showcase --json
+   ```
 
-   > "Archify is not installed on this machine. Falling back to Mermaid diagrams. To unlock interactive HTML maps and 1200×630 share cards, run: `/skill-setup` and choose to install Archify when prompted, or manually: `npx -y skills add tt-a1i/archify --skill archify --global --copy --yes`"
+   For a repository-backed candidate, include evidence on the first draft and use the complete first command: `node bin/archify.mjs finalize <type> <candidate.json> <output.html> --repo-root <repo-root> --quality showcase --json`.
 
-2. **Produce a Mermaid diagram** as fallback — use the appropriate diagram type:
-   - Architecture → `graph LR` or `graph TD`
-   - Sequence → `sequenceDiagram`
-   - State Machine / Lifecycle → `stateDiagram-v2`
-   - Workflow → `flowchart TD`
-   - Dataflow → `graph LR`
+   A passing receipt proves the included `validate`, `deliver`, strict `check`, and real-browser `browser-check` gates passed. Use its compact summary; run standalone commands only for a separate request or focused failure diagnosis.
 
-3. **Do NOT block or error** — Mermaid diagrams are a valid, complete deliverable when Archify is unavailable. Continue the pipeline normally.
+5. A non-zero exit is never success. Read compact stdout or `evidence.summaryReceipt`, then [repair the failed gate](references/delivery-contract.md#failed-finalize-and-candidate-repair), including its repair limit. Preserve requested meaning and source evidence. For several tangled Architecture routes, read [Architecture layout repair](references/architecture-layout-repair.md); for measured field or geometry failures, read [Authoring contract](references/authoring-contract.md). Edit the connected neighborhood and rerun the complete `finalize` command from step 4.
 
-> **Note for repo maintainers:** Archify is an **external optional tool** — it is NOT bundled in this repo. See [catalog.json](../../../optional-stack-skills/catalog.json) for the `archify` entry with `install_command`.
+## Update awareness
 
----
+`finalize` and standalone `deliver` include `update` in their receipts. Do not run a separate check for the same delivery. If `update.noticeRequired` is true, read `references/update-awareness.md` and keep one update line in your final response to the user, even after a quality gate fails. For a task with several diagrams, mention the update once in the final response. Snooze or ignore a reminder only when the user explicitly asks; never install or update on your own initiative.
 
-## Why Archify over Static Mermaid?
+Before the first candidate, use the authoring references and relevant repository source, not Archify implementation or tests. Inspect Archify implementation if diagnostics remain unactionable after focused repairs.
 
-| Feature                  | Static Mermaid                                    | Archify (`tt-a1i/archify`)                                           |
-| :----------------------- | :------------------------------------------------ | :------------------------------------------------------------------- |
-| **Reliability**          | Prone to syntax errors with nested quotes/symbols | **Schema-validated typed JSON IR** (100% deterministic)              |
-| **Interactivity**        | Static image/SVG                                  | **Zoom/pan, node search, semantic lens, route probe**                |
-| **Reach & Blast Radius** | None                                              | **Trace upstream/downstream authored reach in 1 click**              |
-| **Architecture Diffing** | Side-by-side static blocks                        | **Before / Delta / After snapshot diffing** (Added/Removed/Rerouted) |
-| **Story Playback**       | None                                              | **Step-by-step guided story chapter animation**                      |
-| **Documentation Assets** | Manual screenshotting                             | **Direct 1200×630 Hero Share Card & PNG/SVG export**                 |
-| **Source Grounding**     | Text labels only                                  | **Direct commit & file path linkage via `--repo-root`**              |
+## Type router
 
----
+| Type | Use for | Schema | Example |
+|---|---|---|---|
+| `architecture` | Components, services, cloud/security boundaries, infrastructure; what something everyday is made of | `schemas/architecture.schema.json` | System descriptions, services, libraries, and CLI repos: `examples/web-app.architecture.json`; deployment repos: `examples/production-deployment.architecture.json` |
+| `workflow` | Processes, approval gates, tool calls, runbooks, CI/CD; plans and step-by-step life processes | `schemas/workflow.schema.json` | `examples/agent-tool-call.workflow.json` |
+| `sequence` | API call chains, request lifecycles, async traces, returns; back-and-forth between people | `schemas/sequence.schema.json` | `examples/cache-miss-request.sequence.json` |
+| `dataflow` | Pipelines, ETL/ELT, lineage, governance, consumers; where money or documents go | `schemas/dataflow.schema.json` | `examples/product-analytics.dataflow.json` |
+| `lifecycle` | State/status transitions, retries, waiting and terminal states; where an application or order stands | `schemas/lifecycle.schema.json` | `examples/deployment-release.lifecycle.json` |
 
-## Supported Diagram Types
+When ambiguous, run `node bin/archify.mjs guide "<scenario>" --json`. Scenario proof examples are structural references, not facts to copy.
 
-Archify supports 5 specialized diagram types:
+For an everyday subject, keep the same five modes and semantic types, then name them for the reader: use everyday `icon` values and `meta.legend` labels as in [Node icons](references/authoring-contract.md#node-icons). Ask for missing personal facts instead of inventing dates, amounts, or rules.
 
-1. **`architecture`**: Layered system design, microservices, boundaries, gateways, databases, third-party services.
-2. **`workflow`**: Business workflows, approval pipelines, multi-step orchestration, CI/CD stages.
-3. **`sequence`**: Chronological service-to-service communication, RPC/REST calls, latency annotations, request-response paths.
-4. **`dataflow`**: Data ingestion pipelines, event streams (Kafka/RabbitMQ), caching invalidation, ETL flows.
-5. **`lifecycle`**: Finite state machines (FSM), entity lifecycle states (e.g. `PENDING` -> `ACTIVE` -> `SUSPENDED` -> `ARCHIVED`), rollback paths, terminal states.
+## Mermaid input
 
----
+Read Mermaid for topology and meaning, then author fresh Archify JSON; do not mechanically render Mermaid styling.
 
-## When to Invoke in Universal Agent Workflow
+- `flowchart` / `graph` → `workflow`, or `architecture` for a component map.
+- `sequenceDiagram` → `sequence`; participants become semantic participants and arrows become messages.
+- `stateDiagram` → `lifecycle`; states and transitions retain meaning, not Mermaid style.
 
-```mermaid
-graph LR
-    P1["Phase 1: Domain Modeling<br/>(FSM Lifecycle & Workflow)"] --> P2["Phase 2-4: Architecture Spec<br/>(System Map & Data-Flow)"]
-    P2 --> P6A["Phase 6A: Refactoring Review<br/>(Before/Delta/After Diff)"]
-    P6A --> P6B["Phase 6B: Tech Docs & README<br/>(1200x630 Share Cards)"]
-```
+## Delivery
 
-- **Phase 1 (BA & Domain Modeling)**:
-  - Produce interactive **`lifecycle`** maps for complex entity states.
-  - Produce **`workflow`** maps for business processes and approval sequences.
-- **Phase 2 & 3 (Spec & Plan / System Architect)**:
-  - Generate comprehensive **`architecture`** maps in `docs/architecture/` linked to actual code packages.
-  - Generate **`sequence`** and **`dataflow`** diagrams for API transactions and caching layers.
-- **Phase 6A (Architecture Review & `improve-codebase-architecture`)**:
-  - Compare architecture refactorings using **Snapshot Diffing (Before / Delta / After)** via `node bin/archify.mjs compare architecture`.
-- **Phase 6B (Technical Documentation & `tech-doc-architect`)**:
-  - Export canonical **1200×630 PNG Share Cards** for `README.md` and `docs/features/<slug>/README.md`.
-  - Embed self-contained HTML viewers into project documentation.
+Use the `finalize` command above for the first candidate and after a repair.
 
----
+`finalize` stops at the first non-passing gate. Its compact stdout and `<output-stem>.finalize-summary.json` are ordinary evidence. A passing run creates no screenshots and reports `visualReview: "not-requested"`.
 
-## Core JSON IR Structure
+When a passing Architecture receipt reports `visualReviewRecommendation.signals.resolvedCrossovers`, copy the candidate aside and apply the hints in one edit that changes only node positions and sizes: every node, relationship (including its `from` and `to`), label, and source stays as it was. Rerun the complete `finalize` once with `--out-dir <folder>/review-2`, because the previous HTML already owns its browser evidence. If that run fails or reports more crossings, restore the copy and finalize it with `--out-dir <folder>/review-3`. Do not start a second placement round. Hints about extra bends alone are optional.
 
-Every Archify specification uses `schema_version: 1` (integer, not string). All meta fields live in a `meta` object:
+When `layoutReviewRecommendation.action` is `inspect-sequence-width`, follow [Sequence width review](references/delivery-contract.md#sequence-width-review) before handing off a newly authored Sequence.
 
-```json
-{
-  "schema_version": 1,
-  "diagram_type": "architecture",
-  "meta": {
-    "title": "Order Processing System",
-    "output": "docs/architecture/system-map.html",
-    "quality_profile": "showcase",
-    "views": [
-      {
-        "id": "request-path",
-        "label": "Primary request path",
-        "focus": ["client", "gateway", "order-service", "db"],
-        "note": "Follow the request from edge to durable state."
-      }
-    ]
-  },
-  "components": [
-    {
-      "id": "client",
-      "type": "external",
-      "label": "Web Client",
-      "sublabel": "React 19 + Vite",
-      "pos": [40, 200],
-      "size": [130, 60]
-    },
-    {
-      "id": "gateway",
-      "type": "backend",
-      "label": "API Gateway",
-      "sublabel": "NestJS + Fastify",
-      "pos": [240, 200],
-      "size": [130, 60],
-      "repo_link": "apps/api/src/main.ts"
-    },
-    {
-      "id": "order-service",
-      "type": "backend",
-      "label": "Order Service",
-      "sublabel": "CQRS Deep Module",
-      "pos": [440, 200],
-      "size": [130, 60],
-      "repo_link": "apps/api/src/modules/order",
-      "tag": "Deep Module"
-    },
-    {
-      "id": "db",
-      "type": "database",
-      "label": "PostgreSQL",
-      "sublabel": "primary :5432",
-      "pos": [640, 200],
-      "size": [130, 60]
-    }
-  ],
-  "connections": [
-    {
-      "id": "c1",
-      "from": "client",
-      "to": "gateway",
-      "label": "HTTPS / GraphQL",
-      "variant": "emphasis"
-    },
-    {
-      "id": "c2",
-      "from": "gateway",
-      "to": "order-service",
-      "label": "gRPC / Internal"
-    },
-    {
-      "id": "c3",
-      "from": "order-service",
-      "to": "db",
-      "label": "Prisma Pool",
-      "variant": "dashed"
-    }
-  ],
-  "cards": [
-    {
-      "dot": "emerald",
-      "title": "Request Path",
-      "items": ["HTTPS edge, gRPC internal, Prisma persistence"]
-    }
-  ]
-}
-```
+Perceptual review is optional for ordinary generation, including a newly positioned Architecture. Use [Optional capture evidence](references/delivery-contract.md#optional-capture-evidence), with `--out-dir <folder>/visual-check`, when the user requests visual review, during development audits, or for a concrete route/browser concern. `visualReviewRecommendation` is advisory. Inspect captures before claiming visual quality; otherwise report automated checks only.
 
-**Key schema facts (compared to common mistakes):**
+Read [Delivery contract](references/delivery-contract.md) for failed gates, standalone commands, provenance/recovery, repeated delivery, exports, or opening. Recovery follows `deliver` → strict provenance `check` → `browser-check`; captures require strict provenance.
 
-| Field              | CORRECT                                   | WRONG (do not use)           |
-| ------------------ | ----------------------------------------- | ---------------------------- |
-| `schema_version`   | `1` (number)                              | `"2.16.0"` (string)          |
-| Meta wrapper       | `"meta": { "title": ... }`                | `"title"` at top-level       |
-| Architecture nodes | `"components"` array                      | `"nodes"` array              |
-| Node type field    | `"type": "backend"`                       | `"role": "backend"`          |
-| Tech label         | `"tag": "NestJS"` (string)                | `"tags": ["NestJS"]` (array) |
-| Views/chapters     | `"meta.views"` with `"focus"`             | `"chapters"` with `"steps"`  |
-| Lifecycle nodes    | `"states"` array                          | `"nodes"` array              |
-| Lifecycle edges    | `"transitions"` array                     | `"connections"` array        |
-| Dataflow edges     | `"flows"` array                           | `"connections"` array        |
-| Workflow edges     | `"edges"` array                           | `"connections"` array        |
-| Preset field       | `"meta.visual_preset"` (omit for default) | `"preset"` at top-level      |
-| Tier/rank          | Does not exist                            | `"tier"` (invented)          |
-| Semantic lenses    | Does not exist                            | `"lenses"` (invented)        |
+For workflow viewport overflow, read [Workflow viewport repair](references/authoring-contract.md#workflow-viewport-repair) before the next layout edit.
 
----
+Report artifact checks, browser evidence, captures, and actual perceptual review as distinct results. For an explicitly requested immediate preview or active desktop loop, see [Optional opening](references/delivery-contract.md#optional-opening).
 
-## CLI Commands & Workflows
+## Optional viewer capabilities
 
-> **IMPORTANT:** All commands use `node bin/archify.mjs` from inside the installed skill at `~/.agents/skills/archify/`.
-> There is no global `npx archify` command. The skill is a self-contained Node.js package.
+`meta.animation: "trace"` is opt-in.
 
-### 1. Installation
+Read `references/viewer-runtime.md` only when the user explicitly asks for Share Cards, Route/Reach cards, motion, deep links, presentation, search/focus, or another Viewer Runtime feature.
 
-```bash
-npx -y skills add tt-a1i/archify --skill archify --global --copy --yes
-# Installs to: ~/.agents/skills/archify/
-```
+## Setup and fallback
 
-### 2. Health Check
+No install is required inside the skill package. For setup diagnosis, verify with:
 
 ```bash
 node bin/archify.mjs doctor
-node bin/archify.mjs demo /tmp/archify-demo
+node bin/archify.mjs demo <output-directory>
 ```
 
-### 3. Validation (during authoring)
+When shell access is unavailable, hand-place architecture SVG into `assets/template.html`, use CSS semantic classes rather than inline colors, and follow the visual review contract in `references/delivery-contract.md`.
 
-```bash
-# validate <TYPE> <file.json> --quality showcase --json
-node bin/archify.mjs validate architecture docs/architecture/system-map.json --quality showcase --json
-node bin/archify.mjs validate lifecycle docs/architecture/feature-lifecycle.json --quality showcase --json
-node bin/archify.mjs validate workflow docs/architecture/ba-pipeline.json --quality showcase --json
-```
+## Integration with 6-Phase Universal Agent Workflow (WordStreak)
 
-### 4. Delivery (final HTML + SHA-256 receipt)
+In the WordStreak 6-phase engineering workflow, `archify` serves as the standard interactive architecture and system modeling engine:
 
-```bash
-# deliver <TYPE> <input.json> <output.html> --quality showcase --json
-node bin/archify.mjs deliver architecture \
-  docs/architecture/system-map.json \
-  docs/architecture/system-map.html \
-  --quality showcase --json
+- **Phase 1 (BA & Domain Modeling)**:
+  - `lifecycle`: Model entity state machines, status lifecycles, guard conditions, transition triggers, and terminal/deadlock states (e.g., word mastery progression, challenge lifecycles, user streak freeze states).
+  - `workflow`: Diagram business logic, user onboarding funnels, multi-step approval gates, and operational runbooks.
+- **Phase 2–4 (Spec & Plan / System Architect)**:
+  - `architecture`: Generate comprehensive system maps, component topologies, and module boundaries backed by real codebase evidence via `--repo-root` (e.g., `node .agents/skills/archify/bin/archify.mjs finalize architecture <candidate.json> docs/architecture/<slug>.html --repo-root . --quality showcase --json`).
+  - `sequence`: Detail synchronous/asynchronous API call chains, request lifecycles, authentication handshakes, and failure/retry paths.
+  - `dataflow`: Map ETL pipelines, analytics event tracking, streak calculation cron pipelines, and data lineage/governance.
+- **Phase 6A (Adversarial Review & Refactoring)**:
+  - **Before / Delta / After Snapshot Diffing**: Use `compare architecture` to inspect and visualize structural diffs, module boundary changes, additions, and removals when refactoring:
+    ```bash
+    node .agents/skills/archify/bin/archify.mjs compare architecture <before.json> <after.json> [output.html] --quality showcase --json
+    ```
+- **Phase 6B (Technical Documentation)**:
+  - **Interactive HTML Maps**: Place validated standalone interactive diagrams in `docs/architecture/` (macro/system-wide maps) and `docs/features/<slug>/` (feature-specific architecture).
+  - **1200x630 Share Cards**: Export high-resolution 1200x630 Share Cards for PR descriptions, RFC documentation, and visual handoff previews.
 
-# After delivery, collect visual evidence:
-node bin/archify.mjs visual-check docs/architecture/system-map.html --json
-```
+## Output
 
-### 5. Architecture Snapshot Diff (Before / Delta / After)
-
-```bash
-# compare architecture <base.json> <head.json> [output.html] --json
-node bin/archify.mjs compare architecture \
-  docs/architecture/snapshots/v1-shallow.json \
-  docs/architecture/snapshots/v2-deep.json \
-  /tmp/architecture-diff.html --json
-```
-
-### 6. Scenario Guide & Brand Discovery
-
-```bash
-node bin/archify.mjs guide "multi-agent feature lifecycle" --json
-node bin/archify.mjs brands "NestJS" --json
-```
-
----
-
-## Preset Styles
-
-Archify provides 4 fine-tuned visual themes (set via `meta.visual_preset` — **omit by default**, renderer opens in `classic`):
-
-1. **`signal-flow`**: High-contrast dark obsidian canvas with illuminated directional pulses. Best for microservice networks and event streaming.
-2. **`blueprint`**: Technical blueprint grid with crisp hairline borders. Ideal for enterprise domain models and ERDs.
-3. **`classic`** (default): Minimalist monochrome canvas with subtle charcoal lines. Clean and distraction-free.
-4. **`editorial`**: Modern slate-gray enterprise interface with balanced neutral tones for executive summaries.
-
-> Set `meta.visual_preset` only when user explicitly requests a visual style. Omit for the default `classic` preset.
-
----
-
-## Guidelines for AI Subagents
-
-1. **Always use `node bin/archify.mjs`**: Never use `npx archify`. The CLI is local to the skill.
-2. **`schema_version: 1`**: Always a number, never a string.
-3. **`meta` wrapper**: All diagram metadata (`title`, `output`, `quality_profile`, `views`) goes inside `"meta": {}`.
-4. **`components` for architecture**: Not `nodes`. Other types use their own arrays (`states`, `participants`, `nodes` for dataflow).
-5. **`tag` is a string**: Single string per node (`"tag": "NestJS"`), not an array.
-6. **`meta.views` replaces chapters**: Use `focus[]` array of node IDs.
-7. **Validate before deliver**: Run `validate` after every candidate edit; `deliver` once for final acceptance.
-8. **Showcase quality profile**: Set `"quality_profile": "showcase"` in `meta`. Showcase requires 9 artifact checks.
-9. **Ground nodes in code**: Use `repo_link` with relative paths to enable source navigation.
-10. **Add `cards`**: Include 2-3 cards summarizing key architecture decisions.
-
----
-
-## Reference Documents
-
-- [JSON Schema Reference](./references/json-schemas.md) — Complete specifications for all 5 diagram types.
-- [CLI Manual & Export Options](./references/cli-usage.md) — Command-line flags, options, and CI automation.
-- [Examples](./examples/) — Fully validated JSON IR examples for all 5 diagram types.
+Return the checked HTML as an absolute path, diagram type, validation summary, specification/artifact receipt, browser-evidence status, and truthful visual-review status. Do not claim success for a non-zero command or claim visual inspection you did not perform.
