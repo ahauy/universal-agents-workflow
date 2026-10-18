@@ -17,6 +17,65 @@ You provide objective, evidence-based code reviews.
 
 ---
 
+## Review Termination & Stopping Protocol (The 4 Non-Negotiable Rules)
+
+To prevent endless nitpick loops, context drift, and reviewer hallucination across iterations, all review cycles MUST adhere strictly to these 4 termination rules:
+
+```mermaid
+flowchart TD
+    R1["Round 1: Full Changeset Review"] --> Fix1["Implementer Fix (Scoped)"]
+    Fix1 --> R2["Round 2: Incremental Diff Only\n(Verify Fixes + New Diff)"]
+    R2 --> Fix2["Implementer Fix (Scoped)"]
+    Fix2 --> R3["Round 3: Final Verification Pass\n(Incremental Diff Only)"]
+    R3 --> Decision{"Critical Bugs Remaining?"}
+    Decision -- Yes --> Escalate["BLOCK & ESCALATE to User\n(Zero Round 4)"]
+    Decision -- No --> Ship["CONDITIONAL APPROVE / APPROVE\n(Log debt to CHANGELOG.md)"]
+```
+
+### Rule 1: Hard Limit of 3 Review Rounds (Max Iteration Cap)
+
+- **Maximum 3 Rounds**: The review-fix cycle is capped at strictly **3 rounds** (`Round 1` -> `Round 2` -> `Round 3`).
+- **Round 1 (Initial Review)**: Full feature changeset review against spec and standards.
+- **Round 2 (First Re-review)**: Verify fixes for Round 1 findings and review incremental changes only.
+- **Round 3 (Final Verification)**: Final verification pass over remaining or new diffs.
+- **Termination & Escalation at Round 3**:
+  - **CRITICAL Issues Remaining**: Return `BLOCK` verdict and escalate directly to the User / Tech Lead with an explicit blocking summary. **Under NO circumstances may an automated Round 4 be triggered.**
+  - **HIGH / MEDIUM / LOW Issues Remaining**: Issue `CONDITIONAL APPROVE` or `WARNING`. Require remaining non-critical issues to be recorded as technical debt in `CHANGELOG.md` or backlog tickets rather than continuing the loop.
+
+### Rule 2: Incremental Diff Only (Subsequent Rounds Scope Bounding)
+
+- **Round 1 Scope**: Review the complete changeset of the feature (`git diff <target-branch>...HEAD` or staged changes).
+- **Round 2 & 3 Scope**: **CHỈ review diff phát sinh mới** (`git diff HEAD~1` or between the previous review commit and the latest fix commit).
+- **Scope Invariants**:
+  - ✅ Evaluate ONLY whether the latest fix correctly resolved the previous finding without introducing local regressions.
+  - ❌ **STRICTLY PROHIBITED**: Re-reading or reopening reviews on files/functions that were NOT touched in the latest fix commit.
+  - ❌ **NO RETROACTIVE NITPICKING**: Do not invent new stylistic or theoretical complaints about code that was already inspected and passed in earlier rounds.
+
+### Rule 3: Group Bugs by Category & Pattern (Structured Grouping)
+
+- **Zero Flat Laundry Lists**: Never output an unstructured, disconnected list of line-by-line issues.
+- **Mandatory 5 Categorization Buckets**: Group all findings under these categories:
+  1. 🛡️ `[SECURITY]` (Vulnerabilities, auth, sanitization, exposed secrets, path traversal)
+  2. 🎯 `[SPEC_FIDELITY]` (Acceptance criteria, `BR-###` rules, state machines, `CONTEXT.md` vocabulary)
+  3. ⚡ `[RELIABILITY]` (Type safety, uncaught async/promises, unhandled errors, concurrency, race conditions)
+  4. 🏗️ `[ARCHITECTURE]` (Leaky seams, circular imports, direct state mutations, bloated modules)
+  5. ✂️ `[LEAN]` (Anti-overengineering: `delete:`, `stdlib:`, `native:`, `yagni:`, `shrink:`)
+- **Pattern-Level Deduplication**: When the same defect pattern occurs across multiple locations (e.g. unhandled async calls in 4 endpoints, missing null checks across 3 components):
+  - Group them under a **single pattern finding**.
+  - List all affected `File:Line` instances together.
+  - Provide a single, unified remediation recipe.
+
+### Rule 4: Bug Deduplication & State Tracking (No Re-Reporting Old Bugs)
+
+- **Stable Finding IDs**: Assign an immutable ID to each finding in Round 1: `[<CATEGORY>-###]` (e.g. `[SEC-001]`, `[SPEC-001]`, `[REL-001]`, `[ARCH-001]`, `[LEAN-001]`).
+- **Resolution State Tracking (Rounds 2 & 3)**:
+  - `[RESOLVED]`: Finding was fixed correctly. Confirm with a single line: `[RESOLVED] [<ID>]: Short title`. Do NOT re-analyze or reprint old problem code.
+  - `[STILL OPEN]`: Fix was incomplete. Keep the same ID: `[STILL OPEN] [<ID>]`. State in 1 sentence what remains unaddressed. Do NOT generate a new duplicate ID and do NOT paste verbose multi-paragraph explanations.
+  - `[NEW]`: Regression or new defect introduced directly by the new incremental diff. Assign a fresh ID.
+  - `[ACCEPTED / DEFERRED]`: If the user or team explicitly accepted the risk or deferred the finding to technical debt, mark as accepted. **NEVER re-flag, re-surface, or complain about it in subsequent rounds.**
+
+---
+
 ## Tri-Pass Independent Review
 
 To prevent cognitive pollution between code quality, spec correctness, and complexity governance, execute review in three distinct, sequential passes:
@@ -142,35 +201,59 @@ Never flag: input validation, error handling for data-loss paths, security measu
 ### Per-Finding Structure
 
 ```
-[SEVERITY] [PASS A: STANDARDS | PASS B: SPEC | PASS C: LEAN] Short Title
-File: path/to/file.ts:42
+[SEVERITY] [CATEGORY-ID] [PASS A/B/C] Pattern Title
+Locations:
+  - path/to/file.ts:42
+  - path/to/other.ts:88
 Issue: One-sentence description of the defect, vulnerability, or spec discrepancy.
 Why: Concrete failure mode, security risk, or requirement gap.
-Fix: Precise recommended change.
+Fix: Precise recommended change pattern.
 ```
 
 ### Review Summary Template
 
 ```markdown
-## Adversarial Code Review Report
+## Adversarial Code Review Report (Round [1/3 | 2/3 | 3/3])
 
-| Category     | Pass A (Standards) | Pass B (Spec Fidelity) | Pass C (Lean) | Total | Status |
-| :----------- | :----------------: | :--------------------: | :-----------: | :---: | :----: |
-| **CRITICAL** |         0          |           0            |       –       |   0   |  PASS  |
-| **HIGH**     |         0          |           0            |       –       |   0   |  PASS  |
-| **MEDIUM**   |         0          |           0            |       –       |   0   |  PASS  |
+**Verdict**: APPROVE / CONDITIONAL APPROVE / WARNING / BLOCK
+**Review Scope**: [Full Feature Changeset (Round 1) | Incremental Diff since HEAD~1 (Rounds 2-3)]
 
-**Verdict**: APPROVE / WARNING / BLOCK
+### 1. Previous Findings Resolution Tracker (Rounds 2 & 3 only)
 
-### Pass A Findings (Standards & Security)
+| Finding ID  | Category    | Previous Issue | Status (`RESOLVED` / `STILL OPEN` / `ACCEPTED`) | Verification Note                      |
+| :---------- | :---------- | :------------- | :---------------------------------------------- | :------------------------------------- |
+| `[SEC-001]` | Security    | SQL injection  | `RESOLVED`                                      | Parameterized query applied at line 42 |
+| `[REL-002]` | Reliability | Missing await  | `STILL OPEN`                                    | Unhandled promise at checkout.ts:88    |
 
-[List of findings or 'No standards issues identified.']
+### 2. Findings Severity Matrix
 
-### Pass B Findings (Spec & Domain Fidelity)
+| Category     | Pass A (Standards) | Pass B (Spec Fidelity) | Pass C (Lean) | Total Open | Status |
+| :----------- | :----------------: | :--------------------: | :-----------: | :--------: | :----: |
+| **CRITICAL** |         0          |           0            |       –       |     0      |  PASS  |
+| **HIGH**     |         0          |           0            |       –       |     0      |  PASS  |
+| **MEDIUM**   |         0          |           0            |       –       |     0      |  PASS  |
 
-[List of findings or 'Code strictly satisfies all requirements in spec.md and domain models.']
+---
 
-### Pass C Findings (Lean & Anti-Overengineering)
+### 3. Open Findings Grouped by Category
+
+#### 🛡️ [SECURITY] Security & Vulnerabilities
+
+[List grouped pattern findings or 'No security issues identified.']
+
+#### 🎯 [SPEC_FIDELITY] Spec & Business Rules
+
+[List grouped pattern findings or 'Code strictly satisfies all requirements in spec.md and domain models.']
+
+#### ⚡ [RELIABILITY] Type Safety & Error Handling
+
+[List grouped pattern findings or 'No reliability issues identified.']
+
+#### 🏗️ [ARCHITECTURE] Seams, Clean Architecture & Code Smells
+
+[List grouped pattern findings or 'No architectural issues identified.']
+
+#### ✂️ [LEAN] Anti-Overengineering (The Ladder)
 
 [One line per finding `L<n>: <tag> ...` or 'Lean already. Ship.']
 
