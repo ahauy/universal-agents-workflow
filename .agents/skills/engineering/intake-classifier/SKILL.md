@@ -34,37 +34,45 @@ change sneak through without RBAC, migration, or contradiction review.
 Ask yourself these measurable questions about the request. Don't classify on
 vibes — count.
 
-| Signal                                   | Micro-Task / Fast-Fix | Spike          | Bounded Task     | Full Feature        |
-| :--------------------------------------- | :-------------------- | :------------- | :--------------- | :------------------ |
-| **New/changed domain entities**          | 0                     | 0              | 0–1              | 2+                  |
-| **Existing DB schema change**            | No                    | No             | Maybe (additive) | Likely (structural) |
-| **Screens/flows touched**                | 0–1 (minor tweak/fix) | 0 (research)   | 1                | 2+                  |
-| **User roles affected**                  | 0–1                   | N/A            | 1                | 2+                  |
-| **Cross-cutting impact (auth, billing)** | No                    | No             | No               | Often               |
-| **Estimated code lines changed**         | < 30 lines            | 0 (pure notes) | 30–200 lines     | 200+ lines          |
-| **Reversible without user impact**       | Yes                   | N/A            | Yes              | Not always          |
+| Signal                                   | Tier 1: Fast-Track / Fix  | Spike          | Tier 2: Lean Task / US (Roadmap) | Tier 3: Full Feature / Epic |
+| :--------------------------------------- | :------------------------ | :------------- | :------------------------------- | :-------------------------- |
+| **New/changed domain entities**          | 0                         | 0              | 0–1 (additive field/query)       | 2+ (core structural change) |
+| **Existing DB schema change**            | No                        | No             | Minor additive (nullable/enum)   | Structural / breaking       |
+| **Screens/flows touched**                | 0–1 (minor tweak/fix)     | 0 (research)   | 1 existing flow                  | 2+ new flows                |
+| **User roles affected**                  | 0–1                       | N/A            | 1                                | 2+ (cross-cutting RBAC)     |
+| **Cross-cutting impact (auth, billing)** | No                        | No             | No                               | Often                       |
+| **Estimated code lines changed**         | < 80 lines                | 0 (pure notes) | 80–250 lines                     | 250+ lines                  |
+| **Acceptance Criteria status**           | Pre-defined in issue/chat | N/A            | Documented in Roadmap / Backlog  | Undefined / Exploratory     |
+| **Reversible without user impact**       | Yes                       | N/A            | Yes                              | Complex migration needed    |
 
 ### Definitions:
 
-- **Micro-Task / Fast-Fix**: A surgically isolated bug fix, typo, single config value adjustment, or minor cosmetic tweak under 30 lines with zero domain ambiguity.
-- **Spike / Feasibility**: A technical exploration or "is this feasible" research question. No permanent product commitment.
-- **Bounded Task**: A well-scoped change to an existing flow (add a field, adjust validation threshold).
-- **Full Feature / Epic**: A brand-new user flow, new domain entity, cross-cutting change, or multi-role feature.
+- **Tier 1: Fast-Track / Micro-Task**: Surgical bug fixes, UI styling adjustments, single config tweaks, or simple utilities under 80 lines with zero domain ambiguity.
+- **Spike / Feasibility**: Technical exploration or "is this feasible" research question. No permanent product code.
+- **Tier 2: Lean Task / Standard User Story**: Well-scoped User Story from `PRODUCT_BACKLOG_ROADMAP.md` or a standard feature task (80–250 lines) with defined Acceptance Criteria. **Bypasses 8-stage BA ceremony to save 75% tokens.**
+- **Tier 3: Full Feature / Epic**: Brand-new system domain, complex multi-entity relationships, cross-cutting auth/billing architecture, or undefined product initiatives (> 250 lines).
 
 ---
 
-## 2. Select the Protocol
+## 2. Select the Protocol (3-Tier Speed Lanes)
 
-| Classification            | Required Protocol & Execution Flow                                                                                                                                                                                                                                                                     |
-| :------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Micro-Task / Fast-Fix** | **Fast-Track Bypass (Zero Overhead)**:<br>1. Reproduce / inspect defect.<br>2. Write failing test or verification assertion.<br>3. Surgical fix.<br>4. Run verification command.<br>5. Single-line Conventional Commit.<br>_(Pipeline stops here — do NOT create `.specify/features/<slug>/` folder)._ |
-| **Spike**                 | Short technical summary + trade-off note. **Pipeline stops here** — do not create a feature folder, do not proceed to `elicitation-interview`.                                                                                                                                                         |
-| **Bounded Task**          | Rapid interview (2–3 targeted questions via `grilling`), then stages 4, 5 (light), 6 (User Story only), 7, 8. Stage 3 (`gap-analysis`) is skipped.                                                                                                                                                     |
-| **Full Feature**          | Full pipeline, stages 1–8, all at full depth.                                                                                                                                                                                                                                                          |
+| Classification                      | Required Protocol & Execution Flow                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Token & Speed Target              |
+| :---------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------- |
+| **Tier 1: Fast-Track / Micro-Task** | **Zero-Ceremony Direct TDD**:<br>1. Inspect code & write failing test.<br>2. Implement surgical fix.<br>3. Verify test passes.<br>4. Single Conventional Commit.<br>_(Bypasses `.specify/features/<slug>/` folder entirely)._                                                                                                                                                                                                                                                                              | ⏱️ 2–3 mins<br>💰 ~15k tokens     |
+| **Spike**                           | Short technical summary + trade-off note. Pipeline stops here — do not create a feature folder, do not proceed to spec or coding.                                                                                                                                                                                                                                                                                                                                                                          | ⏱️ 3–5 mins<br>💰 ~20k tokens     |
+| **Tier 2: Lean Task / Roadmap US**  | **Roadmap-Driven Lean Flow (Zero BA Duplication)**:<br>1. Read existing AC directly from `PRODUCT_BACKLOG_ROADMAP.md`.<br>2. Generate lightweight `test-plan.md` (map AC to test cases) + optional 1-page `implementation-plan.md` if DB/API changes.<br>3. Jump straight to **Phase 5 (TDD Implementation)**.<br>4. Run single-pass `code-reviewer` (governed by 4 stopping rules).<br>5. Mark US as `[x]` in roadmap.<br>_(Bypasses all 8 BA markdown files `00` through `07` and Speckit duplication)._ | ⏱️ 5–8 mins<br>💰 ~50k–70k tokens |
+| **Tier 3: Full Feature / Epic**     | **Full Enterprise BA & Architecture Pipeline**:<br>1. 8-Stage BA Pipeline (`00` to `07` files + `baseline.md`).<br>2. Speckit Technical Planning (`spec.md`, `plan.md`, `tasks.md`).<br>3. Full implementation orchestrator with vertical slices.<br>4. Adversarial reviews + technical docs + user guide.                                                                                                                                                                                                 | ⏱️ 20+ mins<br>💰 ~200k+ tokens   |
+
+> **🛑 ROADMAP-DRIVEN EXECUTION BYPASS RULE (MANDATORY):**
+> When working on a User Story from `docs/PRODUCT_BACKLOG_ROADMAP.md` that is NOT marked with `[!]` (Blocked):
+>
+> - If `Effort` is `S` $\rightarrow$ ALWAYS route to **Tier 1: Fast-Track**.
+> - If `Effort` is `M` $\rightarrow$ ALWAYS route to **Tier 2: Lean Task**.
+> - NEVER force an already-defined roadmap User Story through the 8-stage BA ceremony unless the user explicitly requests an enterprise re-elicitation.
 
 State the classification and protocol out loud to the user before proceeding:
 
-> This looks like a **Bounded Task** (1 entity touched, 1 flow affected). I'll run the lightweight BA pipeline with a 2-question interview.
+> This looks like a **[Tier 1 Fast-Track | Tier 2 Lean Task | Tier 3 Full Feature]**. Executing the optimized protocol to ensure maximum speed and token efficiency.
 
 If the user disagrees with the classification, defer to them but log the override in `00-intake.md`.
 

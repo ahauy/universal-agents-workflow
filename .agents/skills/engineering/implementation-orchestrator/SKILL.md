@@ -28,31 +28,22 @@ than one slice itself in the same context.
 See `/README.md` for the pipeline this stage extends and the shared file
 conventions it reuses.
 
-## 1. Confirm the baseline is signed off
+## 1. Confirm the requirements baseline (Tier-Aware Gate)
 
-Read `baseline.md`. If `Status` is not `SIGNED-OFF`, stop and send the user
-back to `handover`. Implementing against a draft baseline defeats the
-purpose of every gate before this one — there is no fast path around it.
+- **Tier 3 (Full Feature / Epic)**: Read `baseline.md`. If `Status` is not `SIGNED-OFF`, stop and send the user back to `handover`.
+- **Tier 1 (Fast-Track) & Tier 2 (Roadmap US)**: Verify that the task's Acceptance Criteria (AC) are defined in `PRODUCT_BACKLOG_ROADMAP.md` or `test-plan.md`. Bypasses `baseline.md` requirement entirely to prevent ceremony overhead.
 
-## 2. Decompose into vertical slices, not files
+## 2. Decompose into slices (Calibrated by Task Tier)
 
-Read `spec/SRS.md` and `spec/user-stories.md`. Group `REQ-`/`US-` items into
-slices by **dependency layer**, not by file or by feature area:
+- **Tier 1 (< 80 lines)**: **Zero Slicing**. Implement directly via single developer turn using TDD.
+- **Tier 2 (80–250 lines)**: **Cohesive Slicing**. Merge adjacent layers into a single end-to-end slice (Data + Logic + API handled by one developer subagent, UI by frontend subagent). **Do NOT split into 4 micro-subagents.**
+- **Tier 3 (> 250 lines)**: Read `spec/SRS.md` and `spec/user-stories.md`. Group `REQ-`/`US-` items into slices by **dependency layer**, not by file or by feature area:
+  - **Data layer** — schema/migration, `BR-` validations
+  - **Domain/business logic** — algorithms, state machine transitions
+  - **API/interface layer** — endpoints, contracts
+  - **UI layer** — screens and states from `03-domain-model.md`
 
-- **Data layer** — schema/migration, `BR-` validations that live at the data
-  boundary
-- **Domain/business logic** — algorithms, state machine transitions,
-  business rules
-- **API/interface layer** — endpoints, request/response contracts
-- **UI layer** (if applicable) — screens and states from
-  `03-domain-model.md` §6
-
-A slice should be small enough that one subagent can hold it entirely in
-context alongside the relevant `REQ-`/`BR-` excerpts — not the whole spec.
-Order slices by dependency (data before logic before API before UI) and
-mark which slices are parallel-safe.
-
-Record in `implementation/slice-plan.md`:
+Record in `implementation/slice-plan.md` (Tier 3 only):
 
 ```markdown
 # Slice Plan: <Feature Title>
@@ -94,10 +85,11 @@ the subagent's full working log.
 
 ## 4. Independent review — fresh context, adversarial
 
-Once slices land, review runs in its own subagent or fresh session that
+Once slices land, review runs in its own subagent (`code-reviewer`) or fresh session that
 receives **only**:
 
-- the diff (or changed-file list) the slices produced
+- **Round 1**: the full diff (or changed-file list) the slices produced against base branch
+- **Rounds 2 & 3**: **incremental diff only** (`git diff HEAD~1` or fix commit diff) plus previous open finding IDs
 - `spec/user-stories.md` acceptance criteria
 - the relevant `BR-` rules from `03-domain-model.md`
 
@@ -105,35 +97,50 @@ It must **not** receive the implementer's reasoning, chat history, or
 "deviations" explanations — reviewing with that context present just
 reproduces the implementer's own blind spots. Prompt the reviewer to be
 adversarial: assume something is wrong and look for it, the same posture
-`spec-validator` takes toward the spec itself. Check:
+`spec-validator` takes toward the spec itself. Enforce the 4 stopping rules:
 
-- Every acceptance criterion — happy path **and** edge cases — actually
-  implemented, not just the happy path
-- Every relevant `BR-` rule correctly applied, including anti-abuse rules
-  for any streak/XP/reward logic
-- No silent deviation from spec that wasn't flagged in the slice result
-- Basic code quality (naming, error handling) — secondary to spec
-  conformance, not the primary check
+1. **Round Cap**: Track review iteration count (`Round 1`, `Round 2`, `Round 3`).
+2. **Incremental Scope (Rounds 2+)**: Inspect only the newly touched diff — never re-audit untouched code.
+3. **Grouped Findings**: Categorize by Security, Spec Fidelity, Reliability, Architecture, and Lean.
+4. **Resolution Tracking**: Deduplicate and classify previous items as `[RESOLVED]`, `[STILL OPEN]`, `[NEW]`, or `[ACCEPTED]`. Never re-report closed bugs.
+
 - **UI-layer slices**: invoke `ui-design-review` to audit rendered visual hierarchy, UX states (empty/loading/error), a11y, i18n resilience, and anti-slop rules, recording into `implementation/ui-review-report.md` (a FAIL here blocks overall slice approval).
 
 Record in `implementation/review-report.md`:
 
 ```markdown
-# Review Report: <Feature Title>
+# Review Report: <Feature Title> (Round: [1/3 | 2/3 | 3/3])
 
-**Result**: PASS | FAIL
-**Findings**:
+**Result**: PASS | CONDITIONAL PASS | FAIL | ESCALATE
+**Scope**: [Full Changeset | Incremental Diff since HEAD~1]
 
-| REQ/US | Issue | Severity |
-| ------ | ----- | -------- |
+### Resolution Tracker (Rounds 2 & 3)
+
+| ID  | Category | Previous Issue | Status (`RESOLVED` / `STILL OPEN` / `ACCEPTED`) | Note |
+| :-- | :------- | :------------- | :---------------------------------------------- | :--- |
+
+### Open Findings Grouped by Category
+
+| REQ/US | ID  | Category | Pattern / Issue | Severity |
+| :----- | :-- | :------- | :-------------- | :------- |
 ```
 
-## 5. Scoped fix loop
+## 5. Scoped fix loop (Hard 3-Round Cap)
 
 For each failing test or review finding, delegate a **new, narrowly scoped**
 subagent with just that finding and the specific file(s) involved — not the
-whole codebase, not the full review report. Loop review → fix → review
-until clean. Log each pass briefly in `implementation/test-fix-log.md`
+whole codebase, not the full review report.
+
+**Strict Termination Invariants (The 3-Round Cap)**:
+
+- **Round 1**: Initial review → Scoped fix.
+- **Round 2**: Incremental diff review → Scoped fix for any remaining items.
+- **Round 3**: Final verification pass.
+- **Termination Gates at Round 3**:
+  - If **CRITICAL** issues remain after Round 3: **HALT & ESCALATE** directly to user. **Zero Round 4 permitted.**
+  - If only **HIGH / MEDIUM / LOW** issues remain: Issue **CONDITIONAL PASS**, log the items in `CHANGELOG.md` under `Deferred Technical Debt`, and proceed to closeout.
+
+Log each pass briefly in `implementation/test-fix-log.md`
 (pass number, what failed, what changed) — not the full output of each
 attempt.
 
