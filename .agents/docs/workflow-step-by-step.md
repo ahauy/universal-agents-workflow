@@ -58,18 +58,19 @@ flowchart TD
 
 ---
 
-### 🔹 Bước 2: Khảo Sát & Phỏng Vấn Nghiệp Vụ (Phase 1: BA Pipeline)
+### 🔹 Bước 2: Khảo Sát & Phân Loại Yêu Cầu (Phase 1: 3-Tier Speed Lanes)
 
-- **Thao tác của bạn**: Cung cấp mô tả tính năng mới (ví dụ: paste nội dung Ticket Jira, Linear hoặc ý tưởng của bạn).
-- **Kỹ năng AI kích hoạt**: [`intake-classifier`](../skills/engineering/intake-classifier/SKILL.md) $\rightarrow$ [`elicitation-interview`](../skills/engineering/elicitation-interview/SKILL.md) (kèm [`grilling`](../skills/productivity/grilling/SKILL.md)) $\rightarrow$ [`domain-modeling`](../skills/engineering/domain-modeling/SKILL.md) $\rightarrow$ [`spec-writer`](../skills/engineering/spec-writer/SKILL.md) $\rightarrow$ [`spec-validator`](../skills/engineering/spec-validator/SKILL.md) $\rightarrow$ [`handover`](../skills/engineering/handover/SKILL.md).
+- **Thao tác của bạn**: Cung cấp mô tả tính năng mới (ví dụ: paste Ticket Jira, Linear hoặc gõ `/command-continue-project` để làm task từ roadmap).
+- **Kỹ năng AI kích hoạt**: [`intake-classifier`](../skills/engineering/intake-classifier/SKILL.md).
 - **Hành động cụ thể của AI**:
-  1. **`intake-classifier`** phân loại:
-     - Nếu là task nhỏ (< 30 dòng, sửa bug/typo): Chuyển thẳng sang **Fast-Track** (đi thẳng tới Bước 4 TDD).
-     - Nếu là tính năng chuẩn/epic: Tạo thư mục `.specify/features/<slug>/`.
-  2. **`elicitation-interview`** (🛑 **Customer Gate Bắt Buộc**): AI **dừng lại phỏng vấn bạn** 2-3 câu hỏi mỗi đợt xoay quanh 6 trụ cột nghiệp vụ: Phân quyền RBAC, Máy trạng thái, Luật tính toán/nghiệp vụ, Kịch bản biên (Edge cases), Dữ liệu & Phi chức năng NFRs. _(AI tuyệt đối không được tự ý bịa đặt luật)_.
-  3. **`domain-modeling`**: Xây dựng ma trận RBAC, biểu đồ Mermaid, đặt mã luật `BR-###`.
-  4. **`spec-writer`** & **`spec-validator`**: Biên soạn User Stories chuẩn `Given-When-Then` và kiểm định theo chuẩn IEEE 29148.
-- **🛑 Cổng kiểm soát (Gate 1 — Baseline Signed-Off)**: AI trình bản tóm tắt Baseline và yêu cầu bạn duyệt: _"Đồng ý ký duyệt Baseline v1.0"_.
+  1. **`intake-classifier` phân loại theo 3 làn tốc độ (3-Tier Speed Lanes)**:
+     - 🚀 **Tier 1: Fast-Track (< 80 dòng, bug fix, UI tweak)**: Bỏ qua toàn bộ thủ tục BA & Speckit $\rightarrow$ Chuyển thẳng sang Bước 4 (TDD). Tiết kiệm 85% token, xong trong 2–3 phút.
+     - ⚡ **Tier 2: Lean Task (80–250 dòng, User Story chuẩn từ Roadmap)**: Bỏ qua việc sinh 8 file BA (`00` đến `07`) và Speckit. Lấy trực tiếp Acceptance Criteria từ `PRODUCT_BACKLOG_ROADMAP.md` $\rightarrow$ sinh `test-plan.md` $\rightarrow$ Chuyển thẳng sang Bước 4 (TDD). Tiết kiệm 70% token, xong trong 5–8 phút.
+     - 🏛️ **Tier 3: Full Feature / Epic (> 250 dòng, module hoàn toàn mới, đổi core DB)**: Chạy đầy đủ 8 bước BA:
+       - **`elicitation-interview`** (🛑 **Customer Gate Bắt Buộc**): AI **dừng lại phỏng vấn bạn** 2-3 câu hỏi mỗi đợt xoay quanh 6 trụ cột nghiệp vụ: Phân quyền RBAC, Máy trạng thái, Luật tính toán/nghiệp vụ, Kịch bản biên, Dữ liệu & NFRs.
+       - **`domain-modeling`**: Xây dựng ma trận RBAC, biểu đồ Mermaid, đặt mã luật `BR-###`.
+       - **`spec-writer`** & **`spec-validator`**: Biên soạn User Stories chuẩn `Given-When-Then` và kiểm định theo chuẩn IEEE 29148.
+       - **🛑 Cổng kiểm soát (Gate 1 — Baseline Signed-Off)**: Áp dụng cho Tier 3 để ký duyệt Baseline v1.0 trước khi sang Bước 3.
 
 ---
 
@@ -124,9 +125,15 @@ flowchart TD
 - **Thao tác của bạn**: AI tự động chuyển sang bước này ngay khi toàn bộ test của Phase 5 vượt qua.
 - **Kỹ năng AI kích hoạt**: `<lang>-reviewer` (hoặc `code-reviewer`) & [`ui-design-review`](../skills/engineering/ui-design-review/SKILL.md) (kèm [`ui-taste-pro`](../skills/engineering/ui-taste-pro/SKILL.md)).
 - **Hành vi cụ thể của AI**:
-  1. **Code Review Độc Lập (2 Lượt)**:
+  1. **Code Review Độc Lập (Tri-Pass Review & 4 Quy Tắc Dừng)**:
      - _Pass A_: Kiểm tra quy chuẩn cú pháp, bảo mật, memory leak (`[weak self]`, unwrap `!`, race conditions).
      - _Pass B_: Đối chiếu độ khớp mã nguồn với User Stories ban đầu.
+     - _Pass C_: Chống over-engineering (The Ladder / ponytail-review).
+     - **🛑 4 Quy Tắc Dừng & Giới Hạn Review**:
+       1. **Giới hạn tối đa 3 vòng**: Chu trình review-fix tối đa 3 vòng. Sau vòng 3 nếu còn lỗi `Critical` thì dừng và escalate cho User (cấm tự động chạy vòng 4); nếu chỉ còn lỗi nhỏ thì ghi nhận nợ kỹ thuật vào `CHANGELOG.md` để kết thúc.
+       2. **Chỉ review diff mới**: Vòng 2 & 3 CHỈ review diff mới phát sinh (`git diff HEAD~1` hoặc commit fix), cấm soi lại file/hàm không bị sửa.
+       3. **Gom bug theo loại**: Phân loại theo 5 nhóm chuẩn (`Security`, `Spec Fidelity`, `Reliability`, `Architecture`, `Lean`) và gom lỗi cùng pattern thành 1 nhóm kèm danh sách vị trí để fix đồng loạt.
+       4. **Không báo lại bug cũ**: Quản lý trạng thái (`[RESOLVED]`, `[STILL OPEN]`, `[NEW]`, `[ACCEPTED]`). Không bao giờ nhắc lại hay phân tích lại các bug đã được giải quyết hoặc đã chấp nhận.
   2. **UI Review Độc Lập (Nếu có giao diện)**:
      - Kích hoạt **`ui-taste-pro`**: Quét sạch AI-slop (cấm gradient neon, chỉ dùng 1px hairline border, hover physics ổn định).
      - Đảm bảo đạt chuẩn tiếp cận quốc tế [`frontend-a11y`](../skills/engineering/frontend-a11y/SKILL.md) (WCAG 2.1 AA).

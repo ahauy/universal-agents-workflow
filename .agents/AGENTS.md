@@ -65,11 +65,12 @@ graph TD
 #### Phase 1: Business Analysis & Domain Elicitation (8-Stage BA Pipeline)
 
 - **MANDATORY**: Start every new feature or significant change with `intake-classifier`. This is the entry point to the BA pipeline — never skip straight to elicitation, spec, or code.
-- **Protocol routing by complexity** (decided by `intake-classifier`):
-  - **Micro-Task / Fast-Fix**: Surgical changes (< 30 lines, bug fixes, typos, single config tweaks). **Bypasses BA ceremony & `.specify/features/<slug>/` folder**. Fast-track flow: Reproduce -> Failing Test / Assert -> Surgical Fix -> Verification -> Single-line Conventional Commit.
+- **Protocol routing by complexity (3-Tier Speed Lanes)** (decided by `intake-classifier`):
+  - **Tier 1: Fast-Track / Micro-Task**: Surgical changes (< 80 lines, bug fixes, typos, single config tweaks). **Bypasses BA ceremony & `.specify/features/<slug>/` folder**. Fast-track flow: Reproduce -> Failing Test / Assert -> Surgical Fix -> Verification -> Single-line Conventional Commit. (⏱️ 2–3 mins, 💰 ~15k tokens).
   - **Spike**: Research note only. No feature folder, no downstream stages.
-  - **Bounded Task**: Stages 1 → 2 (interactive, 2–3 questions) → 4 (light) → 5 (light) → 6 (user-stories only) → 7 → 8. Stage 3 skipped.
-  - **Full Feature / Epic**: All 8 stages at full depth with interactive interview at Stage 2.
+  - **Tier 2: Lean Task / Roadmap User Story**: Standard User Story from `PRODUCT_BACKLOG_ROADMAP.md` (80–250 lines) with defined Acceptance Criteria. **Bypasses 8-stage BA ceremony and Speckit duplication**. Directly maps AC to `test-plan.md` $\rightarrow$ TDD Implementation $\rightarrow$ Review. (⏱️ 5–8 mins, 💰 ~50k–70k tokens).
+  - **Tier 3: Full Feature / Uncharted Epic**: Large initiatives (> 250 lines, net-new core entities, cross-cutting auth/billing) or stories marked `[!]` (Blocked). All 8 stages at full depth with interactive interview at Stage 2.
+- **🛑 ROADMAP-DRIVEN LEAN BYPASS RULE**: When executing an already-planned User Story from `docs/PRODUCT_BACKLOG_ROADMAP.md` that is not marked `[!]`, the pipeline automatically bypasses the 8-stage BA ceremony and Speckit duplication, going straight to Tier 1 or Tier 2 TDD implementation. Zero ceremony waste.
 - **Stage descriptions**:
   1. `intake-classifier` — classifies complexity with measurable signals; creates `.specify/features/<slug>/` folder.
   2. `elicitation-interview` — **🛑 MANDATORY INTERACTIVE CUSTOMER INTERVIEW GATE**:
@@ -119,7 +120,7 @@ graph TD
 
 - **Step 1: Quality Gates & Adversarial Review**:
   - Run `speckit-analyze` to check spec/plan/task alignment.
-  - Run `code-reviewer` agent: executes dual passes (Pass A: Standards & Security, Pass B: Spec & Domain Fidelity).
+  - Run `code-reviewer` agent: executes dual passes (Pass A: Standards & Security, Pass B: Spec & Domain Fidelity) governed by the 4 Stopping Rules (Max 3 review rounds cap, Incremental diff only on rounds 2+, Group bugs by category/pattern, No re-reporting old/resolved bugs).
   - Run `ui-design-review` (for UI slices): executes dual passes (Pass A: Design System & Anti-AI-Slop, Pass B: Spec & UX Fidelity).
   - **Architecture & Hotspot Review**: When auditing structural quality, refactoring candidates, or high-churn areas, run `improve-codebase-architecture` (Scan hotspots → Generate interactive HTML report → Conduct interactive design grilling → Record ADR in `adr/`).
   - Enforce **Bug Severity Gates**: `Critical` bugs strictly block completion / release. Zero `Critical` bugs permitted.

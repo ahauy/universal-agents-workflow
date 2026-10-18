@@ -98,17 +98,24 @@ Before starting analysis or code, ensure the working environment is synced with 
    - Test Plan (`test-plan.md`)
    - Source code and test implementation progress.
 
-### Step 3: Route & Execute the Appropriate Phase
+### Step 3: Route & Execute the Appropriate Phase (3-Tier Speed Lanes)
 
 **Auto-routing matrix** (read BEFORE dispatching any subagent):
 
-| Effort | Context-budget | BA Depth                                           | wayfinder?                            |
-| :----- | :------------- | :------------------------------------------------- | :------------------------------------ |
-| S      | single-session | Fast-Track (2–3 questions only, skip gap-analysis) | ❌ No                                 |
-| M      | single-session | Bounded Task (stages 1→2→4→5→6→7→8)                | ❌ No                                 |
-| L      | single-session | Full Feature (all 8 stages)                        | ❌ No                                 |
-| L      | multi-session  | Full Feature (all 8 stages)                        | ✅ Yes — invoke `wayfinder` before BA |
-| XL     | multi-session  | Full Feature (all 8 stages)                        | ✅ Yes — invoke `wayfinder` before BA |
+| Effort | Context-budget | Routing Tier             | Execution Strategy                                                                            | Token & Speed Budget              |
+| :----- | :------------- | :----------------------- | :-------------------------------------------------------------------------------------------- | :-------------------------------- |
+| **S**  | single-session | **Tier 1: Fast-Track**   | **Bypass BA & Speckit**. Direct TDD in single agent turn.                                     | ⏱️ 2–3 mins \| 💰 ~15k tokens     |
+| **M**  | single-session | **Tier 2: Lean Task**    | **Bypass 8 BA Stages**. Read AC & Tasks from roadmap $\rightarrow$ jump to Case C.            | ⏱️ 5–8 mins \| 💰 ~50k–70k tokens |
+| **L**  | single-session | **Tier 3: Full Feature** | Case A (BA Stages 1-8) $\rightarrow$ Case B (Speckit) $\rightarrow$ Case C $\rightarrow$ D.   | ⏱️ 15–20 mins \| 💰 ~150k tokens  |
+| **L**  | multi-session  | **Tier 3: Full Feature** | Invoke `wayfinder` first $\rightarrow$ Full BA $\rightarrow$ Speckit $\rightarrow$ Implement. | ⏱️ 20+ mins \| 💰 ~200k tokens    |
+| **XL** | multi-session  | **Tier 3: Full Feature** | Invoke `wayfinder` first $\rightarrow$ Full BA $\rightarrow$ Speckit $\rightarrow$ Implement. | ⏱️ 20+ mins \| 💰 ~200k tokens    |
+
+> **🛑 ROADMAP-DRIVEN LEAN BYPASS (NON-NEGOTIABLE FOR S & M EFFORT):**
+> If the target User Story from `docs/PRODUCT_BACKLOG_ROADMAP.md` is NOT marked `[!]` and already contains Acceptance Criteria:
+>
+> - **For Effort S**: Skip Case A and Case B entirely. Do not create `.specify/features/<slug>/` folder. Jump directly to **Case C: Direct TDD Implementation**.
+> - **For Effort M**: Skip the 8-stage BA ceremony (`00` to `07` files) and Speckit duplication. Seed a single lightweight `.specify/features/<slug>/test-plan.md` directly from the roadmap AC, and jump directly to **Case C: TDD Implementation**.
+> - **Only Effort L/XL or stories marked `[!]`** require Case A (interactive interview) and Case B (architecture plan).
 
 > **Tech Context Injection (MANDATORY):** Every subagent dispatched in Steps A-D MUST work
 > from the same tech stack facts, otherwise it will hallucinate a stack. Pass those facts by
@@ -128,13 +135,14 @@ Before starting analysis or code, ensure the working environment is synced with 
 > stop retrying, run that step inline in the primary context, verify the artifacts exist, and
 > tell the user which subagent was bypassed and why. Delegation must never dead-lock the run.
 
-#### Case A: No Domain Baseline (Net-New Feature)
+#### Case A: No Domain Baseline (Net-New Epic / Uncharted Feature)
 
+- **Pre-check Roadmap Bypass**: If Effort is `S` or `M` with documented AC $\rightarrow$ **DO NOT EXECUTE Case A**, proceed directly to Case C.
 - **Pre-check wayfinder** (if Effort = L|XL AND Context-budget = multi-session):
   - Dispatch `wayfinder` skill to map decision tickets before any BA work.
   - Only proceed to BA after wayfinder map is confirmed by user.
 
-- **MANDATORY AUTOMATIC SUBAGENT DELEGATION**:
+- **MANDATORY AUTOMATIC SUBAGENT DELEGATION (L & XL only)**:
   - The Orchestrator MUST NEVER run BA stages directly on the primary context.
   - **Step 1 (Intake)**: Dispatch `business-analyst` via `invoke_subagent` with a short task
     such as: `Read .specify/features/<slug>/00-tech-context.md and 00-intake.md, then run intake-classifier.`
@@ -225,13 +233,15 @@ Before starting analysis or code, ensure the working environment is synced with 
   - Dispatch `build-resolver` to fix any compilation / lint errors.
   - Follow TDD cycle in each slice: Write failing tests (Red) -> Implement minimal passing code (Green) -> Refactor.
 
-#### Case D: Implementation Finished, Final Review & Documentation
+#### Case D: Implementation Finished, Final Review & Documentation (On-Demand Flow)
 
 - **MANDATORY AUTOMATIC SUBAGENT DELEGATION**:
-  - Dispatch `code-reviewer` via `invoke_subagent` for adversarial code quality & security audit.
-  - Dispatch `ui-ux-reviewer` via `invoke_subagent` for adversarial UI, anti-slop, and WCAG AA review.
-  - Dispatch `user-guide-creator` via `invoke_subagent` to generate [docs/user-guides/<slug>.md](../../docs/user-guides/) with real Playwright screenshots.
-  - Dispatch `tech-doc-architect` via `invoke_subagent` to update [docs/features/<slug>/README.md](../../docs/features/).
+  - Dispatch `code-reviewer` via `invoke_subagent` for adversarial code quality & security audit (strictly governed by the 4 Stopping Rules).
+  - If the story touched UI components/views: Dispatch `ui-ux-reviewer` via `invoke_subagent` for Anti-AI-slop and WCAG AA review.
+  - **On-Demand User Guide Gate (Zero Screenshot Waste)**:
+    - **UI Stories**: If the story touched or created user-facing screens, dispatch `user-guide-creator` to capture real Playwright screenshots and update [docs/user-guides/<slug>.md](../../docs/user-guides/).
+    - **Backend / API / Logic Stories**: **SKIP `user-guide-creator` entirely**. Do not launch Playwright browser or generate screenshots for non-visual code.
+  - Dispatch `tech-doc-architect` via `invoke_subagent` to update [docs/features/<slug>/README.md](../../docs/features/) or append changelog.
   - Run full test suites (`pnpm test`).
   - Mark the User Story as `[x]` in `docs/PRODUCT_BACKLOG_ROADMAP.md`.
 

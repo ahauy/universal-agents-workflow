@@ -11,8 +11,10 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 Before implementing:
 
 - **Zero Speculation & Zero Hallucination**: NEVER invent, fabricate, or silently assume business rules, formulas, error handling, default parameters, or edge cases. If something is unknown, ambiguous, or underspecified, STOP and ask the customer directly.
-- **Polyglot & Multi-Language Support**: This workflow is 100% language-agnostic (Python, Go, Rust, Java/Kotlin, C#, PHP, Ruby, TypeScript/JavaScript). Do not force Node.js or pnpm idioms onto non-JS codebases.
-- **Fast-Track for Micro-Tasks**: For trivial, surgical fixes (< 30 lines, obvious bug fixes, typos, single config tweaks), `intake-classifier` can route to **Micro-Task Fast-Track**. This bypasses the heavy 8-stage BA pipeline and `.specify/features/<slug>/` folder, proceeding directly to TDD: Reproduce -> Failing Test / Assert -> Surgical Fix -> Verification -> Single-line Conventional Commit.
+- **3-Tier Speed Lanes (Token & Time Optimization)**:
+  - **Tier 1 (Fast-Track, < 80 lines)**: Bypasses BA & Speckit ceremony entirely. Proceed directly to TDD: Reproduce -> Failing Test / Assert -> Surgical Fix -> Verification -> Single Conventional Commit. (⏱️ 2–3 mins, 💰 ~15k tokens).
+  - **Tier 2 (Lean Task / Roadmap User Story, 80–250 lines)**: For any story from `PRODUCT_BACKLOG_ROADMAP.md` with documented Acceptance Criteria (not marked `[!]`), bypass the 8-stage BA ceremony and Speckit duplication. Go straight to TDD Implementation $\rightarrow$ Review. (⏱️ 5–8 mins, 💰 ~50k–70k tokens).
+  - **Tier 3 (Full Feature / Epic, > 250 lines or `[!]`)**: Full 8-stage BA pipeline with interactive customer interview and Speckit planning.
 - State your assumptions explicitly. If uncertain, ask.
 - If multiple interpretations exist, present them - don't pick silently.
 - If a simpler approach exists, say so. Push back when warranted.
@@ -173,14 +175,17 @@ graph TD
 
 ### Protocol Execution Chain:
 
-1. **Phase 1 (BA & Domain Elicitation — 8-Stage Pipeline)**:
-   - **Stage 1 (Intake)**: Auto-dispatch `business-analyst` to run `intake-classifier`. If classified as **Micro-Task / Fast-Fix** (< 30 lines, obvious bug fix, typo), bypass the BA folder and elicitation interview, proceeding directly to Phase 5 TDD (Reproduce -> Failing Test -> Surgical Fix -> Verify). For Bounded Task / Full Feature, create `.specify/features/<slug>/`.
-   - **🛑 STAGE 2 INTERACTIVE ELICITATION INTERVIEW (MANDATORY CUSTOMER GATE)**:
+1. **Phase 1 (BA & Domain Elicitation — 3-Tier Speed Lanes)**:
+   - **Stage 1 (Intake)**: Auto-dispatch `business-analyst` to run `intake-classifier`.
+     - **Tier 1 (Fast-Track, < 80 lines)**: Bypasses BA folder and interview, proceeding directly to Phase 5 TDD (Reproduce -> Failing Test -> Surgical Fix -> Verify).
+     - **Tier 2 (Lean Task / Roadmap US, 80–250 lines)**: For any story from `PRODUCT_BACKLOG_ROADMAP.md` with documented AC (not marked `[!]`), bypass 8 BA stages and Speckit duplication. Jump straight to Phase 5 TDD.
+     - **Tier 3 (Full Feature / Epic, > 250 lines or `[!]`)**: Creates `.specify/features/<slug>/`, runs Stages 2–8.
+   - **🛑 STAGE 2 INTERACTIVE ELICITATION INTERVIEW (Tier 3 Only — MANDATORY CUSTOMER GATE)**:
      - The AI / `business-analyst` **MUST PAUSE** and conduct a live, interactive interview with the User (batched 2–3 questions at a time covering Business Value & the 6 Domain Pillars: RBAC, State Machine, Business Rules/Formulas, Workflows/Edge cases, Data/Privacy, UX/NFRs) using direct chat turns or `ask_question`.
-     - **Strict No-Hallucination Policy**: AI is STRICTLY FORBIDDEN from inventing business rules, error behaviors, default parameters, or edge cases. If anything is unknown or ambiguous, AI MUST ask the customer directly. Silent auto-generation of unconfirmed `ASM-` assumptions without user interaction is strictly prohibited.
-   - **Stage 3–8 (Domain Modeling to Handover)**: Only after the user confirms elicitation answers, `business-analyst` executes gap analysis, domain modeling, risk scanning, spec writing, IEEE 29148 validation, and handover brief to produce `baseline.md`.
-   - **🛑 Confirmation Gate 1**: Present Domain Baseline summary to User for sign-off.
-2. **Phase 2–4 (Spec & Architecture)**: Auto-dispatch `system-architect` to produce `spec.md`, `plan.md`, `data-model.md`, `contracts/`, and `tasks.md`. Present Confirmation Gate 2 to User.
+     - **Strict No-Hallucination Policy**: AI is STRICTLY FORBIDDEN from inventing business rules, error behaviors, default parameters, or edge cases. If anything is unknown or ambiguous, AI MUST ask the customer directly.
+   - **Stage 3–8 (Domain Modeling to Handover — Tier 3 Only)**: Only after the user confirms elicitation answers, `business-analyst` executes gap analysis, domain modeling, risk scanning, spec writing, IEEE 29148 validation, and handover brief to produce `baseline.md`.
+   - **🛑 Confirmation Gate 1 (Tier 3 Only)**: Present Domain Baseline summary to User for sign-off.
+2. **Phase 2–4 (Spec & Architecture — Tier 3 Only)**: Auto-dispatch `system-architect` to produce `spec.md`, `plan.md`, `data-model.md`, `contracts/`, and `tasks.md`. Present Confirmation Gate 2 to User. (Tier 1 & Tier 2 tasks bypass directly to Phase 5).
 3. **Phase 5 (Fullstack Implementation & TDD)**:
    - Auto-dispatch `code-explorer` to inspect existing patterns.
    - Auto-dispatch `backend-developer` & `frontend-developer` in parallel or sequenced slices.
@@ -188,7 +193,7 @@ graph TD
    - Auto-dispatch `build-resolver` to eliminate type/lint build errors.
    - Auto-dispatch `e2e-runner` to verify test suites.
 4. **Phase 6A (Adversarial Review)**:
-   - Auto-dispatch `code-reviewer` for adversarial code quality & security review.
+   - Auto-dispatch `code-reviewer` for adversarial code quality & security review (governed by the 4 stopping rules: 3-round cap, incremental diff only on rounds 2+, grouped bugs, no re-reporting old bugs).
    - Auto-dispatch `ui-ux-reviewer` for Anti-AI-Slop, `DESIGN.md`, `MEMORY.md`, and WCAG AA verification.
 5. **Phase 6B (Documentation & Sign-off)**:
    - Auto-dispatch `tech-doc-architect` (`docs/features/<slug>/README.md`).
