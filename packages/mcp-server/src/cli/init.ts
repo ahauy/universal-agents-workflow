@@ -34,7 +34,7 @@ export async function runInit(targetDir: string = process.cwd()) {
 This project is governed by **Universal Agents Workflow** via Model Context Protocol (MCP).
 
 ## AI Agent Instructions:
-1. Run MCP Prompt \`uaw_intake_classifier\` or \`uaw_grilling\` before coding.
+1. Run the \`intake-classifier\` skill (and \`grilling\` if the brief is vague) before coding.
 2. Read MCP Resource \`uaw://context\` for ubiquitous domain language.
 3. Read MCP Resource \`uaw://adr\` and record decisions using MCP Tool \`uaw_record_adr\`.
 4. Scaffold and validate specifications via \`uaw_scaffold_feature\` & \`uaw_validate_spec\`.

@@ -5,7 +5,7 @@ This project is governed by **Universal Agents Workflow** powered by Model Conte
 ## AI Agent Operational Instructions:
 
 1. **Before Any Coding or Implementation:**
-   - Always run MCP Prompt \`uaw_intake_classifier\` or \`uaw_grilling\` to align scope and eliminate silent assumptions.
+   - Run the `intake-classifier` skill (`.agents/skills/engineering/intake-classifier`) to align scope, and `grilling` when the brief is vague.
    - Do NOT invent unconfirmed business rules or edge cases.
 
 2. **Ubiquitous Language & Terminology:**

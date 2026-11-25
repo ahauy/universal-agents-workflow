@@ -24,24 +24,6 @@ import {
   checkGitLocksSchema,
 } from "./tools/checkGitLocks.js";
 
-import { getGrillingPrompt, grillingPromptArgs } from "./prompts/grilling.js";
-import {
-  getIntakeClassifierPrompt,
-  intakeClassifierArgs,
-} from "./prompts/intakeClassifier.js";
-import {
-  getSpeckitSpecifyPrompt,
-  speckitSpecifyArgs,
-  getSpeckitPlanPrompt,
-  speckitPlanArgs,
-} from "./prompts/speckit.js";
-import {
-  getCodeReviewPrompt,
-  codeReviewArgs,
-  getPonytailReviewPrompt,
-  ponytailReviewArgs,
-} from "./prompts/review.js";
-
 import { readContextResource } from "./resources/context.js";
 import { readAdrResource } from "./resources/adr.js";
 import { readStandardsResource } from "./resources/standards.js";
@@ -99,50 +81,14 @@ export function createUawMcpServer() {
   );
 
   // ==========================================
-  // Register MCP Prompts (Control Plane & Workflows)
+  // Prompts are intentionally NOT registered.
+  //
+  // The six `uaw_*` prompts that used to live here (grilling, intake_classifier,
+  // speckit_specify, speckit_plan, code_review, ponytail_review) duplicated
+  // skills that already exist in `.agents/skills/`. Two sources of truth for the
+  // same instruction means they drift, and every request paid for the schema.
+  // Use the skills instead; this server exposes only tools and resources.
   // ==========================================
-
-  server.prompt(
-    "uaw_grilling",
-    "Interactive domain grilling interview without silent assumptions",
-    grillingPromptArgs,
-    (args) => getGrillingPrompt(args),
-  );
-
-  server.prompt(
-    "uaw_intake_classifier",
-    "Classify feature request complexity (Micro-task, Spike, Bounded, Epic)",
-    intakeClassifierArgs,
-    (args) => getIntakeClassifierPrompt(args),
-  );
-
-  server.prompt(
-    "uaw_speckit_specify",
-    "Generate IEEE 29148 specification from approved baseline",
-    speckitSpecifyArgs,
-    (args) => getSpeckitSpecifyPrompt(args),
-  );
-
-  server.prompt(
-    "uaw_speckit_plan",
-    "Generate architecture plan and contract boundaries from spec",
-    speckitPlanArgs,
-    (args) => getSpeckitPlanPrompt(args),
-  );
-
-  server.prompt(
-    "uaw_code_review",
-    "Dual-pass adversarial code review (Standards + Security, Spec Fidelity)",
-    codeReviewArgs,
-    (args) => getCodeReviewPrompt(args),
-  );
-
-  server.prompt(
-    "uaw_ponytail_review",
-    "Over-engineering review hunting complexity and bloat via The Ladder",
-    ponytailReviewArgs,
-    (args) => getPonytailReviewPrompt(args),
-  );
 
   // ==========================================
   // Register MCP Resources (Dynamic Context Streaming)
