@@ -279,8 +279,9 @@ def collect_framework_files(
     `only` restricts the result to the given ship entries (see
     _expand_ship_entry). This is what lets the installer share this engine while
     still shipping a curated subset — optional-stack-skills is NOT copied
-    wholesale, only the packs the user selected, and those are remapped into
-    .agents/skills/ rather than dumped at their repo location.
+    wholesale, only the packs the user selected, and those land in
+    .agents/skill-library/ (the cold tier) rather than at their repo location,
+    so installing a language pack does not inflate the always-on index.
     """
     if only is None:
         only = INSTALL_SHIP_LIST
@@ -396,8 +397,8 @@ def sync_tree(source_dir: Path, target_dir: Path, manifest: dict[str, str],
     for dest_rel, (src_abs, src_rel) in sorted(all_source_files.items()):
         dest_abs = target_dir / dest_rel
         # The baseline is keyed by SOURCE path, so a pack that lands at
-        # .agents/skills/flutter/... stays recognisable as coming from
-        # optional-stack-skills/languages/flutter/... on the next update.
+        # .agents/skill-library/engineering/flutter-patterns stays recognisable
+        # as coming from optional-stack-skills/languages/flutter/... on update.
         key = src_rel
 
         # 1 & 2 - protected paths. A protected file that already exists is user

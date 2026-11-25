@@ -87,14 +87,28 @@ ANALYSIS_SKILLS=(
   "engineering/risk-contradiction-scanner"
 )
 
+# Skills live in two tiers: the indexed hot set and the on-demand library.
+# Resolve by name so this script keeps working when a skill moves between them.
+resolve_skill_dir() {
+  local rel_path="$1"
+  local root
+  for root in ".agents/skills" ".agents/skill-library"; do
+    if [ -d "$REPO_ROOT/$root/$rel_path" ]; then
+      printf '%s' "$REPO_ROOT/$root/$rel_path"
+      return 0
+    fi
+  done
+  return 1
+}
+
 install_skill() {
   local rel_path="$1"
   local skill_name
   skill_name="$(basename "$rel_path")"
-  local src_dir="$REPO_ROOT/.agents/skills/$rel_path"
+  local src_dir
 
-  if [ ! -d "$src_dir" ]; then
-    echo -e "  ⚠️  ${YELLOW}Không tìm thấy skill nguồn: $src_dir${NC}"
+  if ! src_dir="$(resolve_skill_dir "$rel_path")"; then
+    echo -e "  ⚠️  ${YELLOW}Không tìm thấy skill nguồn: $rel_path${NC}"
     return 1
   fi
 

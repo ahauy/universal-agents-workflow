@@ -25,6 +25,7 @@ import path from "node:path";
 
 const HOT_DIR = ".agents/skills";
 const COLD_DIR = ".agents/skill-library";
+const CATALOG = ".agents/catalog.json";
 const OUTPUT = ".agents/SKILLS.md";
 const MAX_WHEN_CHARS = 120;
 
@@ -199,13 +200,17 @@ function render() {
   const coldByName = new Map(cold.map((skill) => [skill.name, skill]));
   const grouped = new Set(Object.values(GROUPS).flat());
 
+  // Optional stack packs (flutter, swift, go, ...) land in the library when the
+  // user installs them. They are not part of the shipped catalog, so they are
+  // listed separately instead of failing the check. A stale GROUPS entry is
+  // still an error: that is how a rename gets caught.
   const errors = [];
-  for (const skill of cold) {
-    if (!grouped.has(skill.name)) errors.push(`unmapped cold skill: ${skill.name}`);
-  }
   for (const name of grouped) {
     if (!coldByName.has(name)) errors.push(`group map points at a missing skill: ${name}`);
   }
+  const installedPacks = cold
+    .filter((skill) => !grouped.has(skill.name))
+    .sort((a, b) => a.name.localeCompare(b.name));
   if (errors.length > 0) {
     console.error("Skill catalog is out of sync:");
     for (const error of errors) console.error(`  - ${error}`);
@@ -266,6 +271,24 @@ function render() {
     lines.push("");
   }
 
+  if (installedPacks.length > 0) {
+    lines.push(`## Installed packs — not in the shipped catalog (${installedPacks.length})`);
+    lines.push("");
+    lines.push(
+      "Added by the installer from `optional-stack-skills/`. Read one when the",
+    );
+    lines.push("project's stack matches; they are cold, so they cost nothing until then.");
+    lines.push("");
+    lines.push("| Skill | When | Path |");
+    lines.push("| --- | --- | --- |");
+    for (const skill of installedPacks) {
+      lines.push(
+        `| \`${skill.name}\` | ${escapeCell(firstSentence(skill.description))} | \`${skill.path}\` |`,
+      );
+    }
+    lines.push("");
+  }
+
   lines.push("## How to use a cold skill");
   lines.push("");
   lines.push("1. Find the row that matches the situation (or the symptom in *Pick fast*).");
@@ -299,16 +322,70 @@ function findStaleHotCopies() {
   return stale;
 }
 
+/**
+ * Optional stack packs (flutter, swift, go, ...) used to be installed into the
+ * hot tier. On projects installed before the split they are still there and are
+ * re-indexed on every request. The catalog is the source of truth for where a
+ * pack belongs, so relocate exactly those and nothing else — a skill the user
+ * added by hand is never moved.
+ */
+function optionalPackTargets() {
+  const targets = new Map();
+  for (const file of [CATALOG, path.join("optional-stack-skills", "catalog.json")]) {
+    if (!fs.existsSync(file)) continue;
+    let data;
+    try {
+      data = JSON.parse(fs.readFileSync(file, "utf8"));
+    } catch {
+      continue;
+    }
+    for (const item of data.items || []) {
+      const target = item.target_path || "";
+      if (!item.id || !target.startsWith(`${COLD_DIR}/`)) continue;
+      targets.set(item.id, target);
+    }
+  }
+  return targets;
+}
+
+function relocateStalePackCopies(quiet) {
+  const targets = optionalPackTargets();
+  if (targets.size === 0) return 0;
+  let moved = 0;
+  if (!fs.existsSync(HOT_DIR)) return moved;
+
+  for (const group of fs.readdirSync(HOT_DIR)) {
+    const groupDir = path.join(HOT_DIR, group);
+    if (!fs.statSync(groupDir).isDirectory()) continue;
+    for (const name of fs.readdirSync(groupDir)) {
+      if (HOT_NAMES.has(name)) continue;
+      const dir = path.join(groupDir, name);
+      if (!fs.statSync(dir).isDirectory()) continue;
+      if (!fs.existsSync(path.join(dir, "SKILL.md"))) continue;
+      const target = targets.get(name);
+      if (!target || fs.existsSync(target)) continue;
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.renameSync(dir, target);
+      moved += 1;
+      if (!quiet) console.log(`  relocated pack to the cold library: ${dir} -> ${target}`);
+    }
+  }
+  return moved;
+}
+
 function pruneStaleHotCopies(quiet) {
   const stale = findStaleHotCopies();
   for (const dir of stale) {
     fs.rmSync(dir, { recursive: true, force: true });
     if (!quiet) console.log(`  pruned duplicate hot copy: ${dir}`);
   }
-  if (!quiet && stale.length > 0) {
-    console.log(`Pruned ${stale.length} stale hot copies left by an older install.`);
+  const moved = relocateStalePackCopies(quiet);
+  if (!quiet && (stale.length > 0 || moved > 0)) {
+    console.log(
+      `Normalized hot tier: removed ${stale.length} duplicate(s), moved ${moved} pack(s) to the library.`,
+    );
   }
-  return stale.length;
+  return stale.length + moved;
 }
 
 function main() {
@@ -316,10 +393,9 @@ function main() {
   const prune = process.argv.includes("--prune");
   const quiet = process.argv.includes("--quiet");
 
-  if (prune) {
-    const removed = pruneStaleHotCopies(quiet);
-    if (removed === 0 && quiet) return;
-  }
+  // Always regenerate after pruning, even when nothing was removed: a stale
+  // catalog (a description edited without a re-run) must not survive an install.
+  if (prune) pruneStaleHotCopies(quiet);
 
   const { content, hot, cold } = render();
 
