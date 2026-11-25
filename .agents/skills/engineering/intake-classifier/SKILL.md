@@ -1,16 +1,7 @@
 ---
 invocation: user
 name: intake-classifier
-description: >
-  MANDATORY first step whenever a new feature, user story, bug-driven
-  change, or business request is raised — before any elicitation, design, spec,
-  or code. Classifies the request's complexity (Micro-Task / Spike / Bounded Task / Full
-  Feature) using measurable criteria, selects the right depth of the
-  BA Pipeline, and creates the feature working folder if required. Trigger this whenever
-  the user says things like "add a feature", "we need to support...", "can we
-  change how X works", "new user story", "fix this bug", or describes a product change of any
-  size. Do not skip straight to elicitation-interview, domain-modeling, or code without running
-  this classification first.
+description: "MANDATORY first step for any new request: classify Micro-Task/Spike/Bounded/Full Feature, pick pipeline depth, create the feature folder. Before elicitation, spec, or code."
 metadata:
   stage: "BA Pipeline — Stage 1 of 8"
   phase: "Phase 1: Business Analysis"

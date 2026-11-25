@@ -39,7 +39,7 @@ Explicitly state resource ownership boundaries (can users access or mutate resou
 
 For every entity whose lifecycle changes or is introduced, draw the finite
 state machine as a Mermaid `stateDiagram-v2` block or compile an interactive
-lifecycle map using [`archify`](file:///Users/vutuanhau/Documents/PROJECT/Universal-Agents-Workflow/.agents/skills/engineering/archify/SKILL.md) (`diagram_type: "lifecycle"`), including:
+lifecycle map using [`archify`](.agents/skill-library/engineering/archify/SKILL.md) (`diagram_type: "lifecycle"`), including:
 
 - Every named state and its exact transition triggers (user action,
   scheduled job, webhook, etc.)

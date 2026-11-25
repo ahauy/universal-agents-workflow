@@ -516,6 +516,38 @@ def sync_hooks(target_dir: Path) -> None:
         print(f"  ⚠️  Hook re-registration error: {exc}")
 
 
+def normalize_skill_tiers(target_dir: Path) -> None:
+    """Collapse the two-tier skill layout on projects installed before it existed.
+
+    An older install keeps every skill under `.agents/skills/`, so the harness
+    still injects ~65 descriptions (~7k tokens) into every request and every
+    subagent. The catalog generator knows which skills belong in the indexed
+    tier; `--prune` removes the duplicates already present in the library and
+    rewrites `.agents/SKILLS.md`. Best-effort: never fail an update over it.
+    """
+    script = target_dir / ".agents" / "scripts" / "build-skill-index.mjs"
+    if not script.is_file():
+        return
+    if shutil.which("node") is None:
+        print("  \u26a0\ufe0f  Node.js not found - skipped skill tier normalization.")
+        return
+
+    import subprocess
+
+    try:
+        proc = subprocess.run(
+            ["node", str(script), "--prune", "--quiet"],
+            cwd=str(target_dir), capture_output=True, text=True, timeout=60,
+        )
+        if proc.returncode == 0:
+            print("  \U0001f4d1  Skill tiers: normalized (hot set + .agents/SKILLS.md)")
+        else:
+            err = (proc.stderr or proc.stdout or "").strip().splitlines()
+            print(f"  \u26a0\ufe0f  Skill tier normalization failed: {err[-1] if err else proc.returncode}")
+    except Exception as exc:  # pragma: no cover - defensive
+        print(f"  \u26a0\ufe0f  Skill tier normalization error: {exc}")
+
+
 def cmd_sync(target_dir: Path, source_dir: Path, version: str,
              ship: Optional[list[str]] = None, non_interactive: bool = False,
              git_mode: str = "") -> int:
@@ -624,6 +656,7 @@ def cmd_apply(target_dir: Path, non_interactive: bool = False) -> int:
 
         # 5. Re-register harness hooks (Claude Code mirror of .agents/hooks.json)
         sync_hooks(target_dir)
+        normalize_skill_tiers(target_dir)
 
         # 6. Summary report
         print_sync_summary(stats, remote_version)

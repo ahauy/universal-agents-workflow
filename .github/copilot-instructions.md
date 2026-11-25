@@ -9,7 +9,7 @@ All architectural guidelines, multi-agent lifecycle protocols, behavioral constr
 
 1. **Single Source of Truth**: Always read and adhere to the guidelines in [AGENTS.md](../AGENTS.md) and project terminology in [CONTEXT.md](../CONTEXT.md).
 2. **Language Specialization**:
-   - For language-specific standards (Swift, Go, Python, Rust, TypeScript), consult the corresponding rules in `.agents/rules/` and skills in `.agents/skills/engineering/`.
+   - For language-specific standards (Swift, Go, Python, Rust, TypeScript), consult the corresponding rules in `.agents/rules/`. To pick a skill, read `.agents/SKILLS.md` and open the one row that matches.
    - When reviewing or generating code, refer to `.agents/agents/<lang>-reviewer.md` for the language's memory safety, concurrency, and security invariants.
 3. **Strict Anti-AI-Slop**:
    - Zero unrequested multi-color gradients, neon accents, or floating glassmorphism.

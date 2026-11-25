@@ -4,7 +4,7 @@ name: elicitation-interview
 description: >
   Use after intake-classifier has classified a request as a Bounded Task or Full Feature.
   Orchestrates the structured, batched elicitation interview (BABOK/IREB style),
-  delegating the deep questioning mechanics to the `grilling` primitive (`.agents/skills/productivity/grilling`).
+  delegating the deep questioning mechanics to the `grilling` primitive (`.agents/skill-library/productivity/grilling`).
   Surfaces business value, personas, and the 6 domain pillars (RBAC, state machine,
   business rules, workflows/edge cases, data/privacy, UX/NFR). Never assume a business rule,
   default value, or edge case silently — ask.
@@ -48,7 +48,7 @@ Batch these into one turn (2–3 questions at a time, never more):
 
 > [!TIP]
 > **Delegation to `grilling` Primitive:**
-> Follow the recursive questioning mechanics from `.agents/skills/productivity/grilling`.
+> Follow the recursive questioning mechanics from `.agents/skill-library/productivity/grilling`.
 > Frame the request, branch the decision tree, batch 2–3 questions per turn, and never fill in silent assumptions.
 
 For each pillar, ask targeted questions using the standard question format below:

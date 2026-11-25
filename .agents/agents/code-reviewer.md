@@ -4,7 +4,7 @@ description: "Adversarial read-only code and security reviewer running dual pass
 tools: Read, Grep, Glob, Bash
 model: inherit
 subagent: true
-inheritMcp: true
+inheritMcp: false
 commandExecutionPolicy: auto
 ---
 

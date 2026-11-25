@@ -1,5 +1,11 @@
 # 📋 Bảng Tra Cứu Toàn Bộ Kỹ Năng & Lệnh (Default Skills Cheatsheet)
 
+> ⚠️ **Bản diễn giải, không phải nguồn chuẩn.** Danh mục chuẩn (sinh tự động từ
+> frontmatter, có kiểm tra drift) là **[`.agents/SKILLS.md`](../SKILLS.md)**.
+> File này giữ phần giải thích tiếng Việt cho người đọc; nếu lệch, `SKILLS.md`
+> thắng. Đừng thêm skill mới vào đây — thêm vào `GROUPS` của
+> `.agents/scripts/build-skill-index.mjs`.
+
 > **Mục tiêu**: Bảng tra cứu nhanh toàn bộ hơn 25 kỹ năng mặc định và lệnh tự động hóa trong **Universal Agents Workflow**, phân nhóm theo từng giai đoạn trong vòng đời phát triển phần mềm.
 
 ---

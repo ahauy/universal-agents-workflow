@@ -4,7 +4,7 @@ description: "Read-only codebase analyst that traces execution paths, architectu
 tools: Read, Grep, Glob, Bash
 model: inherit
 subagent: true
-inheritMcp: true
+inheritMcp: false
 commandExecutionPolicy: auto
 ---
 

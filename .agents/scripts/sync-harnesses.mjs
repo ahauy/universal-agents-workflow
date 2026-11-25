@@ -143,10 +143,10 @@ ${extra}## Where the rest lives (read on demand, never preload)
 | --- | --- |
 | Non-negotiables, pipeline, gates | \`AGENTS.md\` |
 | Step detail for the phase you are in | \`.agents/docs/pipeline-detail.md\` |
-| Skill lookup by situation | \`.agents/docs/skill-matrix.md\` |
+| Skill catalog (pick one, then open it) | \`.agents/SKILLS.md\` |
 | "Which skill do I need?" | \`.agents/docs/failure-modes.md\` |
 | Large file → which section | \`.agents/docs/reading-map.md\` |
-| Skills | \`.agents/skills/{engineering,productivity}/\` |
+| Skills | \`.agents/skills/\` (hot) + \`.agents/skill-library/\` (cold) |
 | Subagent personas | \`.agents/agents/\` |
 | Shared language / decisions | \`CONTEXT.md\`, \`adr/\` |
 
@@ -174,7 +174,9 @@ Behavioural deltas that are specific to Claude-family models live in
 lanes and delegation contract are all in \`AGENTS.md\` — read that first.
 
 Subagents: \`.claude/agents/\` (generated from \`.agents/agents/\`).
-Skills: \`.claude/skills/\` (linked to \`.agents/skills/\`).
+Skills: \`.claude/skills/\` (hot set, linked to \`.agents/skills/\`). The cold
+library stays at \`.agents/skill-library/\` — pick from \`.agents/SKILLS.md\` and
+read the file directly.
 `,
     );
     fanOutSkills(".claude/skills");
@@ -295,7 +297,9 @@ model it applies to; never restate the pipeline.
 # WorkBuddy
 
 Project guidance is \`AGENTS.md\` (auto-injected). Skills are exposed through
-\`.workbuddy-ai/skills/\`, which links to \`.agents/skills/\`.
+\`.workbuddy-ai/skills/\`, which links to \`.agents/skills/\` (hot set only).
+The cold library at \`.agents/skill-library/\` is read by path from
+\`.agents/SKILLS.md\`.
 
 Commands come from the skills themselves: \`/command-git-push\`,
 \`/command-skill-setup\`, \`/setup-subagents\`, … — the skill directory name is the

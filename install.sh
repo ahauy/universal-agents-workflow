@@ -392,6 +392,20 @@ if [ "$SAFE_SYNC_DONE" != true ]; then
 fi
 
 # ==============================================================================
+# BƯỚC 3.3a — CHUẨN HÓA HAI TẦNG SKILL (hot / cold)
+# ==============================================================================
+# Bản cài cũ giữ toàn bộ skill trong .agents/skills/, nên mọi harness vẫn index
+# hàng chục mô tả trên mỗi request và mỗi subagent (~7k token). --prune xóa bản
+# trùng đã có trong .agents/skill-library/ rồi sinh lại .agents/SKILLS.md.
+if command -v node >/dev/null 2>&1 && [ -f "$TARGET_DIR/.agents/scripts/build-skill-index.mjs" ]; then
+  if ( cd "$TARGET_DIR" && node .agents/scripts/build-skill-index.mjs --prune --quiet ); then
+    echo -e "  ${GREEN}✓${NC} Skill 2 tầng đã chuẩn hóa (hot set + .agents/SKILLS.md)"
+  else
+    echo -e "  ${YELLOW}⚠ Bỏ qua chuẩn hóa skill (script lỗi).${NC}"
+  fi
+fi
+
+# ==============================================================================
 # BƯỚC 3.3b — SINH ADAPTER ĐA HARNESS (một nguồn, nhiều spokes)
 # ==============================================================================
 # Thay vì bảo trì tay 6 file cầu nối (nguồn drift lớn nhất của framework), sinh
@@ -401,7 +415,7 @@ fi
 #   .gemini/commands                   .workbuddy-ai/skills
 # Idempotent: chỉ ghi file do script tạo (có marker), không đụng file người dùng.
 if command -v node >/dev/null 2>&1; then
-  if node "$TARGET_DIR/.agents/scripts/sync-harnesses.mjs" --target "$TARGET_DIR" --mode copy --quiet; then
+  if node "$TARGET_DIR/.agents/scripts/sync-harnesses.mjs" --target "$TARGET_DIR" --mode link --quiet; then
     echo -e "  ${GREEN}✓${NC} Adapter + slash command đã sinh cho mọi harness"
   else
     echo -e "  ${YELLOW}⚠ Bỏ qua bước sinh adapter harness (script lỗi).${NC}"

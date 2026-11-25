@@ -12,6 +12,7 @@ Deep detail, split out to keep the root file short:
 
 | Need | Read |
 | --- | --- |
+| **Skill catalog (which skill for what)** | [`SKILLS.md`](SKILLS.md) |
 | Step-by-step stage detail, merges, gates | [`docs/pipeline-detail.md`](docs/pipeline-detail.md) |
 | Skill → path lookup | [`docs/skill-matrix.md`](docs/skill-matrix.md) |
 | "Which skill do I need?" | [`docs/failure-modes.md`](docs/failure-modes.md) |

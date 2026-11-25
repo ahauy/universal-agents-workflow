@@ -83,7 +83,7 @@ Immediately upon passing Code Review (Stage 4 of implementation / Phase 6):
 
 - [ ] **Feature README Created**: `docs/features/<feature-slug>/README.md` populated with:
   - Background & Business Value (derived from signed-off spec)
-  - Architecture & Data Flow (Mermaid diagrams as core single-source-of-truth; optional interactive Archify maps & 1200×630 share cards via [`archify`](file:///Users/vutuanhau/Documents/PROJECT/Universal-Agents-Workflow/.agents/skills/engineering/archify/SKILL.md))
+  - Architecture & Data Flow (Mermaid diagrams as core single-source-of-truth; optional interactive Archify maps & 1200×630 share cards via [`archify`](.agents/skill-library/engineering/archify/SKILL.md))
   - Key Endpoints & DTO Contracts
   - UI/UX States & Components
   - Test Traceability Matrix (link to `test-plan.md`)

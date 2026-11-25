@@ -4,7 +4,7 @@ description: "Polyglot build and type-error specialist that resolves compiler, d
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 subagent: true
-inheritMcp: true
+inheritMcp: false
 commandExecutionPolicy: auto
 ---
 
