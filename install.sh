@@ -392,6 +392,25 @@ if [ "$SAFE_SYNC_DONE" != true ]; then
 fi
 
 # ==============================================================================
+# BƯỚC 3.3b — SINH ADAPTER ĐA HARNESS (một nguồn, nhiều spokes)
+# ==============================================================================
+# Thay vì bảo trì tay 6 file cầu nối (nguồn drift lớn nhất của framework), sinh
+# chúng từ AGENTS.md, fan-out skills, và sinh slash command cho từng harness:
+#   .claude/{agents,skills,commands}   .cursor/{rules,commands}
+#   .windsurf/{rules,workflows}        .github/{copilot-instructions,prompts}
+#   .gemini/commands                   .workbuddy-ai/skills
+# Idempotent: chỉ ghi file do script tạo (có marker), không đụng file người dùng.
+if command -v node >/dev/null 2>&1; then
+  if node "$TARGET_DIR/.agents/scripts/sync-harnesses.mjs" --target "$TARGET_DIR" --mode copy --quiet; then
+    echo -e "  ${GREEN}✓${NC} Adapter + slash command đã sinh cho mọi harness"
+  else
+    echo -e "  ${YELLOW}⚠ Bỏ qua bước sinh adapter harness (script lỗi).${NC}"
+  fi
+else
+  echo -e "  ${YELLOW}⚠ Không có node — bỏ qua bước sinh adapter harness.${NC}"
+fi
+
+# ==============================================================================
 # BƯỘC 3.4 — XÁC MINH HỢP ĐỒNG AGENT (Layer A + Layer B)
 # ==============================================================================
 # validate-agents.py kiểm hai lớp lỗi làm hỏng việc phân phối subagent mà runtime

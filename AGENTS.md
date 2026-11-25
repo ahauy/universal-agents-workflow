@@ -91,6 +91,7 @@ Reference index (consult by situation, not by reading all of it):
 - Skill → path lookup: `.agents/docs/skill-matrix.md`
 - "Which skill do I need?" symptom index: `.agents/docs/failure-modes.md`
 - Large file → which section to jump to: `.agents/docs/reading-map.md`
+- Using this template in another agent/IDE: `.agents/docs/harness-compatibility.md`
 - Step-by-step walkthrough: `.agents/docs/workflow-step-by-step.md`
 
 ---
