@@ -42,6 +42,8 @@ exactly as written there.
 
 ---
 
+> Some sections of this skill were moved to `references/` to keep the load cheap. The router listing them is at the **bottom of this file**.
+
 ## When to use this skill (Trigger Conditions)
 
 Activate `design-taste-product` whenever **any** of the following apply:
@@ -64,7 +66,6 @@ Activate `design-taste-product` whenever **any** of the following apply:
 - Mixed surfaces (marketing page + in-app screen in one feature) → split the work: `design-taste-frontend` for the marketing surface, this skill for the in-app surface
 
 ---
-
 ## 0. Scope
 
 ### 0.A This skill covers
@@ -92,7 +93,6 @@ If a request lands here, say so explicitly and point to the right tool rather
 than stretching this skill to cover it.
 
 ---
-
 ## 1. Brief inference (read the room, product-UI version)
 
 Before writing code, work out:
@@ -129,7 +129,6 @@ If genuinely ambiguous, ask **one** question — same discipline as
 brief already answers this; don't ask when you can infer.
 
 ---
-
 ## 2. Design system — don't reinvent, delegate
 
 Check `design-taste-frontend` Section 2.A first. It already maps brief
@@ -156,7 +155,6 @@ system "because it's more official" for this one screen. Consistency with
 what's already shipped beats textbook-correct system selection.
 
 ---
-
 ## 3. The dials, recalibrated for product UI
 
 `design-taste-frontend` uses three dials (`DESIGN_VARIANCE`,
@@ -182,7 +180,6 @@ down by it.
   the app, regardless of how expressive the brief sounds.
 
 ---
-
 ## 4. Information hierarchy for the task at hand
 
 Different product-UI tasks need different hierarchy strategies:
@@ -200,157 +197,6 @@ Different product-UI tasks need different hierarchy strategies:
   hunting for a specific item or field, not absorbing a narrative.
 
 ---
-
-## 5. Design anchor (`DESIGN.md`)
-
-The first time real visual decisions are made for a project (color, type
-scale, spacing scale, radius, shadow), write them to a short `DESIGN.md` at
-the project root instead of re-deciding per screen. Every screen after that
-reads the existing file first and stays consistent with it.
-
-```markdown
-# Design System — <project name>
-
-## Palette
-
-- Neutral: <background, surface, border, text>
-- Primary accent: <hex>
-- Secondary accent (optional): <hex>
-- Semantic (only if the domain needs it): success / warning / danger
-
-## Type
-
-- Family: <font(s)>
-- Scale: <e.g. 12 / 14 / 16 / 20 / 24 / 32>
-- Weight usage: <e.g. 400 body, 600 headings>
-
-## Spacing
-
-- Scale: <e.g. 4 / 8 / 12 / 16 / 24 / 32 / 48>
-
-## Radius / Shadow / Motion
-
-- <corner-radius system, shadow usage, default transition duration>
-
-## Notes
-
-- <anything worth remembering — a system this is anchored to, things to avoid>
-```
-
-If a `DESIGN.md` already exists, treat it as the source of truth and update
-it only when the user explicitly changes direction — don't regenerate it from
-scratch because a new screen has different needs.
-
----
-
-## 6. UX states, grounded in the spec
-
-Every view that loads or submits data needs all four states designed, not
-just the happy path:
-
-- **Loading** — a skeleton roughly matching the eventual layout, not a
-  generic centered spinner on a blank page.
-- **Empty** — a real explanation and, where relevant, a next action — not
-  just "No data."
-- **Error** — says what happened and what to do next, not a raw error
-  string.
-- **Populated** — check it at edge densities too (1 row, 100 rows), not just
-  the demo-data case.
-
-If the project has a spec (user stories, acceptance criteria, a domain
-model), every UI-relevant state named there should be visually distinct and
-checkable by looking at the screen — not just inferable from reading the
-code.
-
----
-
-## 7. Accessibility, in context
-
-`frontend-a11y` (if present in this project) covers the code-level patterns —
-label association, ARIA, keyboard handling, focus management. This skill adds
-the judgment layer on top, applied to the actual rendered screen rather than
-the markup in isolation:
-
-- **Keyboard-only pass** — can the core flow (completing a form, finishing a
-  review session) be done without a mouse?
-- **Icon+number pairings need accessible names** — a streak-flame icon next
-  to "12" needs an accessible label, not just a visual pairing a sighted user
-  can infer.
-- **Contrast checked against the actual rendered background**, not the
-  design token in isolation — a token that passes on paper can still fail
-  against a photo, gradient, or translucent surface behind it.
-
----
-
-## 8. i18n resilience
-
-If the project targets more than one language, test labels, buttons, and any
-number/counter displays with a long string — German, Vietnamese, and several
-other languages routinely run longer than English — and confirm nothing
-truncates or breaks layout. This matters more in product UI than marketing:
-a truncated button label blocks a task; a truncated landing-page headline is
-just ugly.
-
----
-
-## 9. Engagement mechanics (streaks, XP, rewards, urgency)
-
-When the product uses streaks, XP, levels, badges, or similar mechanics:
-
-- Make the current state legible at a glance — today's status, current
-  streak, progress to the next milestone — without requiring math or a trip
-  to settings.
-- Reserve strong visual energy for genuine milestones (leveling up,
-  completing a streak). If routine states get the same celebratory treatment
-  as real milestones, nothing feels earned.
-- Check reward/urgency copy against any documented anti-abuse or ethical
-  constraints in the project's own domain rules before shipping loss-framed
-  language ("you'll lose everything") — nudge toward genuine engagement, not
-  anxiety.
-- Reward/streak-increment animations should be motivated feedback for a
-  completed action, and must respect `prefers-reduced-motion` like any other
-  motion (`design-taste-frontend` Section 6.B applies here unchanged).
-
----
-
-## 10. AI tells specific to product UI
-
-These are the dashboard/app equivalents of `design-taste-frontend` Section 9
-— read that section too for the tells that apply everywhere (em-dash ban,
-Inter-as-default, AI-purple, hand-rolled SVGs). The ones below are specific
-to product surfaces:
-
-- **Card soup.** Every element wrapped in an identical white card with the
-  same shadow and radius, with nothing to distinguish a KPI tile from a
-  settings panel from a list item. Use elevation only where it communicates
-  real hierarchy; group with spacing or a hairline divider otherwise.
-- **Cards inside cards.** A card containing another card containing the
-  actual content is a strong tell of not having thought about layout —
-  flatten it.
-- **Meaningless KPI tiles.** A number with an up/down arrow and a percentage
-  that doesn't map to anything the user actually tracks. If a stat isn't
-  something the user would ask about, it doesn't deserve a tile.
-- **Sidebar nav with no grouping.** A dozen ungrouped icons in a rail is not
-  information architecture. Group by function, and don't force icon-only nav
-  when a labeled list would be clearer.
-- **A table that pretends to be data-dense but has no sort, filter, or
-  pagination.** If there's enough data to need a "data table," it needs the
-  actual table functionality, not just table-shaped styling.
-- **A settings page as one long flat form.** Group related settings into
-  sections; don't present 30 fields in one uninterrupted column.
-- **Uniform buttons regardless of intent.** Primary, secondary, and
-  destructive actions all styled the same way forces the user to read every
-  label to know what a click will do.
-- **Happy-path-only screens.** A polished populated state with no loading,
-  empty, or error state designed is not a finished screen (see Section 6).
-- **Marketing copy leaking into product UI.** Hiding the actual workflow,
-  tool, or object behind an onboarding-style hero, a feature-explainer
-  section, or persuasive copy on a screen the user already chose to be on.
-  Once someone is inside the product, show them the tool — they don't need
-  to be sold on it again.
-
----
-
 ## 11. Pre-flight check
 
 Before calling product UI done:
@@ -385,3 +231,15 @@ Before calling product UI done:
       available in this environment; its absence stated explicitly if not?
 
 If a box can't be honestly ticked, the screen isn't done yet.
+
+## References (read on demand)
+
+This skill is split so a load costs ~3.4k tokens instead of ~4.7k. The core above is always relevant; the files below are situational.
+
+| Open | Contains |
+| --- | --- |
+| `references/design-anchor.md` | 5. Design anchor (DESIGN.md), Palette, Type, Spacing, Radius / Shadow / Motion, Notes |
+| `references/ux-states-a11y-i18n.md` | 6. UX states, grounded in the spec, 7. Accessibility, in context, 8. i18n resilience |
+| `references/engagement-and-ai-tells.md` | 9. Engagement mechanics (streaks, XP, rewards, urgency), 10. AI tells specific to product UI |
+
+Never load more than one reference file at a time.

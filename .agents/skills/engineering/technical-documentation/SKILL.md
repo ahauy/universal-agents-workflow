@@ -49,11 +49,11 @@ Produce and review technical documentation that is clear, actionable, and mainta
 
 ---
 
-## The Diataxis Framework for WordStreak Docs
+## The Diataxis Framework for Project Docs
 
 Every technical document must explicitly match one of the 4 Diataxis quadrants:
 
-| Quadrant                                 | Purpose                                                | WordStreak Location / Example                                         | Tone / Style                            |
+| Quadrant                                 | Purpose                                                | Location / Example                                         | Tone / Style                            |
 | ---------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------- | --------------------------------------- |
 | **Tutorial** (Learning-oriented)         | Step-by-step guide for beginners to complete a project | `docs/tutorials/`, Getting Started guides                             | Prescriptive, hands-on, no assumptions  |
 | **How-To Guide** (Problem-oriented)      | Recipes to accomplish a specific real-world task       | `docs/guides/`, "How to seed deck data", "How to add a NestJS module" | Practical, goal-focused, step-by-step   |

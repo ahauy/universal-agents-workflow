@@ -66,7 +66,7 @@ review step adds on top, because it's only checkable with fresh eyes on the
 finished artifact rather than during generation:
 
 - **Cross-check against the spec, not just the checklist.** Every
-  acceptance criterion in `spec/user-stories.md` that has a UI component
+  acceptance criterion in `requirements.md` §4 that has a UI component
   should be checkable by looking at the screen, not just inferred from
   reading the code or trusting the implementer's self-report.
 - **Cross-check against sibling screens.** For product UI, confirm this
@@ -126,7 +126,7 @@ fails the overall slice review and routes through the same scoped fix loop
       `design-taste-product`, never both applied where only one fits
 - [ ] The owning skill's checklist read fresh this run, not from memory or a
       stale copy
-- [ ] Findings cross-checked against the actual spec (`spec/user-stories.md`)
+- [ ] Findings cross-checked against the actual spec (`requirements.md` §4)
       and, for product UI, against sibling screens already shipped — not
       just re-confirmed from the checklist in isolation
 - [ ] A real screenshot pass attempted where a browser tool exists; its

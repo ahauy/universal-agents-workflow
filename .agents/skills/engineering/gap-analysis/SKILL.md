@@ -2,7 +2,7 @@
 invocation: model
 name: gap-analysis
 description: >
-  Use for WordStreak Full Feature work, after elicitation-interview has
+  Use for Full Feature work, after elicitation-interview has
   captured business value and the 6 pillars. Documents AS-IS (current system
   or manual workaround), TO-BE (target end-to-end experience), and the
   functional/data/user-impact/transition gaps between them. Trigger this
@@ -67,7 +67,8 @@ causes the most downstream pain when skipped:
 
 ## 4. Record
 
-Append to `02-gap-analysis.md`:
+Append an `## AS-IS / TO-BE / GAP` section to `03-domain-model.md`. Gap analysis is
+part of domain modeling now — there is no separate `02-gap-analysis.md` file.
 
 ```markdown
 # Gap Analysis: <Feature Title>
@@ -91,13 +92,13 @@ Append to `02-gap-analysis.md`:
 - ...
 ```
 
-Append a short pointer to this file's summary under `baseline.md`'s Stage 3
-section — don't duplicate the full content, link to it.
+Append a short pointer to this section's summary under `baseline.md` — don't
+duplicate the full content, link to it.
 
 ## 5. Hand off
 
-Proceed to `domain-modeling`, which will read both `01-elicitation.md` and
-`02-gap-analysis.md`. Append one line to `CHANGELOG.md`.
+Continue within `domain-modeling`: it reads `01-elicitation.md` and appends the gap
+section to `03-domain-model.md`. Append one line to `CHANGELOG.md`.
 
 ## Exit checklist
 
@@ -105,4 +106,4 @@ Proceed to `domain-modeling`, which will read both `01-elicitation.md` and
 - [ ] TO-BE documented as the concrete end-to-end experience
 - [ ] All four gap categories addressed, including Transition requirements
 - [ ] Data gaps specifically checked against existing schema, not assumed
-- [ ] `02-gap-analysis.md`, `baseline.md`, `CHANGELOG.md` updated
+- [ ] `03-domain-model.md` gap section, `baseline.md`, `CHANGELOG.md` updated

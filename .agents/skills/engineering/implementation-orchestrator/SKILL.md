@@ -2,7 +2,7 @@
 invocation: user
 name: implementation-orchestrator
 description: >
-  Use once handover has signed off a WordStreak feature's baseline and spec
+  Use once handover has signed off a feature's baseline and spec
   (Phase 3 complete) and it's time to write the actual code. Reads the
   signed-off spec, decomposes it into independent vertical slices, delegates
   each slice to a scoped subagent (or an isolated session when subagents
@@ -37,7 +37,7 @@ conventions it reuses.
 
 - **Tier 1 (< 80 lines)**: **Zero Slicing**. Implement directly via single developer turn using TDD.
 - **Tier 2 (80–250 lines)**: **Cohesive Slicing**. Merge adjacent layers into a single end-to-end slice (Data + Logic + API handled by one developer subagent, UI by frontend subagent). **Do NOT split into 4 micro-subagents.**
-- **Tier 3 (> 250 lines)**: Read `spec/SRS.md` and `spec/user-stories.md`. Group `REQ-`/`US-` items into slices by **dependency layer**, not by file or by feature area:
+- **Tier 3 (> 250 lines)**: Read `requirements.md` §3 and §4. Group `REQ-`/`US-` items into slices by **dependency layer**, not by file or by feature area:
   - **Data layer** — schema/migration, `BR-` validations
   - **Domain/business logic** — algorithms, state machine transitions
   - **API/interface layer** — endpoints, contracts
@@ -63,7 +63,7 @@ back-to-back in the orchestrator's own context — that reproduces the exact
 bloat this skill exists to avoid. Give each subagent **only**:
 
 - the `REQ-`/`BR-`/`US-` excerpts it covers, not the full spec
-- the matching acceptance criteria from `spec/user-stories.md`
+- the matching acceptance criteria from `requirements.md` §4
 - the existing code it needs to touch, scoped — not the whole repo
 
 Instruct each subagent to return a short result, not a transcript:
@@ -90,7 +90,7 @@ receives **only**:
 
 - **Round 1**: the full diff (or changed-file list) the slices produced against base branch
 - **Rounds 2 & 3**: **incremental diff only** (`git diff HEAD~1` or fix commit diff) plus previous open finding IDs
-- `spec/user-stories.md` acceptance criteria
+- `requirements.md` §4 acceptance criteria
 - the relevant `BR-` rules from `03-domain-model.md`
 
 It must **not** receive the implementer's reasoning, chat history, or

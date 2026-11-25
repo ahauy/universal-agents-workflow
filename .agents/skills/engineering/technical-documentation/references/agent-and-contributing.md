@@ -20,7 +20,7 @@ To prevent rule drift across multiple AI coding assistants (Antigravity, Cursor,
 
 Every agent policy document must categorize behavioral constraints into three unambiguous levels:
 
-| Boundary        | Description                                   | WordStreak Examples                                                                                   |
+| Boundary        | Description                                   | Examples                                                                                   |
 | --------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | **`Always`**    | Non-negotiable rules that run every time      | Read mandatory skill before coding, follow TDD, maintain zero critical bugs, validate DTO boundaries  |
 | **`Ask First`** | Actions requiring explicit human confirmation | Adding third-party packages, altering DB schema in production, changing core game mechanics           |

@@ -4,7 +4,7 @@ name: "speckit-taskstoissues"
 description: >
   Use to convert tasks.md entries into GitHub Issues with proper labels, dependencies,
   and descriptions. Invoke when you want to track tasks in GitHub Issues instead of
-  or alongside tasks.md. Part of the WordStreak Speckit pipeline.
+  or alongside tasks.md. Part of the Speckit pipeline.
 compatibility: "Requires spec-kit project structure with .specify/ directory"
 metadata:
   author: "github-spec-kit"

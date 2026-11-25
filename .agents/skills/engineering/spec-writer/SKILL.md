@@ -2,84 +2,99 @@
 invocation: model
 name: spec-writer
 description: >
-  Use for WordStreak Bounded Task or Full Feature work once elicitation,
-  domain modeling, and risk scanning are complete (or, for Bounded Tasks,
-  once elicitation and a light domain model exist). Compiles the accumulated
-  business analysis into the right specification document(s) — BRD, PRD,
-  SRS, and/or Gherkin-style User Stories — assigning REQ-/US- IDs so every
-  requirement traces back to a business goal. Trigger this whenever the user
-  says "write the spec", "turn this into a spec", "write user stories for
-  this", or once risk-contradiction-scanner's exit checklist is fully green.
-  Do not write a spec directly from a raw request — this skill assumes the
+  Use for Lean Task or Full Feature work once elicitation, domain modeling, and
+  the consistency scan are complete. Compiles the accumulated business analysis
+  into ONE consolidated requirements.md with four sections (business context,
+  product behaviour, requirements, user stories), assigning REQ-/US- IDs so every
+  requirement traces back to a business goal. Optionally renders per-audience
+  exports (BRD / PRD / SRS / user stories) from that single source. Trigger this
+  whenever the user says "write the spec", "turn this into a spec", "write user
+  stories for this", or once the consistency scan's exit checklist is fully green.
+  Do not write requirements directly from a raw request — this skill assumes the
   upstream BA stages already ran.
 metadata:
-  stage: "BA Pipeline — Stage 6 of 8"
+  stage: "BA Pipeline — Stage 5 of 6"
   phase: "Phase 2: Specification"
   model_recommendation: "Standard thinking sufficient — structured document assembly from upstream artifacts"
-  prev_skill: "risk-contradiction-scanner"
+  prev_skill: "consistency-scan"
   next_skill: "spec-validator"
 ---
 
 # Spec Writer
 
-Phase 2, Stage 6. This is the first stage whose output looks like a
-traditional deliverable — but it's still assembly, not authorship: every
-sentence in the spec should trace back to something already decided in
-`01-elicitation.md` through `04-risk-register.md`. If you find yourself
-inventing a requirement here, stop and send it back to
-`elicitation-interview` instead.
+Phase 2, Stage 5. This is the first stage whose output looks like a traditional
+deliverable — but it's still assembly, not authorship: every sentence should trace
+back to something already decided in `01-elicitation.md`, `03-domain-model.md`, or
+`04-risk-register.md`. If you find yourself inventing a requirement here, stop and
+send it back to `elicitation-interview` instead.
 
-## 1. Choose the document set
+## 0. Naming: `requirements.md` ≠ `spec.md`
 
-Check `00-intake.md` for protocol and audience:
+Two different artifacts share the word "spec". Keep them apart:
 
-| Protocol | Documents produced |
-|---|---|
-| Bounded Task | `user-stories.md` only |
-| Full Feature, single-team | `SRS.md` + `user-stories.md` |
-| Full Feature, cross-team / needs non-technical sign-off | `BRD.md` + `PRD.md` + `SRS.md` + `user-stories.md` |
+| Artifact | Answers | Owner | Path |
+| --- | --- | --- | --- |
+| `requirements.md` | **What** and **why** | This skill (BA, Phase 1) | `.specify/features/<slug>/requirements.md` |
+| `spec.md` | **How** — DTOs, contracts, schema | `speckit-specify` (Phase 2) | `.specify/features/<slug>/spec.md` |
 
-If unsure which Full Feature row applies, ask the user once — don't default
-to producing all four for every feature; that's the over-classification
-failure mode `intake-classifier` exists to prevent.
+Never write to `spec.md` from this skill. That file belongs to the technical phase
+and is generated downstream from the baseline.
 
-## 2. Assign IDs and write
+## 1. One file, four sections
 
-**BRD.md** (business audience — leadership, product owner): problem
-statement, target personas, success metrics, MoSCoW summary. No technical
-detail. Pulled from Stage 1 of `01-elicitation.md` and Stage 5's MoSCoW
-table.
+Earlier versions of this skill produced up to four separate documents (BRD, PRD,
+SRS, user stories) from a single domain model. That was pure duplication: the same
+content re-expressed for four imagined audiences, then re-read by every downstream
+agent. Author **one** `requirements.md` with four sections instead.
 
-**PRD.md** (product/design audience): BRD content plus the TO-BE experience
-from `02-gap-analysis.md`, UX states from `03-domain-model.md` §6, and scope
-boundaries (MoSCoW Must/Should/Could, with Won't-Have stated explicitly).
+| Section | Answers | Written for |
+| --- | --- | --- |
+| 1. Business context | Why, for whom, what is out of scope | Leadership / product owner |
+| 2. Product behaviour | How it works: flows, states, edge cases, MoSCoW | Product / design |
+| 3. Requirements | `REQ-<SLUG>-###`, precise and testable | Dev / QA / architect |
+| 4. User stories | `US-<SLUG>-###`, Given-When-Then | Dev / QA |
 
-**SRS.md** (dev/QA/architect audience — the precise, testable layer):
+A Lean Task may ship with only sections 3–4. Never produce more than these four
+sections; a fifth section means the scope is too broad — split the feature.
+
+## 2. Section 1 — Business context
+
+Problem statement, target personas, success metrics, MoSCoW summary. No technical
+detail. Pull from `01-elicitation.md` (problem & value) and the MoSCoW table in
+`04-risk-register.md`.
+
+## 3. Section 2 — Product behaviour
+
+TO-BE experience from `03-domain-model.md` (gap analysis lives inside that file —
+there is no separate `02-gap-analysis.md`), UX states from `03-domain-model.md` §6,
+and scope boundaries. State the **Won't-Have** list explicitly; a scope without a
+stated Won't-Have is not locked.
+
+## 4. Section 3 — Requirements
 
 ```markdown
-### REQ-STREAK-001: Streak freeze prevents daily reset
-**Category**: Gamification
-**Priority**: Must-Have
+### REQ-<SLUG>-001: <precise, testable statement>
+**Category**: <Gamification | Billing | Auth | ...>
+**Priority**: Must-Have | Should-Have | Could-Have
 **Status**: Draft
-**Description**: <precise, testable statement>
-**Derived from**: BR-STREAK-004, ASM-STREAK-002
-**Business Rules**: BR-STREAK-004
-**Non-Functional Requirements**: <performance/security if applicable>
+**Description**: <one unambiguous statement>
+**Derived from**: BR-<SLUG>-004, ASM-<SLUG>-002
+**Business Rules**: BR-<SLUG>-004
+**Non-Functional Requirements**: <performance / security if applicable>
 **Dependencies**: <other REQ IDs, if any>
 ```
 
-Every `REQ-` ID must cite the `BR-`/`ASM-`/gap-analysis item it came from in
-**Derived from** — this line is what makes `spec-validator`'s traceability
-check possible later.
+Every `REQ-` must cite the `BR-`/`ASM-` it came from in **Derived from**. That line
+is what makes `spec-validator`'s traceability check possible.
 
-**user-stories.md** (always produced):
+## 5. Section 4 — User stories
 
 ```markdown
-### US-STREAK-001: <Title>
+### US-<SLUG>-001: <Title>
 **As a** <role>
 **I want to** <action>
 **So that** <business value>
-**Traces to**: REQ-STREAK-001
+**Traces to**: REQ-<SLUG>-001
 
 **Acceptance Criteria**:
 - **Scenario 1 (happy path)**
@@ -92,35 +107,74 @@ check possible later.
   - Then <graceful handling>
 ```
 
-Pull edge-case scenarios directly from `03-domain-model.md` §4 (Workflows &
-edge cases) — every edge case documented there should show up as a Scenario
-2+ somewhere, not just the happy path.
+Pull edge-case scenarios directly from `03-domain-model.md` §4 (workflows & edge
+cases). Every edge case documented there must appear as Scenario 2+ somewhere.
 
-## 3. Update the baseline
+## 6. Render per-audience exports — only when a real audience exists
 
-Once all documents for this protocol are written, compile the full
-**Domain Decision Baseline** into `baseline.md` (still `Status: DRAFT` —
-only `handover` marks it signed off):
+The four sections map 1:1 onto the four classic documents, so splitting is a
+**rendering** step, not a writing step. Default: do not render. Render only when at
+least one of these holds:
+
+- an external party reads the document (client, auditor, vendor);
+- each artifact needs its **own signature** (PO signs BRD, architect signs SRS);
+- the document is imported into a requirements tool (Jira, DOORS, Polarion);
+- a contract, regulation, or standard names the document explicitly.
+
+If none holds, stop here — extra files with no distinct reader are maintenance debt.
+
+When rendering, write to `.specify/features/<slug>/exports/`:
+
+| Export | Built from |
+| --- | --- |
+| `exports/BRD.md` | §1 (+ MoSCoW summary) |
+| `exports/PRD.md` | §1 + §2 |
+| `exports/SRS.md` | §3 |
+| `exports/user-stories.md` | §4 |
+
+Every export starts with this header, verbatim:
+
+```markdown
+<!-- GENERATED FROM ../requirements.md — DO NOT EDIT BY HAND.
+     Edit requirements.md and re-render. Hand edits here are lost on the next
+     render and will silently diverge from the source. -->
+```
+
+Rules for exports:
+
+1. **Regenerate wholesale.** Overwrite the file; never patch an export.
+2. **Never let an export carry content the source lacks.** If a reader needs
+   something not in `requirements.md`, add it to the source first.
+3. **Framing may change, facts may not.** You may drop internal detail from BRD or
+   reorder for the audience, but any `REQ-`/`US-` id must match the source exactly.
+4. **One-way flow.** Export → never import. Feedback from an export goes back into
+   `requirements.md`.
+
+## 7. Compile the baseline
+
+Once `requirements.md` is written, compile the **Domain Decision Baseline** into
+`baseline.md` (still `Status: DRAFT` — only `handover` marks it signed off):
 
 1. Business summary & problem statement
-2. Gap analysis summary (Full Feature only)
-3. Approved domain model summary (RBAC, states, rules — link to
-   `03-domain-model.md`, don't duplicate)
-4. MoSCoW table (link to `04-risk-register.md`)
-5. Link to the full spec document set
-6. Open risks accepted rather than mitigated (from `04-risk-register.md`)
+2. Approved domain model summary — RBAC, states, rules (link to
+   `03-domain-model.md`, do not duplicate)
+3. MoSCoW table (link to `04-risk-register.md`)
+4. Link to `requirements.md` (the single source), plus `exports/` if rendered
+5. Open risks accepted rather than mitigated (from `04-risk-register.md`)
 
-## 4. Hand off
+## 8. Hand off
 
 Proceed to `spec-validator`. Append one line to `CHANGELOG.md`.
 
 ## Exit checklist
 
-- [ ] Correct document set chosen for the protocol/audience — not
-      over-produced
-- [ ] Every REQ has a **Derived from** line citing an upstream `BR-`/`ASM-`/
-      gap item — none invented fresh at this stage
+- [ ] Exactly one `requirements.md` exists, with no more than four sections
+- [ ] `spec.md` was **not** touched — that file belongs to `speckit-specify`
+- [ ] Every REQ has a **Derived from** line citing an upstream `BR-`/`ASM-` item —
+      none invented fresh at this stage
 - [ ] Every user story has both a happy-path and an edge-case scenario
-- [ ] Every edge case from `03-domain-model.md` §4 appears in at least one
-      user story
+- [ ] Every edge case from `03-domain-model.md` §4 appears in at least one story
+- [ ] Won't-Have list is explicit
+- [ ] Exports rendered **only** if a split condition in §6 was met, each carrying
+      the generated-file header
 - [ ] `baseline.md` compiled (still DRAFT), `CHANGELOG.md` updated

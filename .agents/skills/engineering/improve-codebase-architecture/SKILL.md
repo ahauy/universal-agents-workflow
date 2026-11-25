@@ -92,7 +92,7 @@ Generate a standalone, interactive visual report saved to the operating system's
    - **Structure**:
      - **Header**: Repository name, scan timestamp, and visual legend (Solid box = Module, Dashed line = Seam, Red line = Leakage, Dark card = Deep Module).
      - **Candidate Cards**: One `<article>` per candidate containing:
-       - **Title**: Action-oriented name (e.g., _"Collapse WordStreak Quiz Engine Pipeline"_).
+       - **Title**: Action-oriented name (e.g., _"Collapse Quiz Engine Pipeline"_).
        - **Badge Row**: Recommendation strength badge (`Strong` = emerald, `Worth exploring` = amber, `Speculative` = slate) + dependency classification tag (`in-process`, `local-substitutable`, `ports & adapters`, `mock`).
        - **Files**: Monospaced paths of all affected files.
        - **Problem**: 1–2 sentences pinpointing the exact architectural friction.

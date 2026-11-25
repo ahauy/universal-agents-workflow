@@ -1,205 +1,84 @@
 # GEMINI.md
 
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+Behavioural deltas for Gemini-family models. **The pipeline, gates, tier lanes,
+token budgets and delegation contract live in [`AGENTS.md`](./AGENTS.md) — read
+that first.** This file only adds what is specific to this model family.
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+**Tradeoff:** these guidelines bias toward caution over speed. For trivial tasks,
+use judgment.
 
-## 1. Think Before Coding
+## 1. Think before coding
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+- **Zero speculation.** Never invent a business rule, formula, default parameter,
+  error behaviour, or edge case. If something is underspecified, stop and ask.
+- State assumptions explicitly. If two interpretations exist, present both — do
+  not pick one silently.
+- If a simpler approach exists, say so and push back.
 
-Before implementing:
+Tier classification and token budgets are defined once in `AGENTS.md` §2. Do not
+re-derive them here.
 
-- **Zero Speculation & Zero Hallucination**: NEVER invent, fabricate, or silently assume business rules, formulas, error handling, default parameters, or edge cases. If something is unknown, ambiguous, or underspecified, STOP and ask the customer directly.
-- **3-Tier Speed Lanes (Token & Time Optimization)**:
-  - **Tier 1 (Fast-Track, < 80 lines)**: Bypasses BA & Speckit ceremony entirely. Proceed directly to TDD: Reproduce -> Failing Test / Assert -> Surgical Fix -> Verification -> Single Conventional Commit. (⏱️ 2–3 mins, 💰 ~15k tokens).
-  - **Tier 2 (Lean Task / Roadmap User Story, 80–250 lines)**: For any story from `PRODUCT_BACKLOG_ROADMAP.md` with documented Acceptance Criteria (not marked `[!]`), bypass the 8-stage BA ceremony and Speckit duplication. Go straight to TDD Implementation $\rightarrow$ Review. (⏱️ 5–8 mins, 💰 ~50k–70k tokens).
-  - **Tier 3 (Full Feature / Epic, > 250 lines or `[!]`)**: Full 8-stage BA pipeline with interactive customer interview and Speckit planning.
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+## 2. Simplicity — the ladder
 
-## 2. Simplicity First — The Ladder of Minimal Code
+Stop at the first rung that holds:
 
-**Before writing any code, stop at the first rung that holds:**
+1. Does this need to exist at all? Speculative future need → skip it.
+2. Already in this codebase? Reuse the helper, util, type, or pattern.
+3. Stdlib does it? Use it (`functools.lru_cache`, `Intl.DateTimeFormat`, `os.path`).
+4. Native platform feature covers it? `<input type="date">` over a picker lib, CSS
+   over JS, a DB constraint over application code.
+5. Already-installed dependency solves it? Use it. Never add one for a few lines.
+6. Can it be one line? Write one line.
+7. Only then: the minimum code that works and passes the test.
 
-1. **Does this need to exist at all?** Speculative future need → skip it, say so in one line. (YAGNI)
-2. **Already in this codebase?** A helper, util, type, or pattern already living here → reuse it. Look before you write.
-3. **Stdlib does it?** Use the standard library (`functools.lru_cache`, `Intl.DateTimeFormat`, `os.path`, etc.).
-4. **Native platform feature covers it?** `<input type="date">` over a picker lib, CSS over JS, DB constraint over app code.
-5. **Already-installed dependency solves it?** Use it. Never add a new one for what a few lines can do.
-6. **Can it be one line?** Write one line.
-7. **Only then:** the minimum code that works and passes the test.
+No unrequested abstractions. No scaffolding "for later". If you wrote 200 lines and
+it could be 50, rewrite it. Mark deliberate simplifications with a `ponytail:`
+comment naming the ceiling and the upgrade path.
 
-**Anti-overengineering rules:**
-
-- No unrequested abstractions: no interface with one implementation, no factory for one product, no config for a value that never changes.
-- No boilerplate, no scaffolding "for later" — later can scaffold for itself.
-- If you write 200 lines and it could be 50, rewrite it.
-- Mark deliberate simplifications with a `ponytail:` comment naming the ceiling and upgrade path: `# ponytail: global lock, per-account locks if throughput > 1k rps`
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-## 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
+## 3. Surgical changes
 
 - Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
+- Don't refactor what isn't broken.
+- Match existing style even if you'd do it differently.
+- Notice unrelated dead code → mention it, don't delete it.
+- Remove only the imports/variables your own change orphaned.
 
-When your changes create orphans:
+The test: every changed line traces directly to the user's request.
 
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
+## 4. Goal-driven execution
 
-The test: Every changed line should trace directly to the user's request.
+Turn tasks into verifiable goals before starting:
 
-## 4. Goal-Driven Execution
+- "Add validation" → "write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "write a test that reproduces it, then make it pass"
+- "Refactor X" → "tests pass before and after"
 
-**Define success criteria. Loop until verified.**
+For multi-step work, state the plan as `[step] → verify: [check]` lines. Strong
+success criteria let you loop without asking.
 
-Transform tasks into verifiable goals:
+## 5. Design system & anti-slop
 
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
+Before touching `.tsx`, `.jsx`, `.css`, or any UI mockup:
 
-For multi-step tasks, state a brief plan:
+1. Read `CONTEXT.md` for canonical terminology and `adr/` for settled decisions.
+2. Read the target project's design tokens (`DESIGN.md` or component tokens) to
+   match its palette, typography and geometry.
 
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
+Forbidden: unrequested multi-colour gradients, heavy glassmorphism, floating blurred
+neon orbs, fake pricing tiers, mocked CLI output.
 
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+Required: clean canvas, 1px hairline borders, explicit type hierarchy
+(display / body / mono), and a **stable outer anchor** for hover physics — never
+attach hover handlers to elements translating on the Y axis.
 
-## 5. Strict Design System & Anti-AI-Slop Governance
+Detail: `design-taste-frontend` (public surfaces) or `design-taste-product`
+(in-app screens) — read the router section first, then one `references/` file.
 
-**MANDATORY FOR ANY FRONTEND / UI WORK:**
-Before touching any `.tsx`, `.jsx`, `.css`, or UI mockup, the AI MUST:
+## 6. Reporting
 
-1. **Check Project Shared Language & Decisions**:
-   - Read [CONTEXT.md](file:///Users/vutuanhau/Documents/PROJECT/Universal-Agents-Workflow/CONTEXT.md) for canonical project terminology and naming conventions.
-   - Read [adr/](file:///Users/vutuanhau/Documents/PROJECT/Universal-Agents-Workflow/adr) for settled architectural decision records.
-2. **Check Target Project Design System**:
-   - Read the repository's design documentation or tokens (e.g. `DESIGN.md`, `MEMORY.md`, or component design tokens in the project) to match exact color palettes, typography, and geometry.
+When a subagent is dispatched or finishes, announce in chat: name & role, active
+model, task scope, output artifact path. Detail in `AGENTS.md` §4.
 
-**Strict Anti-AI-Slop Rules:**
-
-- **Zero Generic AI Slop**: Absolutely NO unrequested multi-color gradients (e.g. `bg-gradient-to-r from-purple-500 to-indigo-600`), NO heavy dark-mode glassmorphism, NO floating blurred neon orbs, NO fake pricing tiers or mocked CLI commands.
-- **Minimal Canvas & Intentional Palette**: Clean document canvas, 1px hairline borders (`#e5e5e5`/`#d4d4d4`), purposeful CTA geometry (e.g. solid obsidian pills `rounded-full`).
-- **Typography Tokens**: Explicit font hierarchy (Display / Heading, Body copy, Monospace code) rather than unstyled defaults.
-- **Stable Outer Anchor for Hover**: Never attach hover handlers directly to elements translating on Y-axis. Always use a stable outer anchor to eliminate 60Hz hover jitter.
-
-## 6. Subagent Transparency & Model Notification
-
-**MANDATORY NOTIFICATION ON SUBAGENT EXECUTION:**
-Whenever a subagent is dispatched (e.g. for adversarial UI review, technical documentation, slice implementation, or browser automation):
-
-- The agent MUST explicitly display a notification card in chat.
-- It MUST indicate the **Subagent Name**, the **Active Model Name** (the model actually serving this session, e.g. the model shown in the IDE status bar), the **Goal**, and the **Final Artifact/Report Link**.
-
-## 7. Mandatory Automatic Subagent Delegation Protocol
-
-**AUTOMATIC MULTI-AGENT LIFECYCLE (MANDATORY & NON-NEGOTIABLE):**
-The primary orchestrator agent MUST strictly follow the standard multi-agent execution pipeline without waiting for manual user prompting. Every phase MUST automatically dispatch its dedicated subagents via `invoke_subagent`:
-
-```mermaid
-graph TD
-    subgraph P1 ["PHASE 1: BA & Domain Elicitation"]
-        BA["🍉 business-analyst (model: inherit)"]
-    end
-
-    subgraph P2 ["PHASE 2-4: Tech Spec & Architecture Planning"]
-        SA["🏗️ system-architect (model: inherit)"]
-    end
-
-    subgraph P5 ["PHASE 5: Fullstack Implementation & TDD"]
-        CE["🔍 code-explorer (model: inherit)"]
-        BE["⚙️ backend-developer (model: inherit)"]
-        FE["🎨 frontend-developer (model: inherit)"]
-        SI["⚡ slice-implementer (model: inherit)"]
-        BR["🔧 build-resolver (model: inherit)"]
-        E2E["🧪 e2e-runner (model: inherit)"]
-
-        CE --> BE
-        CE --> FE
-        BE --> SI
-        FE --> SI
-        SI --> BR
-        BR --> E2E
-    end
-
-    subgraph P6A ["PHASE 6A: Adversarial Quality Review"]
-        CR["🛡️ code-reviewer (model: inherit)"]
-        UR["👁️ ui-ux-reviewer (model: inherit)"]
-    end
-
-    subgraph P6B ["PHASE 6B: Standard Documentation"]
-        TD["📚 tech-doc-architect (model: inherit)"]
-        UG["💼 user-guide-creator (model: inherit)"]
-        AE["⚖️ agent-evaluator (model: inherit)"]
-    end
-
-    BA --> SA
-    SA --> CE
-    E2E --> CR
-    E2E --> UR
-    CR --> TD
-    CR --> UG
-    CR --> AE
-    UR --> TD
-    UR --> UG
-    UR --> AE
-```
-
-### Strict Orchestrator Invariants & Hard Coding Ban (NON-NEGOTIABLE):
-
-- **Zero Direct Feature Coding by Orchestrator**: The primary orchestrator agent is **STRICTLY PROHIBITED** from calling `write_to_file` or `replace_file_content` directly for any feature code, specifications, database schemas, or unit/E2E test files.
-- **Mandatory Delegation via `invoke_subagent`**: All domain elicitation, architecture planning, backend/frontend implementation, code review, and user guide generation MUST be delegated to dedicated subagents spawned via `invoke_subagent`.
-- **Model Allocation Matrix**: All subagents declare `model: inherit` and therefore run on the model selected for the current session. Override `model:` in an agent file only with an ID that this harness actually serves, and keep every agent in one phase chain on a reachable model.
-  - Deep Domain Elicitation: `business-analyst`.
-  - Architecture & Adversarial Review: `system-architect`, `code-reviewer`, `agent-evaluator`.
-  - Fast Execution & Testing: `code-explorer`, `backend-developer`, `frontend-developer`, `slice-implementer`, `build-resolver`, `ui-ux-reviewer`, `tech-doc-architect`, `user-guide-creator`.
-- **Language Specialization (Zero Conflict / Dynamic Dispatch)**: When specialized stack subagents are present in `.agents/agents/` (e.g., `swift-reviewer`, `swift-build-resolver`, `go-reviewer`, `rust-reviewer`):
-  - In **Phase 5**, the orchestrator delegates compilation and build resolution to `<lang>-build-resolver`.
-  - In **Phase 6A**, the orchestrator delegates adversarial code inspection to `<lang>-reviewer`.
-  - The generic `build-resolver` and `code-reviewer` serve as polyglot fallbacks, ensuring zero naming conflict and zero workflow divergence.
-- **Pre-execution Catalog Definition**: Before running any phase, the orchestrator MUST ensure subagents are defined via `define_subagent` with specialized system prompts.
-
-### Protocol Execution Chain:
-
-1. **Phase 1 (BA & Domain Elicitation — 3-Tier Speed Lanes)**:
-   - **Stage 1 (Intake)**: Auto-dispatch `business-analyst` to run `intake-classifier`.
-     - **Tier 1 (Fast-Track, < 80 lines)**: Bypasses BA folder and interview, proceeding directly to Phase 5 TDD (Reproduce -> Failing Test -> Surgical Fix -> Verify).
-     - **Tier 2 (Lean Task / Roadmap US, 80–250 lines)**: For any story from `PRODUCT_BACKLOG_ROADMAP.md` with documented AC (not marked `[!]`), bypass 8 BA stages and Speckit duplication. Jump straight to Phase 5 TDD.
-     - **Tier 3 (Full Feature / Epic, > 250 lines or `[!]`)**: Creates `.specify/features/<slug>/`, runs Stages 2–8.
-   - **🛑 STAGE 2 INTERACTIVE ELICITATION INTERVIEW (Tier 3 Only — MANDATORY CUSTOMER GATE)**:
-     - The AI / `business-analyst` **MUST PAUSE** and conduct a live, interactive interview with the User (batched 2–3 questions at a time covering Business Value & the 6 Domain Pillars: RBAC, State Machine, Business Rules/Formulas, Workflows/Edge cases, Data/Privacy, UX/NFRs) using direct chat turns or `ask_question`.
-     - **Strict No-Hallucination Policy**: AI is STRICTLY FORBIDDEN from inventing business rules, error behaviors, default parameters, or edge cases. If anything is unknown or ambiguous, AI MUST ask the customer directly.
-   - **Stage 3–8 (Domain Modeling to Handover — Tier 3 Only)**: Only after the user confirms elicitation answers, `business-analyst` executes gap analysis, domain modeling, risk scanning, spec writing, IEEE 29148 validation, and handover brief to produce `baseline.md`.
-   - **🛑 Confirmation Gate 1 (Tier 3 Only)**: Present Domain Baseline summary to User for sign-off.
-2. **Phase 2–4 (Spec & Architecture — Tier 3 Only)**: Auto-dispatch `system-architect` to produce `spec.md`, `plan.md`, `data-model.md`, `contracts/`, and `tasks.md`. Present Confirmation Gate 2 to User. (Tier 1 & Tier 2 tasks bypass directly to Phase 5).
-3. **Phase 5 (Fullstack Implementation & TDD)**:
-   - Auto-dispatch `code-explorer` to inspect existing patterns.
-   - Auto-dispatch `backend-developer` & `frontend-developer` in parallel or sequenced slices.
-   - Auto-dispatch `slice-implementer` to wire integration.
-   - Auto-dispatch `build-resolver` to eliminate type/lint build errors.
-   - Auto-dispatch `e2e-runner` to verify test suites.
-4. **Phase 6A (Adversarial Review)**:
-   - Auto-dispatch `code-reviewer` for adversarial code quality & security review (governed by the 4 stopping rules: 3-round cap, incremental diff only on rounds 2+, grouped bugs, no re-reporting old bugs).
-   - Auto-dispatch `ui-ux-reviewer` for Anti-AI-Slop, `DESIGN.md`, `MEMORY.md`, and WCAG AA verification.
-5. **Phase 6B (Documentation & Sign-off)**:
-   - Auto-dispatch `tech-doc-architect` (`docs/features/<slug>/README.md`).
-   - Auto-dispatch `user-guide-creator` (`docs/user-guides/<slug>.md`).
-   - Auto-dispatch `agent-evaluator` (Final DoD & Quality Scorecard).
-
----
-
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, zero generic AI slop in UI, total subagent transparency, automatic subagent delegation for all phases, and clarifying questions come before implementation rather than after mistakes.
+These guidelines are working if: diffs contain fewer unnecessary changes, fewer
+rewrites from overcomplication, zero generic AI slop, and clarifying questions
+arrive before implementation rather than after mistakes.

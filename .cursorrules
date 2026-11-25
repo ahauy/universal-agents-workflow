@@ -7,7 +7,7 @@ Before taking action, modifying code, or creating features, read and follow:
 - CONTEXT.md
 
 Invariants:
-1. Always follow the 7-phase pipeline in AGENTS.md.
+1. Always follow the 7-step pipeline in AGENTS.md §1 and the 6 non-negotiables in §0.
 2. For language-specific files (Swift, Go, Rust, Python, TS), utilize specialized rules in .agents/rules/ and subagents in .agents/agents/.
 3. Zero AI-slop: clean document canvas, 1px borders, no unrequested gradients.
 4. Never commit or push to git autonomously without explicit user command.

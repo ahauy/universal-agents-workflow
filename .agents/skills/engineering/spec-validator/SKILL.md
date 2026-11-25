@@ -2,7 +2,7 @@
 invocation: model
 name: spec-validator
 description: >
-  Use for WordStreak Bounded Task or Full Feature work immediately after
+  Use for Lean Task or Full Feature work immediately after
   spec-writer produces its documents. Checks every requirement and user story
   against the ISO/IEC/IEEE 29148 quality criteria (necessary, unambiguous,
   complete, singular, feasible, verifiable, consistent, traceable) and builds
@@ -14,7 +14,7 @@ description: >
   unresolved quality issues, and never proceed to handover without a clean
   pass or an explicit, logged user override.
 metadata:
-  stage: "BA Pipeline — Stage 7 of 8"
+  stage: "BA Pipeline — Stage 6 of 6"
   phase: "Phase 2: Specification — Quality Gate"
   model_recommendation: "Extended thinking preferred — adversarial IEEE 29148 compliance check; must find gaps not just confirm"
   prev_skill: "spec-writer"
@@ -29,8 +29,8 @@ problem and try to find it, rather than skimming for confirmation.
 
 ## 1. Run the IEEE 29148 checklist
 
-For **every** `REQ-` and `US-` item in `spec/SRS.md` and
-`spec/user-stories.md`, check:
+For **every** `REQ-` and `US-` item in `requirements.md` §3 (requirements) and §4
+(user stories), check:
 
 | Criterion | Fails if... |
 |---|---|

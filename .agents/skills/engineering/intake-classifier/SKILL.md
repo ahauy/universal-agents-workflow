@@ -49,7 +49,7 @@ vibes — count.
 
 - **Tier 1: Fast-Track / Micro-Task**: Surgical bug fixes, UI styling adjustments, single config tweaks, or simple utilities under 80 lines with zero domain ambiguity.
 - **Spike / Feasibility**: Technical exploration or "is this feasible" research question. No permanent product code.
-- **Tier 2: Lean Task / Standard User Story**: Well-scoped User Story from `PRODUCT_BACKLOG_ROADMAP.md` or a standard feature task (80–250 lines) with defined Acceptance Criteria. **Bypasses 8-stage BA ceremony to save 75% tokens.**
+- **Tier 2: Lean Task / Standard User Story**: Well-scoped User Story from `PRODUCT_BACKLOG_ROADMAP.md` or a standard feature task (80–250 lines) with defined Acceptance Criteria. **Bypasses the full BA ceremony to save ~75% tokens.**
 - **Tier 3: Full Feature / Epic**: Brand-new system domain, complex multi-entity relationships, cross-cutting auth/billing architecture, or undefined product initiatives (> 250 lines).
 
 ---
@@ -68,7 +68,7 @@ vibes — count.
 >
 > - If `Effort` is `S` $\rightarrow$ ALWAYS route to **Tier 1: Fast-Track**.
 > - If `Effort` is `M` $\rightarrow$ ALWAYS route to **Tier 2: Lean Task**.
-> - NEVER force an already-defined roadmap User Story through the 8-stage BA ceremony unless the user explicitly requests an enterprise re-elicitation.
+> - NEVER force an already-defined roadmap User Story through the full BA ceremony unless the user explicitly requests an enterprise re-elicitation.
 
 State the classification and protocol out loud to the user before proceeding:
 

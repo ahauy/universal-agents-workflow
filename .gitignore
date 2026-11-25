@@ -59,3 +59,6 @@ Cargo.lock.bak
 *.swp
 *.swo
 *~
+
+# Agent session cache (regenerated per workspace)
+.agents/.cache/

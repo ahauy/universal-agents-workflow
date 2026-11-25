@@ -3,7 +3,7 @@ invocation: model
 name: verification-before-completion
 description: >
   Use at the end of Phase 5 (Implementation) and Phase 6 (Quality Review)
-  to verify that a WordStreak feature is fully complete and safe to close.
+  to verify that a feature is fully complete and safe to close.
   Enforces two hard documentation gates: spec docs must exist BEFORE tests
   run, and technical docs plus user guide must be completed AFTER tests pass.
   Runs all automated test suites, checks zero Critical bugs, validates
@@ -36,7 +36,7 @@ No step can be skipped. Each is a hard gate.
 Before running any test suite, confirm the following documents exist and
 are complete for `.specify/features/<slug>/`:
 
-- [ ] `spec/user-stories.md` — acceptance criteria source of truth
+- [ ] `requirements.md` §4 — acceptance criteria source of truth
 - [ ] `test-plan.md` — maps every `US-<SLUG>-###` scenario to a `TC-###`
 - [ ] `traceability-matrix.md` — `REQ-` → `US-` chain is recorded
 - [ ] `baseline.md` is marked `SIGNED-OFF` (not DRAFT)
@@ -105,7 +105,7 @@ If the feature touched `prisma/schema.prisma` or added migration files:
 Open `.specify/features/<slug>/test-plan.md` and verify:
 
 - [ ] Every `US-<SLUG>-###` happy-path scenario has a `TC-###`
-- [ ] Every edge-case scenario in `spec/user-stories.md` has a `TC-###`
+- [ ] Every edge-case scenario in `requirements.md` §4 has a `TC-###`
 - [ ] Every `TC-###` maps to an actual test file and test name
 - [ ] No `TC-###` is "skipped" or "TODO" without an accepted-risk note
 
@@ -211,7 +211,7 @@ the UI is final. The story stays open until both confirmation and guide exist.
 
 ## Exit Checklist
 
-- [ ] **Gate 0**: `spec/user-stories.md`, `test-plan.md`, `traceability-matrix.md` exist; `baseline.md` is SIGNED-OFF
+- [ ] **Gate 0**: `requirements.md` §4, `test-plan.md`, `traceability-matrix.md` exist; `baseline.md` is SIGNED-OFF
 - [ ] All automated test suites pass (exit 0)
 - [ ] Zero Critical bugs, zero unaccepted High bugs
 - [ ] Schema change validated (or marked N/A)
