@@ -291,7 +291,8 @@ flowchart TD
 | **`/route`**              | `bước tiếp theo?` | Trợ lý thông minh định hướng bước đi hoặc lệnh cần chạy tiếp theo.       |
 | **`/wait-what`**          | `nói dễ hiểu hơn` | Yêu cầu AI giải thích lại thuật ngữ bằng ngôn ngữ đời thường.            |
 
-> 📋 **Xem bảng tra cứu đầy đủ toàn bộ 25+ kỹ năng tại**: [📑 .agents/docs/skills-cheatsheet.md](.agents/docs/skills-cheatsheet.md)
+> 📑 **Mục lục kỹ năng (nguồn chuẩn)**: [`.agents/SKILLS.md`](.agents/SKILLS.md) — sinh tự động từ frontmatter, có `--check` chống lệch.
+> Giải thích tiếng Việt chi tiết: [`.agents/docs/skills-cheatsheet.md`](.agents/docs/skills-cheatsheet.md).
 
 ---
 
@@ -342,8 +343,10 @@ Thư mục dự án:
 │   │   ├── workflow-step-by-step.md    # Chi tiết 7 bước thực hành
 │   │   ├── skills-cheatsheet.md        # Bảng tra cứu toàn bộ kỹ năng
 │   │   └── smart-update-guide.md       # Cơ chế nâng cấp 3-Way Hash
+│   ├── SKILLS.md                       # 📑 Mục lục toàn bộ kỹ năng (sinh tự động)
 │   ├── catalog.json                    # Kho đăng ký động kỹ năng theo stack
-│   ├── skills/                         # Kỹ năng Engineering & Productivity
+│   ├── skills/                         # Hot set: entry point + slash command (được index)
+│   ├── skill-library/                  # Cold set: 57 kỹ năng đọc theo nhu cầu
 │   ├── agents/                         # Danh mục subagents chuyên môn hóa
 │   ├── rules/                          # Quy chuẩn coding style theo ngôn ngữ
 │   ├── hooks.json                      # Cấu hình khóa bảo vệ Git & an toàn dữ liệu
