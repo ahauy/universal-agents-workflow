@@ -104,6 +104,21 @@ function getGitBranch(cwd = process.cwd()) {
 }
 
 /**
+ * Get the current HEAD commit sha (short), or "none" outside a git repo.
+ */
+function getGitHead(cwd = process.cwd()) {
+  try {
+    return execSync("git rev-parse --short HEAD", {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "none";
+  }
+}
+
+/**
  * Get list of modified/staged/untracked files matching optional regex patterns.
  */
 function getGitModifiedFiles(patterns = [], cwd = process.cwd()) {
@@ -247,6 +262,7 @@ module.exports = {
   log,
   isGitRepo,
   getGitBranch,
+  getGitHead,
   getGitModifiedFiles,
   readFileSafe,
   writeFileSafe,
