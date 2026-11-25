@@ -3,7 +3,7 @@ invocation: model
 name: user-guide-with-screenshots
 description: >
   Creates or updates a user-facing guide (non-technical language, real
-  screenshots) for a WordStreak feature that was just built or modified.
+  screenshots) for a feature that was just built or modified.
   Use whenever: (1) a feature / user story ships, (2) any UI screen is
   changed (layout, flow, added/removed fields), (3) the user asks for
   "user guide", "end-user docs", "how-to guide", or "instructions for

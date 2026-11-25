@@ -58,38 +58,37 @@ Update `baseline.md`:
 **Signed off by**: <user, date>
 ```
 
-From this point, `baseline.md` and the `spec/` documents are locked as
+From this point, `baseline.md` and `requirements.md` are locked as
 written. Any further scope change is a **new** version, not an edit to the
 signed-off one — see §4.
 
-## 3. Produce the handover brief
+## 3. Append the handover brief to the baseline
 
-A short, dev-facing summary (not a re-statement of the full spec — link to
-it):
+Do **not** create a separate brief file — it duplicates `baseline.md`. Append a
+short, dev-facing summary as the final section of `baseline.md` itself. It is a
+pointer, not a re-statement of the spec:
 
 ```markdown
-# Handover Brief: <Feature Title>
+## Dev Handover Brief
 
 **Baseline version**: 1.0 (signed off <date>)
-**Spec documents**: spec/SRS.md, spec/user-stories.md [, BRD.md, PRD.md]
+**Requirements**: requirements.md (single source — `spec.md` is generated later in Step 3)
+**Audience exports**: `exports/BRD.md`, `exports/SRS.md` … or `none`
+**Exports rendered for**: <client / auditor / requirements tool — or "none, internal only">
 **Traceability matrix**: traceability-matrix.md
 
-## What's being built
-
+### What's being built
 <2-3 sentences>
 
-## What's explicitly out of scope
-
+### What's explicitly out of scope
 <from the MoSCoW Won't-Have list>
 
-## Known accepted risks/gaps
-
+### Known accepted risks/gaps
 <from validation-report.md and 04-risk-register.md, if any>
 
-## Next step
-
-Invoke `speckit-specify` (or hand to the dev team) to generate
-`.specify/features/<feature-slug>/spec.md` implementation artifacts.
+### Next step
+Invoke `speckit-specify` (or hand to the dev team) to generate the technical
+plan artifacts.
 ```
 
 ## 4. Change management after sign-off
@@ -114,5 +113,8 @@ why>`), and route the actual change through whichever upstream stage owns
 - [ ] `baseline.md` marked `SIGNED-OFF` with a version number
 - [ ] Handover brief written and links to the real documents rather than
       duplicating them
+- [ ] Audience exports recorded: either `none` (internal only) or the list of
+      rendered files with who they were rendered for — and each one carries the
+      `GENERATED FROM` header
 - [ ] User explicitly told what's next (who/what receives the handoff)
 - [ ] `CHANGELOG.md` updated with the sign-off entry

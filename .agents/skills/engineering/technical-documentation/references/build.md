@@ -33,7 +33,7 @@ Step 4: Self-Verification
 
 ## 2. Feature Documentation Template (`docs/features/<feature-slug>/README.md`)
 
-When documenting a completed WordStreak feature (Phase 6):
+When documenting a completed feature (Phase 6):
 
 ```markdown
 # Feature: <Feature Title>

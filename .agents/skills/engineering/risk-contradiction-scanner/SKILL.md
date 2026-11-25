@@ -2,7 +2,7 @@
 invocation: model
 name: risk-contradiction-scanner
 description: >
-  Use for WordStreak Bounded Task or Full Feature work, after domain-modeling,
+  Use for Lean Task or Full Feature work, after domain-modeling,
   to scan the accumulated business rules and state machines for logic
   contradictions, unreachable states, and backward-compatibility breaks; to
   build a risk register (technical, operational, legal); to consolidate the
@@ -40,8 +40,8 @@ Read `03-domain-model.md` in full and check for:
   out, or transitions that reference a state that was never defined.
 - **Backward-compatibility risks** — changes to existing schemas, REST
   contracts, or frontend contracts that would break current clients or
-  existing user data (cross-check against `02-gap-analysis.md`'s data gaps
-  if that file exists).
+  existing user data (cross-check against the data-gaps section of
+  `03-domain-model.md` if that file exists).
 
 Every finding gets logged even if resolved in the same turn — the point is
 an auditable record, not just a fixed document.

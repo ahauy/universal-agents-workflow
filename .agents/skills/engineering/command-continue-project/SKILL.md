@@ -114,7 +114,7 @@ Before starting analysis or code, ensure the working environment is synced with 
 > If the target User Story from `docs/PRODUCT_BACKLOG_ROADMAP.md` is NOT marked `[!]` and already contains Acceptance Criteria:
 >
 > - **For Effort S**: Skip Case A and Case B entirely. Do not create `.specify/features/<slug>/` folder. Jump directly to **Case C: Direct TDD Implementation**.
-> - **For Effort M**: Skip the 8-stage BA ceremony (`00` to `07` files) and Speckit duplication. Seed a single lightweight `.specify/features/<slug>/test-plan.md` directly from the roadmap AC, and jump directly to **Case C: TDD Implementation**.
+> - **For Effort M**: Skip the full BA ceremony and Speckit duplication. Seed a single lightweight `.specify/features/<slug>/test-plan.md` directly from the roadmap AC, and jump directly to **Case C: TDD Implementation**.
 > - **Only Effort L/XL or stories marked `[!]`** require Case A (interactive interview) and Case B (architecture plan).
 
 > **Tech Context Injection (MANDATORY):** Every subagent dispatched in Steps A-D MUST work

@@ -115,9 +115,9 @@ node bin/archify.mjs demo <output-directory>
 
 When shell access is unavailable, hand-place architecture SVG into `assets/template.html`, use CSS semantic classes rather than inline colors, and follow the visual review contract in `references/delivery-contract.md`.
 
-## Integration with 6-Phase Universal Agent Workflow (WordStreak)
+## Integration with 6-Phase Universal Agent Workflow
 
-In the WordStreak 6-phase engineering workflow, `archify` serves as the standard interactive architecture and system modeling engine:
+In the 7-step engineering workflow, `archify` serves as the standard interactive architecture and system modeling engine:
 
 - **Phase 1 (BA & Domain Modeling)**:
   - `lifecycle`: Model entity state machines, status lifecycles, guard conditions, transition triggers, and terminal/deadlock states (e.g., word mastery progression, challenge lifecycles, user streak freeze states).

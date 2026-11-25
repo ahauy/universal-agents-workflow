@@ -64,7 +64,7 @@ Create or update `docs/user-guides/<slug>.md` following the standard template:
 ```markdown
 # 📖 User Guide: [Feature Name]
 
-> **Audience:** WordStreak Learners  
+> **Audience:** End users  
 > **Last Updated:** [Current Date]
 
 ---
