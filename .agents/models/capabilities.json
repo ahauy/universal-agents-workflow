@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "verifiedAt": "2026-11-25",
+  "_note": "Capability registry for setup-subagents. Model names drift faster than role intent: update `knownModels` when a harness ships new families, and bump `verifiedAt`. Roles change rarely; models change often.",
+  "tiers": {
+    "reasoning": {
+      "intent": "Planning, elicitation, adversarial review — work where nothing downstream catches a mistake.",
+      "costProfile": "highest per turn, fewest turns"
+    },
+    "standard": {
+      "intent": "Implementation and structured writing from an already-scoped context pack.",
+      "costProfile": "middle, moderate turn count"
+    },
+    "fast": {
+      "intent": "Mechanical loops whose output is self-verifying (compiler, test runner, file scan).",
+      "costProfile": "lowest per turn, highest turn count"
+    }
+  },
+  "roles": {
+    "business-analyst": {
+      "tier": "reasoning",
+      "role": "Phỏng vấn & đặc tả",
+      "why": "Câu hỏi phỏng vấn sai thì mọi thứ phía sau sai; không test nào bắt được."
+    },
+    "system-architect": {
+      "tier": "reasoning",
+      "role": "Kiến trúc & hợp đồng",
+      "why": "Trade-off và ranh giới module chỉ lộ hậu quả sau nhiều tháng."
+    },
+    "code-reviewer": {
+      "tier": "reasoning",
+      "role": "Review đối kháng",
+      "why": "Giá trị nằm ở việc tìm ra cái model yếu bỏ sót; false negative sẽ ship bug."
+    },
+    "ui-ux-reviewer": {
+      "tier": "reasoning",
+      "role": "Review UI/UX",
+      "why": "Phân biệt design tốt và AI-slop là phán đoán, không phải kiểm tra cú pháp."
+    },
+    "agent-evaluator": {
+      "tier": "reasoning",
+      "role": "Đánh giá quy trình",
+      "why": "Meta-review chất lượng workflow; hạ tier được nếu ngân sách eo hẹp."
+    },
+    "backend-developer": {
+      "tier": "standard",
+      "role": "Viết code backend",
+      "why": "Đã có context pack scoped + test làm lưới an toàn."
+    },
+    "frontend-developer": {
+      "tier": "standard",
+      "role": "Viết code frontend",
+      "why": "Như backend; review UI là lớp kiểm tra riêng phía sau."
+    },
+    "slice-implementer": {
+      "tier": "standard",
+      "role": "Ghép lát cắt",
+      "why": "Nối các lớp đã có; lỗi lộ ra ngay ở integration test."
+    },
+    "tech-doc-architect": {
+      "tier": "standard",
+      "role": "Tài liệu kỹ thuật",
+      "why": "Viết lại từ artifact đã tồn tại, không cần suy luận mới."
+    },
+    "code-explorer": {
+      "tier": "fast",
+      "role": "Khảo sát codebase",
+      "why": "Đọc và tóm tắt; kết quả được kiểm chứng bằng lần đọc file thật."
+    },
+    "build-resolver": {
+      "tier": "fast",
+      "role": "Sửa lỗi build",
+      "why": "Compiler là người chấm bài, và đây là agent chạy nhiều lượt nhất."
+    },
+    "e2e-runner": {
+      "tier": "fast",
+      "role": "Chạy E2E",
+      "why": "Chạy test và báo pass/fail — đầu ra tự kiểm chứng."
+    },
+    "user-guide-creator": {
+      "tier": "fast",
+      "role": "Hướng dẫn người dùng",
+      "why": "Chụp màn hình + viết theo template; không có quyết định kỹ thuật."
+    }
+  },
+  "knownModels": [
+    { "match": "opus", "class": "reasoning", "notes": "Suy luận sâu, đắt nhất." },
+    { "match": "o3", "class": "reasoning", "notes": "Reasoning-first; chậm, mạnh." },
+    { "match": "o4", "class": "reasoning", "notes": "Reasoning-first thế hệ sau." },
+    { "match": "sonnet", "class": "balanced", "notes": "Cân bằng; mặc định an toàn cho code." },
+    { "match": "haiku", "class": "fast", "notes": "Nhanh, rẻ; đủ cho vòng lặp cơ học." },
+    { "match": "gemini", "class": "balanced", "notes": "Phân nhánh pro/flash quyết định class." },
+    { "match": "flash", "class": "fast", "notes": "Latency thấp, giá thấp." },
+    { "match": "gpt-4o", "class": "balanced", "notes": "Đa dụng, tool-calling ổn định." },
+    { "match": "mini", "class": "fast", "notes": "Bản rút gọn; tốt cho task hẹp." },
+    { "match": "reasoning", "class": "reasoning", "notes": "Routing value của WorkBuddy." },
+    { "match": "lite", "class": "fast", "notes": "Routing value của WorkBuddy." },
+    { "match": "default", "class": "balanced", "notes": "Routing value của WorkBuddy." }
+  ],
+  "heuristics": {
+    "_note": "Ordered — first match wins. Applied only when knownModels has no hit.",
+    "reasoning": ["opus", "o3", "o4", "reasoning", "thinking", "ultra", "max"],
+    "fast": ["haiku", "flash", "lite", "mini", "nano", "small", "turbo", "instant"],
+    "balanced": ["sonnet", "pro", "default", "standard", "4o", "gpt", "claude", "gemini"]
+  },
+  "capabilityCaveats": [
+    "Tên model thay đổi nhanh hơn vai trò — luôn xác nhận lại với người dùng trước khi áp dụng.",
+    "Không thể suy ra quyền truy cập (entitlement) từ file cấu hình; chỉ suy ra model đã khai báo.",
+    "Model 'reasoning' có thể tệ hơn 'balanced' cho vòng lặp sửa lỗi vì chậm và đắt hơn, không vì kém thông minh."
+  ]
+}

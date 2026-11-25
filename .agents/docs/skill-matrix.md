@@ -80,6 +80,7 @@
 | Hunk-by-hunk git conflict resolution by intent    | `resolving-merge-conflicts`        | `engineering/resolving-merge-conflicts` |
 | Authoring documentation optimized for AI agents   | `writing-for-agents`               | `engineering/writing-for-agents`|
 | One-time repository onboarding & self-config      | `/command-skill-setup`             | `engineering/command-skill-setup` |
+| Model assignment per subagent role, per harness   | `/setup-subagents`                 | `engineering/setup-subagents`   |
 | Interactive architecture, sequence & FSM diagrams | `archify`                          | `engineering/archify`           |
 
 ## Ponytail family (minimal-code enforcement)
