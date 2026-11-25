@@ -58,19 +58,12 @@ First agent 1, then agent 2, then agent 3
 
 ---
 
-## Dispatch Resilience (Weak-Model Safe)
+## Dispatch & Delegation
 
-Subagent dispatch is the most fragile call in the pipeline: the `task` argument is a JSON string, and models with weaker tool-call formatting (GLM, Qwen, DeepSeek, small local models) break on unescaped quotes, newlines, or very long strings inside it.
+Single source of truth: **`AGENTS.md` §4 (Delegation contract)**. It covers dispatch
+hygiene (short ASCII `task` strings, reference by path), the two-strike fallback that
+prevents deadlock, subagent transparency, and the completion contract.
 
-- **Keep `task` short and boring**: under 400 characters, single line, plain ASCII. No double quotes, no LaTeX math markers, no emoji, no Markdown tables, no pasted file contents.
-- **Reference, don't paste**: pass artifact paths (`.specify/features/<slug>/00-intake.md`) and let the subagent read them.
-- **Persona lives in the file**: never re-inject the agent's own description into the `task` string; the harness already loads it.
-- **Two-strike fallback**: after two syntax failures or one artifact-less completion, stop retrying and run the stage inline, then report the bypass to the user.
-
-## Delegation Completion Contract
-
-Applies to every agent at every depth (parent, child, grandchild):
-
-1. **Your final message IS the deliverable.** Never end your turn with "waiting for background agents" — a spawned task is not a completed task.
-2. **If you delegate, you own collection.** Wait for results, integrate them, then return.
-3. **Decompose only when the work cannot fit in one context.** Do not re-delegate a task already sized for a single agent.
+Delegation is **tier-gated**: Tier 1 and Tier 2 may be implemented directly by the
+orchestrator; only Tier 3 fans out into slices. Do not spawn micro-subagents for a
+two-file change.

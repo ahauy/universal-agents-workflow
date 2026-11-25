@@ -152,7 +152,7 @@ If any answer is 'no', **downgrade or drop the finding**. Zero findings is a val
 
 ### 1. Requirements & User Story Traceability
 
-- Compare modified code directly against `.specify/features/<slug>/spec.md` and `user-stories.md`.
+- Compare modified code directly against `.specify/features/<slug>/requirements.md` (§3 requirements, §4 user stories).
 - Verify that every Given-When-Then scenario has an actual implementation or passing test.
 - Check for undocumented behavior or unrequested feature additions (YAGNI violation).
 
@@ -243,7 +243,7 @@ Fix: Precise recommended change pattern.
 
 #### 🎯 [SPEC_FIDELITY] Spec & Business Rules
 
-[List grouped pattern findings or 'Code strictly satisfies all requirements in spec.md and domain models.']
+[List grouped pattern findings or 'Code strictly satisfies all requirements in requirements.md and domain models.']
 
 #### ⚡ [RELIABILITY] Type Safety & Error Handling
 
