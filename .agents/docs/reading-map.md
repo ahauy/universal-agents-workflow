@@ -11,7 +11,7 @@
 
 | If you need… | Read | In |
 | --- | --- | --- |
-| Where a skill lives | the row for your situation | `.agents/docs/skill-matrix.md` |
+| Which skill to use, and where it lives | the *Pick fast* table | `.agents/SKILLS.md` |
 | Which skill fits a symptom | the symptom row | `.agents/docs/failure-modes.md` |
 | The step you are currently on | that step only | `.agents/docs/pipeline-detail.md` |
 | A command or skill name | the matching numbered group | `.agents/docs/skills-cheatsheet.md` |

@@ -74,18 +74,28 @@ function formatFile(filePath, workspaceRoot) {
     }
   }
 
-  // Web & Config: Prettier
+  // Web & Config: Prettier.
+  // `npx prettier` resolves against the registry when the package is not
+  // installed locally, which turns every file write into a network round-trip.
+  // Prefer the local binary, then a cache-only npx. Never fetch.
   if (/\.(tsx?|jsx?|json|css|scss|md|html|yaml|yml)$/i.test(filePath)) {
-    try {
-      execSync(`npx prettier --write "${filePath}"`, {
-        cwd: workspaceRoot,
-        stdio: "pipe",
-        timeout: 15000,
-      });
-      return "prettier";
-    } catch {
-      return null;
+    const localBin = path.join(workspaceRoot, "node_modules", ".bin", "prettier");
+    const candidates = fs.existsSync(localBin)
+      ? [`"${localBin}" --write "${filePath}"`]
+      : [`npx --no-install prettier --write "${filePath}"`];
+    for (const command of candidates) {
+      try {
+        execSync(command, {
+          cwd: workspaceRoot,
+          stdio: "pipe",
+          timeout: 15000,
+        });
+        return "prettier";
+      } catch {
+        // try the next candidate
+      }
     }
+    return null;
   }
 
   return null;

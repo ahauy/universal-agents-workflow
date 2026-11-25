@@ -197,7 +197,7 @@ Một User Story / Task chỉ được chuyển trạng thái từ `[/]` sang `[
    - Frontend: Component render chuẩn, tương tác state mượt mà, không console error.
 3. **Chất lượng mã nguồn (Code Quality Gate):**
    - Tuân thủ quy chuẩn kiến trúc (`File < 800 dòng, Function < 50 dòng, Immutable data patterns`).
-   - Đã kiểm tra qua các stack skills phù hợp trong `.agents/skills/engineering/`.
+   - Đã kiểm tra qua các stack skills phù hợp (chọn từ `.agents/SKILLS.md`).
 4. **Không có lỗi nghiêm trọng (Bug Severity Gate):** Zero Critical / Blocker bugs.
 5. **Tài liệu hóa:** Cập nhật `docs/features/<slug>/README.md` và user guide kèm ảnh chụp thực tế.
 

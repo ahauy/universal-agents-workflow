@@ -1,15 +1,7 @@
 ---
 invocation: user
 name: command-generate-backlog
-description: >-
-  Activated when the user types /generate-backlog (or shortcuts /create-roadmap, /plan-backlog).
-  Conducts a structured grilling interview (2-3 batches, 6 core questions) to extract
-  Product, Platform, Auth, Content, Monetization, and Scope constraints from the user's
-  raw product idea. Then renders a fully-structured docs/PRODUCT_BACKLOG_ROADMAP.md
-  file (schema-version 1.2) with YAML frontmatter, Won't-Have fence, MoSCoW & RICE matrix,
-  ASCII roadmap tree, Dependency chain, Effort sizing, Context-budget, Tasks breakdown
-  (Backend/Frontend), and Pre-Deploy Hardening checklist — ready to power /command-continue-project.
-  Zero hallucination: never invents stories or ACs without user confirmation.
+description: "Interview the user and render docs/PRODUCT_BACKLOG_ROADMAP.md: MoSCoW, RICE, dependency chain, effort, context budget, tasks. Never invents stories."
 triggers:
   - "/generate-backlog"
   - "/create-roadmap"

@@ -4,7 +4,7 @@ description: "Evaluates agent output and PR changes against a 5-axis quality rub
 tools: Read, Grep, Glob, Bash
 model: inherit
 subagent: true
-inheritMcp: true
+inheritMcp: false
 commandExecutionPolicy: auto
 ---
 

@@ -1,10 +1,7 @@
 ---
 invocation: user
 name: command-git-push
-description: >-
-  Activated when the user types /command-git-push (or shortcuts /push, /ship, /auto-git-push).
-  Fast 2-shot modular git commit and push workflow: inspects changes, creates Conventional Commits
-  by layer (Spec -> Types -> Backend -> Frontend -> Docs), pushes to remote branch, and generates an English PR Brief.
+description: "Inspect changes, write Conventional Commits by layer, push the branch, and emit an English PR brief."
 triggers:
   - "/command-git-push"
   - "/git-push"

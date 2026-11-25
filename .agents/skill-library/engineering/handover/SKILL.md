@@ -23,7 +23,7 @@ metadata:
 > **NOT to be confused with `handoff`:**
 >
 > - `handover` (this skill) = **Control Plane** (Stage 8 of BA Pipeline) formal sign-off gate for the Domain Decision Baseline before coding begins.
-> - `handoff` (`.agents/skills/productivity/handoff`) = **Data Plane** session compactor for transferring active mental state and next steps to another agent context.
+> - `handoff` (`.agents/skill-library/productivity/handoff`) = **Data Plane** session compactor for transferring active mental state and next steps to another agent context.
 
 Phase 3, Stage 8 — the final gate. Nothing in this pipeline authorizes
 writing implementation code; that authorization is what this skill grants,

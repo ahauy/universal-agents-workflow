@@ -95,15 +95,15 @@ Read the active language from `CONTEXT.md` / `PRODUCT_BACKLOG_ROADMAP.md` frontm
 
 ### Blueprint A — C4 Layered
 
-Read template: `.agents/skills/engineering/scaffold-architecture/templates/c4-layered.md`
+Read template: `.agents/skill-library/engineering/scaffold-architecture/templates/c4-layered.md`
 
 ### Blueprint B — Hexagonal / Ports & Adapters
 
-Read template: `.agents/skills/engineering/scaffold-architecture/templates/hexagonal.md`
+Read template: `.agents/skill-library/engineering/scaffold-architecture/templates/hexagonal.md`
 
 ### Blueprint C — Feature-Based Modules
 
-Read template: `.agents/skills/engineering/scaffold-architecture/templates/feature-based.md`
+Read template: `.agents/skill-library/engineering/scaffold-architecture/templates/feature-based.md`
 
 **Idempotency rule**: Before creating any directory or file, check if it already exists. If it exists, **skip silently** (do not overwrite). Report a summary of what was created vs. skipped at the end.
 
@@ -250,7 +250,7 @@ pub enum DomainError {
 
 ## Step 4: Write ADR-ARCH-001
 
-If `adr/ADR-ARCH-001-architecture-blueprint.md` does NOT already exist, create it using the template at `.agents/skills/engineering/scaffold-architecture/templates/adr-arch-001-template.md`.
+If `adr/ADR-ARCH-001-architecture-blueprint.md` does NOT already exist, create it using the template at `.agents/skill-library/engineering/scaffold-architecture/templates/adr-arch-001-template.md`.
 
 Fill in:
 

@@ -5,6 +5,7 @@ weak tool-calling models (GLM, Qwen, and similar local/self-hosted families),
 not just on frontier models.
 
 Audience: anyone editing `.agents/agents/*.md`, `.agents/skills/**/SKILL.md`,
+`.agents/skill-library/**/SKILL.md`,
 `AGENTS.md`, `.agents/AGENTS.md`, or the installer.
 
 ---

@@ -4,7 +4,10 @@
       "path": ".agents/skills/engineering"
     },
     {
-      "path": ".agents/skills/productivity"
+      "path": ".agents/skill-library/engineering"
+    },
+    {
+      "path": ".agents/skill-library/productivity"
     }
   ]
 }

@@ -91,7 +91,8 @@ Chỉ tầng 1 là bắt buộc. Tầng 2–3 quyết định trải nghiệm, k
   native của repo.
 - **Không có subagent** (Copilot, Cursor tuỳ phiên bản): pipeline chạy tuần tự
   trong một context. Vẫn đúng, chỉ tốn token hơn.
-- **Không tự nạp skill**: model phải được bảo đọc `.agents/skills/...`. Con trỏ
+- **Không tự nạp skill**: model phải được bảo đọc một file cụ thể. Mở
+  `.agents/SKILLS.md`, chọn một dòng, rồi đọc đúng `SKILL.md` đó. Con trỏ
   trong adapter đã ghi đường dẫn nên vẫn hoạt động.
 
 ## Thêm một harness mới

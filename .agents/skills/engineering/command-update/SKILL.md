@@ -1,11 +1,6 @@
 ---
 name: command-update
-description: >
-  Smart update command for Universal Agents Workflow. Checks for new framework
-  versions, applies updates using the 3-Way Hash Conflict Engine, and protects
-  all project data files (CONTEXT.md, adr/, docs/, .specify/features/, src/,
-  PRODUCT_BACKLOG_ROADMAP.md, CHANGELOG.md, .env*, etc.) from ever being
-  overwritten. Preserves user-added custom skills and agents (Zero Deletion Policy).
+description: "Update the framework through the 3-Way Hash engine; protects project data and user-added skills (Zero Deletion Policy)."
 triggers:
   - /update
   - /upgrade

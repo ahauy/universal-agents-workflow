@@ -16,18 +16,18 @@ user-guide-with-screenshots/
 
 ## 1. Copy the folder into your project
 
-The skill is already placed at `.agents/skills/user-guide-with-screenshots/`.
+The skill is already placed at `.agents/skill-library/user-guide-with-screenshots/`.
 Antigravity picks it up automatically from this location.
 
 ## 2. Point your AI tool at this skill
 
-- **Antigravity**: the skill is auto-discovered from `.agents/skills/`. No extra
+- **Antigravity**: the skill is auto-discovered from `.agents/skill-library/`. No extra
   config needed — Antigravity matches it by the `triggers` list in the frontmatter.
 - **Cursor**: create `.cursor/rules/user-guide-with-screenshots.mdc` and paste in
   the contents of `SKILL.md`. Set `alwaysApply: false` so it only applies when
   relevant, or `alwaysApply: true` if you want it in every session.
 - **Other tools with file access**: tell the AI "read
-  `.agents/skills/user-guide-with-screenshots/SKILL.md` and follow it" — since
+  `.agents/skill-library/user-guide-with-screenshots/SKILL.md` and follow it" — since
   the tool can read files, it will open and follow the instructions directly.
 
 ## 3. Before using for the first time

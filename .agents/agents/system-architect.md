@@ -4,7 +4,7 @@ description: "System architect for Phases 2-4: technical spec, clarification, qu
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 subagent: true
-inheritMcp: true
+inheritMcp: false
 commandExecutionPolicy: auto
 ---
 

@@ -12,9 +12,9 @@ metadata:
 
 > [!IMPORTANT]
 > **Runtime Resolution**:
-> Inside a workspace containing `.agents/skills/archify/`, agents should run the local sandbox-safe runtime:
+> Inside a workspace containing `.agents/skill-library/archify/`, agents should run the local sandbox-safe runtime:
 > ```bash
-> node .agents/skills/archify/bin/archify.mjs ...
+> node .agents/skill-library/archify/bin/archify.mjs ...
 > ```
 > If the local workspace package is not found, fallback globally to:
 > ```bash
@@ -123,13 +123,13 @@ In the 7-step engineering workflow, `archify` serves as the standard interactive
   - `lifecycle`: Model entity state machines, status lifecycles, guard conditions, transition triggers, and terminal/deadlock states (e.g., word mastery progression, challenge lifecycles, user streak freeze states).
   - `workflow`: Diagram business logic, user onboarding funnels, multi-step approval gates, and operational runbooks.
 - **Phase 2–4 (Spec & Plan / System Architect)**:
-  - `architecture`: Generate comprehensive system maps, component topologies, and module boundaries backed by real codebase evidence via `--repo-root` (e.g., `node .agents/skills/archify/bin/archify.mjs finalize architecture <candidate.json> docs/architecture/<slug>.html --repo-root . --quality showcase --json`).
+  - `architecture`: Generate comprehensive system maps, component topologies, and module boundaries backed by real codebase evidence via `--repo-root` (e.g., `node .agents/skill-library/archify/bin/archify.mjs finalize architecture <candidate.json> docs/architecture/<slug>.html --repo-root . --quality showcase --json`).
   - `sequence`: Detail synchronous/asynchronous API call chains, request lifecycles, authentication handshakes, and failure/retry paths.
   - `dataflow`: Map ETL pipelines, analytics event tracking, streak calculation cron pipelines, and data lineage/governance.
 - **Phase 6A (Adversarial Review & Refactoring)**:
   - **Before / Delta / After Snapshot Diffing**: Use `compare architecture` to inspect and visualize structural diffs, module boundary changes, additions, and removals when refactoring:
     ```bash
-    node .agents/skills/archify/bin/archify.mjs compare architecture <before.json> <after.json> [output.html] --quality showcase --json
+    node .agents/skill-library/archify/bin/archify.mjs compare architecture <before.json> <after.json> [output.html] --quality showcase --json
     ```
 - **Phase 6B (Technical Documentation)**:
   - **Interactive HTML Maps**: Place validated standalone interactive diagrams in `docs/architecture/` (macro/system-wide maps) and `docs/features/<slug>/` (feature-specific architecture).

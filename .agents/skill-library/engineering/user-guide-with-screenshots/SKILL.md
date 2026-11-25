@@ -72,7 +72,7 @@ warning) only if the user needs to know about it.
 - If Playwright is not yet installed: `pnpm add -D playwright --filter web && pnpm --filter web exec playwright install chromium`.
 - Write a JSON capture plan (see `scripts/screenshot-plan.example.json` in this
   skill folder as a reference — each step from Step 2 becomes one entry in `steps`).
-- Run: `node .agents/skills/user-guide-with-screenshots/scripts/capture-screenshots.mjs <path-to-plan.json>`
+- Run: `node .agents/skill-library/user-guide-with-screenshots/scripts/capture-screenshots.mjs <path-to-plan.json>`
 - The script opens each screen, performs the actions (click / fill / hover),
   and saves images to the `outDir` declared in the plan.
 - Review the captured images — if a screenshot shows the wrong state (e.g. the
@@ -97,7 +97,7 @@ of the file:
 
 ## Reference Files
 
-Located at `.agents/skills/user-guide-with-screenshots/`:
+Located at `.agents/skill-library/user-guide-with-screenshots/`:
 
 - `scripts/capture-screenshots.mjs` — Playwright script; reads a JSON plan and captures screenshots.
 - `scripts/screenshot-plan.example.json` — example plan file based on the "Create flashcard" feature.

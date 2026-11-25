@@ -83,12 +83,19 @@ This is the highest-leverage rule in the framework. Context is the scarce resour
   `.specify/templates/context-pack.md`. It carries only: scope, the `BR-`/`REQ-`
   ids in play, acceptance criteria, contracts, and the exact files to touch.
   Downstream agents read the pack, not the full spec chain.
+- **Skills are cold by default.** `.agents/skills/` holds only entry points and
+  slash commands — that is the set every harness indexes on every request.
+  Everything else lives in `.agents/skill-library/` and costs nothing until read.
+  To use one: read `.agents/SKILLS.md`, pick one row, open one `SKILL.md`.
+  Never preload the library.
 - **Large skills are routers.** When a `SKILL.md` points at `references/*.md`, read
   the router first and open one reference file at a time.
 
 Reference index (consult by situation, not by reading all of it):
 
+- Skill catalog → `.agents/SKILLS.md`
 - Skill → path lookup: `.agents/docs/skill-matrix.md`
+- Token cost of context, skills, MCP, hooks: `.agents/docs/token-budget.md`
 - "Which skill do I need?" symptom index: `.agents/docs/failure-modes.md`
 - Large file → which section to jump to: `.agents/docs/reading-map.md`
 - Using this template in another agent/IDE: `.agents/docs/harness-compatibility.md`

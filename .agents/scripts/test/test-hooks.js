@@ -227,17 +227,25 @@ console.log("\n# package-install-guardian.js");
 
 console.log("\n# session-context-init.js");
 {
+  // The hook caches its output by git fingerprint + TTL, so a run that follows
+  // a normal session would skip injection and fail here for the wrong reason.
+  // Force the injection path and drop the cache to keep the test hermetic.
+  fs.rmSync(path.join(ROOT, ".agents", ".cache", "session-context.json"), { force: true });
+  process.env.UAW_CONTEXT_ALWAYS = "1";
+
   const cc = runClaude("session-context-init.js", "SessionStart", "", {});
   const ctx =
     cc.parsed && cc.parsed.hookSpecificOutput && cc.parsed.hookSpecificOutput.additionalContext;
   check("claude-code SessionStart yields additionalContext", !!ctx);
   check(
     "additionalContext carries the workflow reminder",
-    typeof ctx === "string" && ctx.includes("Workflow Reminder"),
+    typeof ctx === "string" && ctx.includes("Pipeline: Intake") && ctx.includes("Invariants:"),
   );
 
   const ag = execHook("session-context-init.js", {});
   check("antigravity SessionStart yields injectSteps", Array.isArray(ag.parsed.injectSteps));
+
+  delete process.env.UAW_CONTEXT_ALWAYS;
 }
 
 console.log("\n# fail-open behavior");

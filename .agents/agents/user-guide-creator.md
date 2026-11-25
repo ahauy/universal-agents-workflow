@@ -4,7 +4,7 @@ description: "End-user guide specialist producing docs/user-guides with step-by-
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 subagent: true
-inheritMcp: true
+inheritMcp: false
 commandExecutionPolicy: auto
 ---
 

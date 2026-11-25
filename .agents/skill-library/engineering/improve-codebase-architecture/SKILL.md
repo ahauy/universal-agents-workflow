@@ -102,7 +102,7 @@ Generate a standalone, interactive visual report saved to the operating system's
        - **ADR Callout**: Warning notice if the proposal revisits an existing ADR, stating why it is now justified.
      - **Top Recommendation**: Prominent card highlighting the highest-leverage candidate to tackle first.
 
-3. **Guidance Reference**: Consult [HTML-REPORT.md](HTML-REPORT.md) and [`archify`](file:///Users/vutuanhau/Documents/PROJECT/Universal-Agents-Workflow/.agents/skills/engineering/archify/SKILL.md) for complete HTML templates, CSS classes, badge color schemes, and snapshot diffing.
+3. **Guidance Reference**: Consult [HTML-REPORT.md](HTML-REPORT.md) and [`archify`](.agents/skill-library/engineering/archify/SKILL.md) for complete HTML templates, CSS classes, badge color schemes, and snapshot diffing.
 
 4. **Done Criteria**: HTML report generated, opened in default browser, and prompt user: _"Which candidate would you like to explore?"_
 
@@ -111,7 +111,7 @@ Generate a standalone, interactive visual report saved to the operating system's
 ### Phase 3: Grilling Loop
 
 When the user selects a candidate, engage in an architectural grilling dialogue to refine the proposal before writing code.
-Delegate the questioning mechanics to the `grilling` primitive (`.agents/skills/productivity/grilling`).
+Delegate the questioning mechanics to the `grilling` primitive (`.agents/skill-library/productivity/grilling`).
 
 1. **Grill the Design**:
    - **Define the Public Interface**: What is the minimal surface area needed by consumers?

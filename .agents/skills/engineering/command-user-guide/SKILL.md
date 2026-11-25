@@ -1,10 +1,7 @@
 ---
 invocation: user
 name: command-user-guide
-description: >-
-  Activated when the user types /command-user-guide (or shortcuts /user-guide, /guide, /auto-user-guide).
-  Verifies the running dev server, plans and captures real UI screenshots using Playwright,
-  and generates/updates docs/user-guides/<slug>.md with non-technical language and actionable tips.
+description: "Verify the dev server, capture real Playwright screenshots, and write docs/user-guides/<slug>.md in non-technical language."
 triggers:
   - "/command-user-guide"
   - "/user-guide"
@@ -50,10 +47,10 @@ This command skill automates the creation and maintenance of end-user documentat
 
 ### Step 3: Plan & Capture Screenshots
 
-1. Create a temporary screenshot plan (e.g., `.agents/skills/user-guide-with-screenshots/scripts/<slug>-plan.json`).
+1. Create a temporary screenshot plan (e.g., `.agents/skill-library/engineering/user-guide-with-screenshots/scripts/<slug>-plan.json`).
 2. Run the automated Playwright capture script:
    ```bash
-   node .agents/skills/user-guide-with-screenshots/scripts/capture-screenshots.mjs .agents/skills/user-guide-with-screenshots/scripts/<slug>-plan.json
+   node .agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs .agents/skill-library/engineering/user-guide-with-screenshots/scripts/<slug>-plan.json
    ```
    _(Or use the browser tool to capture screenshots for each step into `docs/user-guides/images/<slug>/`)_.
 

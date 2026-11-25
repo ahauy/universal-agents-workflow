@@ -65,6 +65,6 @@ When invoked:
 1. Identify the user's immediate bottleneck (Domain clarity? Architecture? Bug? Testing? Git?).
 2. Match against the routing matrices above or the **Failure-Mode Index** in `AGENTS.md`.
 3. Provide a direct recommendation in 2–3 sentences:
-   - Name the skill and its folder path (`.agents/skills/engineering/...` or `.../productivity/...`).
+   - Name the skill and its folder path (`.agents/skill-library/engineering/...` or `.../productivity/...`).
    - Give the exact trigger instruction or command.
    - Explain why this skill matches their situation.

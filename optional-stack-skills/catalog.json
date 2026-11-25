@@ -9,7 +9,10 @@
       "name": "Go Idiomatic Architecture & Deep Modules",
       "category": "Language",
       "short_description": "Enforces Go idioms: internal/ package boundaries, minimal consumer-defined interfaces, structured error wrapping, and anti-anemic domain models.",
-      "detection_markers": ["go.mod", "main.go"],
+      "detection_markers": [
+        "go.mod",
+        "main.go"
+      ],
       "source_path": "optional-stack-skills/languages/go/go-patterns",
       "target_type": "skill",
       "target_path": ".agents/skills/engineering/go-patterns",
@@ -20,7 +23,9 @@
       "name": "Go Coding Style & Rules",
       "category": "Language",
       "short_description": "Coding standards for Go: naming conventions, concurrency safety, table-driven unit testing, and defer cleanup rules.",
-      "detection_markers": ["go.mod"],
+      "detection_markers": [
+        "go.mod"
+      ],
       "source_path": "optional-stack-skills/languages/go/rules/coding-style.md",
       "target_type": "rule",
       "target_path": ".agents/rules/go-coding-style.md",
@@ -31,7 +36,9 @@
       "name": "Go Depguard Architectural Linter",
       "category": "Boundary Enforcement",
       "short_description": "Golangci-lint boundary checker configuration preventing unauthorized cross-package imports and keeping domain packages isolated.",
-      "detection_markers": ["go.mod"],
+      "detection_markers": [
+        "go.mod"
+      ],
       "source_path": "optional-stack-skills/languages/go/depguard.yaml",
       "target_type": "config",
       "target_path": "depguard.yaml",
@@ -75,7 +82,10 @@
       "name": "Python Import-Linter Boundary Checker",
       "category": "Boundary Enforcement",
       "short_description": "Enforces strict layer hierarchy in Python codebases (Domain -> Services -> Adapters) using import-linter contracts.",
-      "detection_markers": ["pyproject.toml", "requirements.txt"],
+      "detection_markers": [
+        "pyproject.toml",
+        "requirements.txt"
+      ],
       "source_path": "optional-stack-skills/languages/python/.importlinter.ini",
       "target_type": "config",
       "target_path": ".importlinter.ini",
@@ -86,7 +96,9 @@
       "name": "Rust Idiomatic Workspaces & Deep Modules",
       "category": "Language",
       "short_description": "Rust workspace boundary design: pub(crate) encapsulation, typed error trees with thiserror/anyhow, and trait-based zero-cost abstractions.",
-      "detection_markers": ["Cargo.toml"],
+      "detection_markers": [
+        "Cargo.toml"
+      ],
       "source_path": "optional-stack-skills/languages/rust/rust-patterns",
       "target_type": "skill",
       "target_path": ".agents/skills/engineering/rust-patterns",
@@ -97,7 +109,9 @@
       "name": "Rust Coding Style & Safety Standards",
       "category": "Language",
       "short_description": "Rust API design guidelines: ownership semantics, pub(crate) encapsulation, zero raw unwrap in production, and Clippy compliance.",
-      "detection_markers": ["Cargo.toml"],
+      "detection_markers": [
+        "Cargo.toml"
+      ],
       "source_path": "optional-stack-skills/languages/rust/rules/coding-style.md",
       "target_type": "rule",
       "target_path": ".agents/rules/rust-coding-style.md",
@@ -108,7 +122,10 @@
       "name": "TypeScript Deep Modules & Seam Discipline",
       "category": "Language",
       "short_description": "Clean TypeScript architecture: explicit barrel files (index.ts), branded types, schema validation with Zod, and avoidance of circular dependencies.",
-      "detection_markers": ["tsconfig.json", "package.json"],
+      "detection_markers": [
+        "tsconfig.json",
+        "package.json"
+      ],
       "source_path": "optional-stack-skills/languages/typescript/rules",
       "target_type": "rule",
       "target_path": ".agents/rules/typescript-rules",
@@ -119,7 +136,10 @@
       "name": "TypeScript Dependency-Cruiser Configuration",
       "category": "Boundary Enforcement",
       "short_description": "Automated architectural boundary validator preventing UI code from leaking into domain entities and blocking cyclic imports.",
-      "detection_markers": ["package.json", "tsconfig.json"],
+      "detection_markers": [
+        "package.json",
+        "tsconfig.json"
+      ],
       "source_path": "optional-stack-skills/languages/typescript/dependency-cruiser.config.cjs",
       "target_type": "config",
       "target_path": "dependency-cruiser.config.cjs",
@@ -130,7 +150,11 @@
       "name": "React & Next.js Best Practices",
       "category": "Framework",
       "short_description": "Comprehensive React standards: hook purity, custom hook extraction, Server/Client component separation, and robust accessibility.",
-      "detection_markers": ["react", "next", "package.json:\"react\""],
+      "detection_markers": [
+        "react",
+        "next",
+        "package.json:\"react\""
+      ],
       "source_path": "optional-stack-skills/frameworks/react-rules",
       "target_type": "rule",
       "target_path": ".agents/rules/react-rules",
@@ -206,9 +230,9 @@
         "package.json:\"pg\"",
         "requirements.txt:\"psycopg2\""
       ],
-      "source_path": ".agents/skills/engineering/postgres-patterns",
+      "source_path": ".agents/skill-library/engineering/postgres-patterns",
       "target_type": "skill",
-      "target_path": ".agents/skills/engineering/postgres-patterns",
+      "target_path": ".agents/skill-library/engineering/postgres-patterns",
       "recommendation": "recommended"
     },
     {
@@ -222,9 +246,9 @@
         "docker-compose.yaml",
         "compose.yaml"
       ],
-      "source_path": ".agents/skills/engineering/docker-patterns",
+      "source_path": ".agents/skill-library/engineering/docker-patterns",
       "target_type": "skill",
-      "target_path": ".agents/skills/engineering/docker-patterns",
+      "target_path": ".agents/skill-library/engineering/docker-patterns",
       "recommendation": "recommended"
     },
     {
@@ -361,7 +385,10 @@
       "name": "Go Specialized Subagents (Reviewer & Build Resolver)",
       "category": "Subagent",
       "short_description": "Dedicated Go subagents: go-reviewer (error wrapping, context, race detector) and go-build-resolver (import cycles, build fixer).",
-      "detection_markers": ["go.mod", "main.go"],
+      "detection_markers": [
+        "go.mod",
+        "main.go"
+      ],
       "source_path": "optional-stack-skills/languages/go/agents",
       "target_type": "agent",
       "target_path": ".agents/agents",
@@ -372,7 +399,10 @@
       "name": "Python Specialized Subagent (Reviewer)",
       "category": "Subagent",
       "short_description": "Dedicated Python subagent: python-reviewer (strict Mypy typing, Pydantic v2, layer separation, async safety).",
-      "detection_markers": ["pyproject.toml", "requirements.txt"],
+      "detection_markers": [
+        "pyproject.toml",
+        "requirements.txt"
+      ],
       "source_path": "optional-stack-skills/languages/python/agents",
       "target_type": "agent",
       "target_path": ".agents/agents",
@@ -383,7 +413,9 @@
       "name": "Rust Specialized Subagents (Reviewer & Build Resolver)",
       "category": "Subagent",
       "short_description": "Dedicated Rust subagents: rust-reviewer (borrow checker, unsafe audit) and rust-build-resolver (lifetimes, Cargo build fixer).",
-      "detection_markers": ["Cargo.toml"],
+      "detection_markers": [
+        "Cargo.toml"
+      ],
       "source_path": "optional-stack-skills/languages/rust/agents",
       "target_type": "agent",
       "target_path": ".agents/agents",
@@ -394,7 +426,10 @@
       "name": "TypeScript Specialized Subagents (Reviewer & Build Resolver)",
       "category": "Subagent",
       "short_description": "Dedicated TypeScript subagents: typescript-reviewer (type safety, hook purity, anti-AI-slop) and react-build-resolver (tsc, bundler fixer).",
-      "detection_markers": ["tsconfig.json", "package.json"],
+      "detection_markers": [
+        "tsconfig.json",
+        "package.json"
+      ],
       "source_path": "optional-stack-skills/languages/typescript/agents",
       "target_type": "agent",
       "target_path": ".agents/agents",
@@ -405,7 +440,11 @@
       "name": "Flutter & Dart Modern Architecture & Deep Modules",
       "category": "Language",
       "short_description": "Clean Architecture layer seams, Dart 3 sealed classes/pattern matching, widget decomposition, 60fps render performance, and anti-AI-slop design standards.",
-      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "detection_markers": [
+        "pubspec.yaml",
+        "*.dart",
+        ".flutter-plugins"
+      ],
       "source_path": "optional-stack-skills/languages/flutter/flutter-patterns",
       "target_type": "skill",
       "target_path": ".agents/skills/engineering/flutter-patterns",
@@ -416,7 +455,11 @@
       "name": "Flutter Production State Management (Riverpod & BLoC)",
       "category": "Frontend",
       "short_description": "Production state architecture using Riverpod (AsyncNotifier, autoDispose) and BLoC/Cubit (sealed events/states, BlocBuilder) with strict immutability and lifecycle disposal.",
-      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "detection_markers": [
+        "pubspec.yaml",
+        "*.dart",
+        ".flutter-plugins"
+      ],
       "source_path": "optional-stack-skills/languages/flutter/flutter-state-management",
       "target_type": "skill",
       "target_path": ".agents/skills/engineering/flutter-state-management",
@@ -427,7 +470,11 @@
       "name": "Flutter & Dart Comprehensive Testing Suite",
       "category": "Testing",
       "short_description": "Comprehensive Flutter testing patterns: fast unit tests with mocktail, widget tests with WidgetTester, golden UI pixel regression tests, and integration tests.",
-      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "detection_markers": [
+        "pubspec.yaml",
+        "*.dart",
+        ".flutter-plugins"
+      ],
       "source_path": "optional-stack-skills/languages/flutter/flutter-testing",
       "target_type": "skill",
       "target_path": ".agents/skills/engineering/flutter-testing",
@@ -438,7 +485,11 @@
       "name": "Flutter Resilient Networking & Local Persistence",
       "category": "Database",
       "short_description": "Resilient Dio networking with JWT refresh interceptors, exponential backoff retry, and offline-first storage with Drift/SQLite, Hive, and flutter_secure_storage.",
-      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "detection_markers": [
+        "pubspec.yaml",
+        "*.dart",
+        ".flutter-plugins"
+      ],
       "source_path": "optional-stack-skills/languages/flutter/flutter-networking-storage",
       "target_type": "skill",
       "target_path": ".agents/skills/engineering/flutter-networking-storage",
@@ -449,7 +500,11 @@
       "name": "Flutter & Dart Coding Style & Best Practices",
       "category": "Language",
       "short_description": "Effective Dart standards, const widget discipline, context.mounted async safety, pure domain layer separation, and resource disposal.",
-      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "detection_markers": [
+        "pubspec.yaml",
+        "*.dart",
+        ".flutter-plugins"
+      ],
       "source_path": "optional-stack-skills/languages/flutter/rules/coding-style.md",
       "target_type": "rule",
       "target_path": ".agents/rules/flutter-coding-style.md",
@@ -460,7 +515,11 @@
       "name": "Flutter Strict Analysis Options Boundary Linter",
       "category": "Boundary Enforcement",
       "short_description": "Strict static analysis rules enforcing sound null-safety, strict-casts, unawaited futures prevention, subscription cancellation, and const constructors.",
-      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "detection_markers": [
+        "pubspec.yaml",
+        "*.dart",
+        ".flutter-plugins"
+      ],
       "source_path": "optional-stack-skills/languages/flutter/linters/analysis_options.yaml",
       "target_type": "config",
       "target_path": "analysis_options.yaml",
@@ -471,7 +530,11 @@
       "name": "Flutter Specialized Subagents (Reviewer & Build Resolver)",
       "category": "Subagent",
       "short_description": "Dedicated Flutter subagents: flutter-reviewer (widget health, memory disposal, async mounted guard, anti-AI-slop) and flutter-build-resolver (flutter analyze, dart fix, build fixer).",
-      "detection_markers": ["pubspec.yaml", "*.dart", ".flutter-plugins"],
+      "detection_markers": [
+        "pubspec.yaml",
+        "*.dart",
+        ".flutter-plugins"
+      ],
       "source_path": "optional-stack-skills/languages/flutter/agents",
       "target_type": "agent",
       "target_path": ".agents/agents",
@@ -482,13 +545,19 @@
       "name": "Code-Review-Graph Local MCP Intelligence Server",
       "category": "Intelligence (MCP)",
       "short_description": "AST-based persistent SQLite code graph (Tree-sitter) enabling subagents (code-explorer, code-reviewer) to query callers, callees, and blast-radius with up to 26x fewer tokens.",
-      "detection_markers": ["git", ".git"],
+      "detection_markers": [
+        "git",
+        ".git"
+      ],
       "source_path": "https://github.com/tirth8205/code-review-graph",
       "target_type": "mcp",
       "target_path": ".agents/mcp_config.json",
       "mcp_config": {
         "command": "uvx",
-        "args": ["code-review-graph", "serve"],
+        "args": [
+          "code-review-graph",
+          "serve"
+        ],
         "type": "stdio"
       },
       "recommendation": "optional"
@@ -498,10 +567,14 @@
       "name": "Architecture Scaffolding (P3→P5 Bridge)",
       "category": "Engineering / Architecture",
       "short_description": "Generates project/feature folder structure, seeds base files (shared types, domain errors, DTO stubs), writes ADR-ARCH-001, and updates CONTEXT.md Module Map. Runs after speckit-plan, before implementation. Always asks user to confirm blueprint (C4 Layered, Hexagonal, or Feature-Based). Polyglot: TypeScript, Go, Python, Flutter, Swift, Rust.",
-      "detection_markers": ["plan.md", "data-model.md", ".specify/"],
-      "source_path": ".agents/skills/engineering/scaffold-architecture",
+      "detection_markers": [
+        "plan.md",
+        "data-model.md",
+        ".specify/"
+      ],
+      "source_path": ".agents/skill-library/engineering/scaffold-architecture",
       "target_type": "skill",
-      "target_path": ".agents/skills/engineering/scaffold-architecture",
+      "target_path": ".agents/skill-library/engineering/scaffold-architecture",
       "recommendation": "recommended"
     },
     {
@@ -509,10 +582,12 @@
       "name": "Smart Framework Update (/update)",
       "category": "Engineering / DevOps",
       "short_description": "3-Way Hash Smart Update Engine: safely updates Universal Agents Workflow to latest version. Protects all project data (CONTEXT.md, adr/, docs/, .specify/features/, src/, PRODUCT_BACKLOG_ROADMAP.md, CHANGELOG.md, .env*). Auto-updates unmodified framework files, asks [K]eep/[O]verwrite/[D]iff for locally-modified ones. Zero Deletion Policy for user-added skills. Offline-safe with graceful fallback.",
-      "detection_markers": [".agents/workflow-source.json"],
-      "source_path": ".agents/skills/engineering/command-update",
+      "detection_markers": [
+        ".agents/workflow-source.json"
+      ],
+      "source_path": ".agents/skill-library/engineering/command-update",
       "target_type": "skill",
-      "target_path": ".agents/skills/engineering/command-update",
+      "target_path": ".agents/skill-library/engineering/command-update",
       "recommendation": "recommended"
     },
     {
@@ -521,9 +596,9 @@
       "category": "Anti-Overengineering",
       "short_description": "Enforces The Ladder of Minimal Code (YAGNI → stdlib → native → one line → minimum). Active every response. Channels a lazy senior dev: question if the task needs to exist, reuse before rewriting, stdlib before custom, native before deps, one line before fifty. Use when AI over-engineers or when user says 'be lazy', 'simplest solution', 'yagni', 'do less'. MIT license — bundled from DietrichGebert/ponytail.",
       "detection_markers": [],
-      "source_path": ".agents/skills/engineering/ponytail",
+      "source_path": ".agents/skill-library/engineering/ponytail",
       "target_type": "skill",
-      "target_path": ".agents/skills/engineering/ponytail",
+      "target_path": ".agents/skill-library/engineering/ponytail",
       "recommendation": "always-included"
     },
     {
@@ -532,9 +607,9 @@
       "category": "Anti-Overengineering",
       "short_description": "Code review focused exclusively on over-engineering. Finds what to delete: reinvented stdlib, unneeded deps, speculative abstractions, dead flexibility. One line per finding with tags (delete:/stdlib:/native:/yagni:/shrink:). Ends with 'net: -N lines possible' or 'Lean already. Ship.' MIT license — bundled from DietrichGebert/ponytail.",
       "detection_markers": [],
-      "source_path": ".agents/skills/engineering/ponytail-review",
+      "source_path": ".agents/skill-library/engineering/ponytail-review",
       "target_type": "skill",
-      "target_path": ".agents/skills/engineering/ponytail-review",
+      "target_path": ".agents/skill-library/engineering/ponytail-review",
       "recommendation": "recommended"
     },
     {
@@ -543,9 +618,9 @@
       "category": "Anti-Overengineering",
       "short_description": "Whole-repo audit for over-engineering. Scans the entire codebase (not just a diff) and ranks findings biggest cut first. Same tags as ponytail-review. One-shot report, applies nothing. MIT license — bundled from DietrichGebert/ponytail.",
       "detection_markers": [],
-      "source_path": ".agents/skills/engineering/ponytail-audit",
+      "source_path": ".agents/skill-library/engineering/ponytail-audit",
       "target_type": "skill",
-      "target_path": ".agents/skills/engineering/ponytail-audit",
+      "target_path": ".agents/skill-library/engineering/ponytail-audit",
       "recommendation": "recommended"
     },
     {
@@ -554,9 +629,9 @@
       "category": "Anti-Overengineering",
       "short_description": "Harvests every `ponytail:` comment in the codebase into a debt ledger so deliberate shortcuts don't quietly rot into 'later means never'. Grep-based scan, one row per marker with ceiling and upgrade path. Flags no-trigger entries. MIT license — bundled from DietrichGebert/ponytail.",
       "detection_markers": [],
-      "source_path": ".agents/skills/engineering/ponytail-debt",
+      "source_path": ".agents/skill-library/engineering/ponytail-debt",
       "target_type": "skill",
-      "target_path": ".agents/skills/engineering/ponytail-debt",
+      "target_path": ".agents/skill-library/engineering/ponytail-debt",
       "recommendation": "recommended"
     },
     {
@@ -565,9 +640,9 @@
       "category": "Anti-Overengineering",
       "short_description": "Displays ponytail's measured benchmark impact: ~54% less LOC, ~20% cheaper, ~27% faster, 100% safe (Haiku 4.5, 12 real feature tasks). One-shot scoreboard, changes no mode. MIT license — bundled from DietrichGebert/ponytail.",
       "detection_markers": [],
-      "source_path": ".agents/skills/engineering/ponytail-gain",
+      "source_path": ".agents/skill-library/engineering/ponytail-gain",
       "target_type": "skill",
-      "target_path": ".agents/skills/engineering/ponytail-gain",
+      "target_path": ".agents/skill-library/engineering/ponytail-gain",
       "recommendation": "optional"
     },
     {
@@ -576,9 +651,9 @@
       "category": "Anti-Overengineering",
       "short_description": "Quick-reference card for all ponytail modes (lite/full/ultra), skills, and slash commands. One-shot display. MIT license — bundled from DietrichGebert/ponytail.",
       "detection_markers": [],
-      "source_path": ".agents/skills/engineering/ponytail-help",
+      "source_path": ".agents/skill-library/engineering/ponytail-help",
       "target_type": "skill",
-      "target_path": ".agents/skills/engineering/ponytail-help",
+      "target_path": ".agents/skill-library/engineering/ponytail-help",
       "recommendation": "optional"
     },
     {
@@ -586,10 +661,12 @@
       "name": "Archify Interactive Architecture & Flow Visualizer",
       "category": "Visualization",
       "short_description": "Generates verified, interactive HTML/SVG architecture maps, sequence flows, state lifecycles, and 1200x630 share cards from typed JSON IR. Requires separate CLI install: npx -y skills add tt-a1i/archify --skill archify --global --copy --yes",
-      "detection_markers": ["AGENTS.md"],
+      "detection_markers": [
+        "AGENTS.md"
+      ],
       "source_path": "optional-stack-skills/tools/archify",
       "target_type": "skill",
-      "target_path": ".agents/skills/engineering/archify",
+      "target_path": ".agents/skill-library/engineering/archify",
       "install_command": "npx -y skills add tt-a1i/archify --skill archify --global --copy --yes",
       "runtime_check": "node ~/.agents/skills/archify/bin/archify.mjs doctor",
       "runtime_path": "~/.agents/skills/archify/bin/archify.mjs",

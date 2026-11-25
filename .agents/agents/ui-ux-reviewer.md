@@ -4,7 +4,7 @@ description: "Adversarial read-only UI and accessibility reviewer checking anti-
 tools: Read, Grep, Glob, Bash
 model: inherit
 subagent: true
-inheritMcp: true
+inheritMcp: false
 commandExecutionPolicy: auto
 ---
 

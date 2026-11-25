@@ -2,7 +2,7 @@
 
 ## Skill-Based Workflow & Subagents
 
-This project uses skills from `.agents/skills/` and structured subagent personas from `.agents/agents/` across all development phases.
+This project uses skills from `.agents/skills/` (hot set, indexed) and `.agents/skill-library/` (cold, read on demand via `.agents/SKILLS.md`), plus structured subagent personas from `.agents/agents/` across all development phases.
 See `.agents/AGENTS.md` for the unified pipeline and mandatory quality gates.
 
 ---

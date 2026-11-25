@@ -4,7 +4,7 @@ description: "Lead business analyst for Phase 1: intake classification, interact
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 subagent: true
-inheritMcp: true
+inheritMcp: false
 commandExecutionPolicy: auto
 ---
 

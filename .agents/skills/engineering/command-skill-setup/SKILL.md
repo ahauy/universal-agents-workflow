@@ -1,11 +1,7 @@
 ---
 invocation: user
 name: command-skill-setup
-description: >-
-  Activated when the user types /skill-setup (or /setup-workspace, /setup-skills, /setup).
-  Scans project manifests, matches compatible skills/rules from the curated catalog, presents
-  a clear interactive table with concise summaries for each skill, prompts for user confirmation,
-  and activates skills, rules, boundary linters, and optional code-review-graph MCP server.
+description: "Scan project manifests, match compatible skills and rules from the catalog, confirm with the user, then activate skills, linters and optional MCP."
 triggers:
   - "/skill-setup"
   - "/setup-workspace"

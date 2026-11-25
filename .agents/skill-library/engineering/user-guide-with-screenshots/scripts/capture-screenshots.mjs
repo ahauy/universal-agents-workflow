@@ -8,7 +8,7 @@
 //   pnpm --filter web exec playwright install chromium
 //
 // Usage:
-//   node .agents/skills/user-guide-with-screenshots/scripts/capture-screenshots.mjs <path-to-plan.json>
+//   node .agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs <path-to-plan.json>
 //
 // See scripts/screenshot-plan.example.json for the plan file structure.
 

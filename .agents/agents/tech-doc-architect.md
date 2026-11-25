@@ -4,7 +4,7 @@ description: "Technical documentation specialist for Phase 6: feature docs, arch
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 subagent: true
-inheritMcp: true
+inheritMcp: false
 commandExecutionPolicy: auto
 ---
 
