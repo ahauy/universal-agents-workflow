@@ -1,0 +1,109 @@
+{
+  "removed": [
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-freeze-screenshots.mjs",
+      "bytes": 13552
+    },
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-speech-pronunciation-screenshots.mjs",
+      "bytes": 20632
+    },
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-browser-extension-screenshots.mjs",
+      "bytes": 18901
+    },
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-streak-screenshots.mjs",
+      "bytes": 12348
+    },
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-xp-levels-screenshots.mjs",
+      "bytes": 23188
+    },
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-matching-screenshots.mjs",
+      "bytes": 16482
+    },
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-fill-blank-screenshots.mjs",
+      "bytes": 10868
+    },
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-deck-import-export-screenshots.mjs",
+      "bytes": 41298
+    },
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-pwa-offline-screenshots.mjs",
+      "bytes": 27918
+    },
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-analytics-screenshots.mjs",
+      "bytes": 12087
+    },
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-ai-vocabulary-screenshots.mjs",
+      "bytes": 12274
+    },
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-community-decks-screenshots.mjs",
+      "bytes": 19620
+    },
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/verify-extension-live.mjs",
+      "bytes": 1081
+    },
+    {
+      "path": ".agents/skill-library/engineering/user-guide-with-screenshots/templates/user-guide-example-card-creation.md",
+      "bytes": 2606
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/lifecycle-agent-run.html",
+      "bytes": 758914
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/sequence-cache-miss-request.html",
+      "bytes": 762310
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/dataflow-product-analytics.html",
+      "bytes": 764604
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/web-app-rendered.html",
+      "bytes": 762310
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/workflow-agent-tool-call-rendered.html",
+      "bytes": 767770
+    },
+    {
+      "path": "optional-stack-skills/tools/archify/examples/sequence.example.json",
+      "bytes": 6288
+    },
+    {
+      "path": "optional-stack-skills/tools/archify/examples/lifecycle.example.json",
+      "bytes": 6545
+    },
+    {
+      "path": "optional-stack-skills/tools/archify/examples/architecture.example.json",
+      "bytes": 4972
+    },
+    {
+      "path": "optional-stack-skills/tools/archify/examples/dataflow.example.json",
+      "bytes": 6155
+    },
+    {
+      "path": "optional-stack-skills/tools/archify/examples/workflow.example.json",
+      "bytes": 7006
+    },
+    {
+      "path": "optional-stack-skills/tools/archify/references/cli-usage.md",
+      "bytes": 7437
+    },
+    {
+      "path": "optional-stack-skills/tools/archify/references/json-schemas.md",
+      "bytes": 9684
+    }
+  ],
+  "totalBytes": 4096850
+}

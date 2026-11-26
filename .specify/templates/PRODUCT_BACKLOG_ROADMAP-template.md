@@ -1,273 +1,139 @@
 ---
-project: "<Project Name>"
+project: "<Tên dự án đã xác nhận>"
 tech-stack:
-  language: "<e.g. TypeScript>"
-  backend: "<e.g. NestJS + Prisma ORM>"
-  frontend: "<e.g. Next.js 15 App Router + Zustand>"
-  database: "<e.g. PostgreSQL 16>"
-  infra: "<e.g. Docker Compose (local) / Koyeb + Vercel + Neon (prod)>"
-  test: "<e.g. Vitest + Playwright>"
-git-mode: "team" # team | local | stealth | hybrid
+  language: "<Đã xác nhận | unresolved | not applicable>"
+  backend: "<Đã xác nhận | unresolved | not applicable>"
+  frontend: "<Đã xác nhận | unresolved | not applicable>"
+  database: "<Đã xác nhận | unresolved | not applicable>"
+  infra: "<Đã xác nhận | unresolved | not applicable>"
+  test: "<Đã xác nhận | unresolved | not applicable>"
+git-mode: "<Đã xác nhận: team | local | stealth | hybrid; hoặc unresolved>"
 schema-version: "1.2"
 ---
 
-# 🗺️ Product Backlog & Execution Roadmap
+# Product Backlog & Execution Roadmap
 
-> **Sản phẩm:** `<Product Name>` — `<One-sentence description>`  
-> **Cập nhật lần cuối:** `<YYYY-MM-DD>`  
-> **Trạng thái tài liệu:** Living Document — Quản lý tiến độ và đồng bộ với `/command-continue-project`
->
-> **Ký hiệu trạng thái:**
->
-> - `[x]` **Hoàn thành (Done)** — Đã hoàn thiện code, test pass và tài liệu kỹ thuật/hướng dẫn đầy đủ.
-> - `[/]` **Đang triển khai (In Progress)** — `/continue` sẽ ưu tiên tiếp tục xử lý cho xong.
-> - `[ ]` **Chưa triển khai (To Do / Backlog)** — Đã có đặc tả, sẵn sàng bốc theo thứ tự từ trên xuống.
-> - `[!]` **Bị chặn / Cần làm rõ (Blocked / Review Needed)** — Cần quyết định kiến trúc hoặc phụ thuộc module khác; `/continue` sẽ dừng lại cảnh báo và đề xuất phiên `grilling` để tháo gỡ điểm nghẽn.
-> - `[~]` **Dự kiến dài hạn (Deferred / Future Phase)** — Tính năng đã ghi nhận nhưng chủ động hoãn lại sang phiên bản sau.
+> **Sản phẩm:** `<Tên và mô tả đã xác nhận>`
+> **Cập nhật:** `<YYYY-MM-DD>`
+> **Nguồn quyết định:** `<Câu trả lời, tài liệu hoặc bằng chứng đã xác nhận>`
 
----
+Template chỉ cung cấp cấu trúc. Khi render, giữ nội dung có bằng chứng; không
+biến placeholder thành scope, stack, điểm số hoặc cam kết. Tái sử dụng quyết định
+đã xác nhận, ghi câu hỏi chưa rõ thành `ASM-` và đánh `[!]` cho story bị ảnh hưởng
+bởi quyết định nghiệp vụ còn thiếu. Không đặt lại câu hỏi đã có câu trả lời.
 
-## 🚫 Explicitly Out of Scope — Won't-Have for MVP
+**Trạng thái:** `[ ]` chưa làm; `[/]` đang làm; `[!]` bị chặn/cần quyết định;
+`[~]` được xác nhận hoãn; `[x]` hoàn thành với bằng chứng đạt AC và gate áp dụng.
+Công việc mới bắt đầu bằng `[ ]` hoặc `[!]`; chỉ giữ `[x]` có bằng chứng sẵn có.
 
-> **CRITICAL:** Phần này là "scope fence" bắt buộc. Thiếu Won't-Have → AI BA sẽ hallucinate scope.
-> Xóa gạch đầu dòng nào không áp dụng, thêm các điểm đặc thù của dự án bạn.
+## Scope và Won't-Have
 
-- **NO** mobile native app (iOS/Android) — Web-only for MVP.
-- **NO** offline mode / local-first sync.
-- **NO** enterprise SSO (SAML/LDAP/Active Directory).
-- **NO** billing or payment integration.
-- **NO** multi-tenancy with data isolation.
-- **NO** real-time collaborative editing (e.g. Google Docs style).
-- **NO** `<thêm điểm Won't-Have đặc thù>`
+| Phạm vi | Quyết định đã xác nhận | Nguồn / bằng chứng |
+| --- | --- | --- |
+| In scope | <Kết quả/hành vi được xác nhận> | <Nguồn> |
+| Won't-Have | <Chỉ ghi giới hạn đã được xác nhận; chưa có thì unresolved> | <Nguồn hoặc ASM- id> |
 
----
+Không suy ra giới hạn nền tảng, offline, auth, billing hay sản phẩm từ template.
 
-## 📊 Bảng Ma Trận Ưu Tiên MoSCoW & RICE Score
+## Ưu tiên MoSCoW và RICE
 
-| Mã Epic     | Nghiệp vụ / Tính năng                               |  Phân loại MoSCoW   | RICE Score |    Mức ưu tiên    | Sprint khuyến nghị |
-| :---------- | :-------------------------------------------------- | :-----------------: | :--------: | :---------------: | :----------------: |
-| **EPIC-01** | `<Tên Epic 1 — e.g. Auth & User Profile>`           |    **Must Have**    |    9.0     | **P0 (Critical)** |      Sprint 1      |
-| **EPIC-02** | `<Tên Epic 2 — e.g. Core Domain CRUD>`              |    **Must Have**    |    8.5     | **P0 (Core USP)** |      Sprint 1      |
-| **EPIC-03** | `<Tên Epic 3 — e.g. Advanced Interaction / Engine>` |   **Should Have**   |    7.5     |   **P1 (High)**   |      Sprint 2      |
-| **EPIC-04** | `<Tên Epic 4 — e.g. Analytics / Export>`            |   **Could Have**    |    6.0     |  **P2 (Medium)**  |      Sprint 2      |
-| **EPIC-05** | `<Tên Epic 5 — e.g. Mobile PWA / Extensions>`       | **Won't Have (v1)** |    4.5     | **P3 (Phase 2)**  | Sprint 3 / Future  |
+| Epic | Kết quả người dùng | MoSCoW | RICE inputs / bằng chứng | RICE Score | Priority | Sprint |
+| --- | --- | --- | --- | --- | --- | --- |
+| <Epic id> | <Kết quả đã xác nhận> | <Đã xác nhận / unresolved> | <Reach, Impact, Confidence, Effort và nguồn; hoặc unavailable> | <Tính từ inputs và cách tính có bằng chứng; hoặc unavailable> | <Đã xác nhận / unresolved> | <Đã thống nhất / unscheduled> |
 
----
+Không tự đặt số, công thức hoặc lịch. Khi thiếu ước lượng, giữ `unavailable` và
+nêu thông tin cần bổ sung; không biến ước lượng chưa rõ thành điểm ưu tiên.
 
-## 🗺️ Lộ Trình Phát Hành (Release Roadmap)
+## Release roadmap và dependency chain
 
 ```text
-[ Sprint 0 - Setup & Architecture ] ──► [ COMPLETED ✅ ]
-  ├── SETUP-001: Khởi tạo repo, cấu hình `.agents/`, `.specify/`, Git mode
-  ├── SETUP-002: Thiết lập Docker Compose / Dev environment
-  └── SETUP-003: Cấu hình CI/CD pipeline
-
-[ Sprint 1 - Core Foundation (MVP) ] ──► [ IN PROGRESS 🔄 ]
-  ├── US-<MOD>-001: <Tiêu đề Story 1>
-  ├── US-<MOD>-002: <Tiêu đề Story 2>
-  └── US-<MOD>-003: <Tiêu đề Story 3>
-
-[ Sprint 2 - Feature Expansion ] ──► [ TO DO 📋 ]
-  ├── US-<MOD>-004: <Tiêu đề Story 4>
-  └── US-<MOD>-005: <Tiêu đề Story 5>
-
-[ Sprint 3 - Production Hardening & Go-Live ] ──► [ GO-LIVE 🚀 ]
-  ├── US-DEPLOY-01: Security Hardening (Pre-Deploy)
-  ├── US-DEPLOY-02: Cloud Database Setup & Migration
-  ├── US-DEPLOY-03: Backend API Deployment & Health Check
-  ├── US-DEPLOY-04: Frontend SPA Deployment & Routing Fallback
-  └── US-DEPLOY-05: End-to-End Smoke Test Production URL
+<Release / sprint đã thống nhất, hoặc unscheduled>
+  └── <Story id đã xác nhận> — <Trạng thái có bằng chứng>
+<Story id> -> <Story phụ thuộc đã xác nhận; chưa rõ thì ASM- id>
 ```
 
----
+Chỉ render sprint, setup và release work có trong scope đã xác nhận. Không mặc
+định dự án đã setup, có CI/CD, Docker, backend, frontend hoặc database.
 
-## ⚙️ Sprint 0: Project Setup & Architecture (Không phải User Story)
+## Setup / architecture tasks (nếu áp dụng)
 
-> Sprint 0 là công việc setup một lần, không cần BA pipeline.  
-> Dùng Micro-Task Fast-Track: Reproduce → Fix → Verify → Commit.
+- [ ] **SETUP-<id>**: `<Công việc setup đã xác nhận>`
+  - **Bằng chứng cần đạt:** `<Kết quả quan sát được>`
+  - **Depends-on:** `<Id đã xác nhận | none đã xác nhận | unresolved>`
+  - **Nguồn / câu hỏi:** `<Bằng chứng hoặc ASM- id>`
 
-- [x] **SETUP-001**: Khởi tạo repo, cấu hình `.agents/`, `.specify/`, Git mode
-- [x] **SETUP-002**: Thiết lập Docker Compose / Dev environment
-- [x] **SETUP-003**: Cấu hình CI/CD pipeline (GitHub Actions / Cloud)
+Setup áp dụng checkpoint, lane và gates của UAW giống mọi implementation task.
+Bỏ phần này nếu không có công việc setup trong scope.
 
----
+## Sprint: `<Tên / mục tiêu đã xác nhận, hoặc unscheduled>`
 
-## 🎯 Sprint 1: `<Tên Sprint — Mục Tiêu MVP>`
+> **Mục tiêu:** `<Kết quả nghiệp vụ đã xác nhận và nguồn>`
 
-> **Mục tiêu Sprint:** `<Một câu mô tả kết quả kinh doanh khi Sprint hoàn thành.>`
-
-- [ ] **US-`<MOD>`-001**: `<Tiêu đề User Story — Động từ + Danh từ>`
+- [ ] **US-<MOD>-<id>**: `<Động từ + kết quả người dùng đã xác nhận>`
   - **Slug:** `<kebab-case-slug>`
-  - **Effort:** S <!-- S | M | L | XL — dùng cho auto-routing của /continue -->
-  - **Context-budget:** single-session <!-- single-session | multi-session -->
-  - **Priority:** Must-Have (P0) <!-- Must-Have P0 | Should-Have P1 | Could-Have P2 | Won't-Have -->
-  - **Depends-on:** _(none)_ <!-- US-XXX-NNN hoặc _(none)_ -->
-  - **Blocks:** `US-<MOD>-002` <!-- Các US bị chặn nếu story này chưa [x] -->
-  - **Mô tả:** `<1-2 câu mô tả value cho người dùng. Không mô tả kỹ thuật.>`
+  - **Effort:** `<S | M | L | XL có cơ sở, hoặc unresolved>`
+  - **Context-budget:** `<single-session | multi-session có cơ sở, hoặc unresolved>`
+  - **Priority:** `<MoSCoW / mức ưu tiên đã xác nhận, hoặc unresolved>`
+  - **Depends-on:** `<Story ids | none đã xác nhận | unresolved>`
+  - **Blocks:** `<Story ids | none đã xác nhận | unresolved>`
+  - **Mô tả:** `<Giá trị nghiệp vụ, actor và hành vi đã xác nhận>`
+  - **Nguồn / open decisions:** `<Bằng chứng và ASM- ids còn mở>`
   - **Acceptance Criteria (AC):**
-    - [ ] `<AC 1: Điều kiện kiểm thử được, có thể pass/fail rõ ràng>`
-    - [ ] `<AC 2>`
-    - [ ] `<AC 3>`
-  - **Tasks (Phân rã kỹ thuật cho Subagents):**
-    - [ ] **Backend:** `<Endpoint / DTO / Service logic / Database migration>`
-    - [ ] **Frontend:** `<Component / Page / State store / UI Modal / Form validation>`
-  - **Deliverables khi [x]:**
-    - `.specify/features/<slug>/baseline.md` (SIGNED-OFF)
-    - `docs/features/<slug>/README.md`
-    - `docs/user-guides/<slug>.md` (với ảnh Playwright thật)
+    - [ ] `<Given / When / Then có thể quan sát và kiểm chứng>`
+  - **Tasks (phạm vi sơ bộ; chỉ giữ các lớp áp dụng):**
+    - [ ] **Backend:** `<Công việc đã có căn cứ, nếu có backend>`
+    - [ ] **Frontend:** `<Công việc đã có căn cứ, nếu có frontend>`
+    - [ ] **Khác:** `<Công việc áp dụng khác, nếu có>`
+  - **Deliverables / bằng chứng khi [x]:**
+    - `<Kết quả AC, kiểm chứng và self-check/review theo lane được chọn>`
+    - `<Full: artifact/gate/docs theo AGENTS.md; Fast không tạo Full folder>`
+    - `<User guide chỉ khi áp dụng cho thay đổi/release đã xác nhận>`
 
-- [ ] **US-`<MOD>`-002**: `<Tiêu đề User Story>`
-  - **Slug:** `<kebab-case-slug>`
-  - **Effort:** M
-  - **Context-budget:** single-session
-  - **Priority:** Must-Have (P0)
-  - **Depends-on:** `US-<MOD>-001`
-  - **Blocks:** `US-<MOD>-003`
-  - **Mô tả:** `<...>`
-  - **Acceptance Criteria (AC):**
-    - [ ] `<AC 1>`
-    - [ ] `<AC 2>`
-  - **Tasks (Phân rã kỹ thuật cho Subagents):**
-    - [ ] **Backend:** `<...>`
-    - [ ] **Frontend:** `<...>`
-  - **Deliverables khi [x]:**
-    - `.specify/features/<slug>/baseline.md` (SIGNED-OFF)
-    - `docs/features/<slug>/README.md`
+Nhân bản block story theo scope đã xác nhận. Tasks là scope notes, không phải
+lệnh phân công subagent hay phê duyệt thiết kế. Effort và Context-budget mô tả
+scope/ước lượng, không quyết định lane hoặc miễn checkpoint T1–T7.
 
-- [ ] **US-`<MOD>`-003**: `<Tiêu đề User Story>`
-  - **Slug:** `<kebab-case-slug>`
-  - **Effort:** M
-  - **Context-budget:** single-session
-  - **Priority:** Should-Have (P1)
-  - **Depends-on:** `US-<MOD>-002`
-  - **Blocks:** _(none)_
-  - **Mô tả:** `<...>`
-  - **Acceptance Criteria (AC):**
-    - [ ] `<AC 1>`
-    - [ ] `<AC 2>`
-  - **Tasks (Phân rã kỹ thuật cho Subagents):**
-    - [ ] **Backend:** `<...>`
-    - [ ] **Frontend:** `<...>`
-  - **Deliverables khi [x]:**
-    - `.specify/features/<slug>/baseline.md` (SIGNED-OFF)
-    - `docs/features/<slug>/README.md`
+## Deferred / future scope (nếu đã xác nhận)
 
----
+- [~] **US-FUTURE-<id>**: `<Ý tưởng đã được xác nhận hoãn; nguồn quyết định>`
 
-## 🚀 Sprint 2: `<Tên Sprint 2>`
+Không tự bổ sung ý tưởng tương lai. Khi được chọn lại, xác nhận hành vi/AC và
+phụ thuộc còn thiếu qua checkpoint trước khi triển khai.
 
-> **Mục tiêu Sprint:** `<...>`
+## Definition of Done
 
-- [ ] **US-`<MOD>`-004**: `<Tiêu đề User Story>`
-  - **Slug:** `<kebab-case-slug>`
-  - **Effort:** L
-  - **Context-budget:** multi-session <!-- L/XL nên là multi-session — /continue sẽ gọi wayfinder trước -->
-  - **Priority:** Must-Have (P0)
-  - **Depends-on:** `US-<MOD>-001`
-  - **Blocks:** _(none)_
-  - **Mô tả:** `<...>`
-  - **Acceptance Criteria (AC):**
-    - [ ] `<AC 1>`
-  - **Tasks (Phân rã kỹ thuật cho Subagents):**
-    - [ ] **Backend:** `<...>`
-    - [ ] **Frontend:** `<...>`
-  - **Deliverables khi [x]:**
-    - `.specify/features/<slug>/baseline.md` (SIGNED-OFF)
-    - `docs/features/<slug>/README.md`
+Chỉ chuyển story sang `[x]` khi AC đã xác nhận được đáp ứng, verification phù
+hợp đã pass và không có Critical còn mở. Bằng chứng gồm `<Lệnh/check, kết quả,
+đường dẫn liên quan>`. Áp dụng chuẩn và gate tại `AGENTS.md`:
 
----
+- **Fast:** checkpoint/plan trong chat, một context, verification và self-check;
+  không ép baseline, feature folder, subagent hoặc bộ docs Full.
+- **Full:** Gate 1 và 2 trước implementation; scoped slices, review và feature
+  documentation theo gates. User guide/screenshot chỉ khi thay đổi áp dụng.
+- Git writes chỉ khi được user cho phép theo `AGENTS.md` §0.1.
 
-## 🔮 Backlog Dự Kiến — Future Horizons (V2.0+)
+## Release / go-live (chỉ khi nằm trong scope)
 
-> Các ý tưởng chưa được ưu tiên. Không có Slug, không có AC — chỉ là placeholder.  
-> Khi quyết định làm, chuyển vào Sprint tương ứng và điền đầy đủ thông tin.
+| Công việc đã xác nhận | Điều kiện áp dụng / bằng chứng | Phụ thuộc | Kiểm chứng cần đạt | Trạng thái |
+| --- | --- | --- | --- | --- |
+| <Release task id và nội dung> | <Bề mặt thực tế/rủi ro và nguồn> | <Ids / none đã xác nhận / unresolved> | <Kết quả quan sát được> | [ ] |
 
-- [~] **US-FUTURE-001**: `<Tên tính năng tương lai 1>`
-- [~] **US-FUTURE-002**: `<Tên tính năng tương lai 2>`
+Chỉ thêm kiểm tra security, migration/rollback, routing, smoke test hoặc monitoring
+phù hợp bề mặt thực tế. Không yêu cầu auth, database, cloud hay stack cụ thể.
+Deployment không miễn checkpoint/lane/gates; đánh giá rủi ro theo cùng quy tắc UAW.
 
----
+**Cấu hình release (nếu có):** `<Tên biến/config từ code hoặc quyết định đã xác
+nhận; nguồn, môi trường và cách cung cấp an toàn>`. Không điền secrets hoặc tự
+chọn token lifetime, port, URL, công nghệ hay policy chưa được xác nhận.
 
-## 🏁 Quy Chuẩn Định Nghĩa Hoàn Thành (Definition of Done - DoD)
+## Hướng dẫn tiếp tục cho AI
 
-Một User Story / Task chỉ được chuyển trạng thái từ `[/]` sang `[x]` khi đáp ứng đủ các tiêu chí:
+Quy trình chuẩn nằm tại `AGENTS.md` §2 và
+`.agents/skills/engineering/command-continue-project/SKILL.md`; đọc và thực hiện
+khi `/command-continue-project` chạy. Template không định nghĩa pipeline riêng.
 
-1. **Nghiệp vụ (Business Acceptance):** Đạt 100% các điều kiện trong Acceptance Criteria (AC).
-2. **Kiểm thử tự động (Automated Tests):**
-   - Backend: Có Unit/Integration Test cho Controller, Service, DB queries.
-   - Frontend: Component render chuẩn, tương tác state mượt mà, không console error.
-3. **Chất lượng mã nguồn (Code Quality Gate):**
-   - Tuân thủ quy chuẩn kiến trúc (`File < 800 dòng, Function < 50 dòng, Immutable data patterns`).
-   - Đã kiểm tra qua các stack skills phù hợp (chọn từ `.agents/SKILLS.md`).
-4. **Không có lỗi nghiêm trọng (Bug Severity Gate):** Zero Critical / Blocker bugs.
-5. **Tài liệu hóa:** Cập nhật `docs/features/<slug>/README.md` và user guide kèm ảnh chụp thực tế.
-
----
-
-## 🚀 Kế Hoạch Phát Hành Production (Go-Live Plan)
-
-### 1. Pre-Deploy Checklist (Bắt buộc trước khi Go-Live)
-
-#### 🔴 Critical — Blockers tuyệt đối
-
-- [ ] **SEC-01**: Loại bỏ toàn bộ credentials / secrets hardcoded; chuyển sang biến môi trường (`.env`).
-- [ ] **SEC-02**: Sinh JWT Secret mạnh: `openssl rand -hex 64` (không dùng secret mặc định).
-- [ ] **SEC-03**: Cấu hình CORS whitelist chỉ cho phép domain Frontend thực tế (không dùng `*` trên production).
-
-#### 🟡 Important — Hoàn thành trước ngày mở cho người dùng
-
-- [ ] **DB-01**: Khởi tạo Cloud Database (PostgreSQL Serverless) và chạy migration an toàn (`prisma migrate deploy`).
-- [ ] **API-01**: Deploy Backend service container / serverless; kiểm tra health check endpoint trả về HTTP 200.
-- [ ] **WEB-01**: Deploy Frontend SPA / Next.js; kiểm tra cấu hình SPA routing fallback (refresh trang con không bị 404).
-- [ ] **TEST-01**: Chạy Playwright smoke test toàn bộ happy path trên URL production thực tế.
-
-#### 🟢 Nice-to-have — Sau khi Go-Live
-
-- [ ] **OBS-01**: Tích hợp Error Monitoring (Sentry / Log drain) để bắt runtime exceptions.
-- [ ] **OBS-02**: Cấu hình Uptime Monitoring cảnh báo khi server gặp sự cố.
-
-### 2. Biến Môi Trường Production Mẫu (.env Template)
-
-```bash
-# ── Backend Service ──────────────────────────────────────────
-NODE_ENV=production
-PORT=3000
-DATABASE_URL="postgresql://<user>:<password>@<host>/<database>?sslmode=require"
-JWT_SECRET="<openssl rand -hex 64>"
-JWT_EXPIRES_IN="15m"
-JWT_REFRESH_SECRET="<openssl rand -hex 64>"
-JWT_REFRESH_EXPIRES_IN="7d"
-CORS_ORIGINS="https://<your-frontend-domain>"
-
-# ── Frontend Service ─────────────────────────────────────────
-VITE_API_URL="https://<your-backend-domain>"
-```
-
-### 3. Sprint Go-Live Tracking
-
-- [ ] **US-DEPLOY-01**: Security Hardening & Secret Audit (Pre-Deploy SEC-01 → SEC-03)
-- [ ] **US-DEPLOY-02**: Cloud Database Provisioning & Safe Migration
-- [ ] **US-DEPLOY-03**: Backend API Deployment & Health Check Verification
-- [ ] **US-DEPLOY-04**: Frontend Deployment & SPA Routing Fallback Verification
-- [ ] **US-DEPLOY-05**: Production End-to-End Smoke Test
-
----
-
-## 📝 Ghi Chú Quan Trọng Cho AI
-
-> AI đọc phần này để hiểu ngữ cảnh và quy tắc của file. Không xóa.
-
-### Quy tắc quét của `/command-continue-project`:
-
-1. **Step 1**: Đọc `tech-stack` từ YAML frontmatter → paste vào system prompt của mọi subagent.
-2. **Step 2**: Tìm story `[/]` trước (ưu tiên tuyệt đối), sau đó `[ ]` đầu tiên từ trên xuống.
-3. **Step 3 (Blocked Gate)**:
-   - Nếu story tiếp theo mang nhãn `[!]`: **DỪNG LẠI**, cảnh báo người dùng về vướng mắc/quyết định kiến trúc; chủ động đề xuất kích hoạt phiên `grilling` để làm rõ và gỡ block trước khi tiếp tục.
-   - Bỏ qua các mục mang nhãn `[~]` (Deferred).
-4. **Step 4 (Dependency Gate)**: Kiểm tra `Depends-on` — nếu dependency chưa `[x]`, **từ chối làm story này**, báo blocked và đề xuất làm dependency trước.
-5. **Step 5 (Effort & Budget Routing)**:
-   - `Effort: S` + `single-session` → **Fast-Track BA** (2–3 câu, skip gap-analysis).
-   - `Effort: M` + `single-session` → **Bounded Task BA** (stages 1→2→4→5→6→7→8).
-   - `Effort: L|XL` + `multi-session` → **Full Feature BA** (all 8 stages) + invoke `wayfinder` trước.
-6. **Step 6 (Task Allocation)**: Trong Phase 5 Implementation, phân rã công việc trực tiếp từ mục `Tasks: Backend / Frontend` cho `backend-developer` và `frontend-developer`.
-7. **Step 7 (Go-Live Sprints)**: Với các story `US-DEPLOY-###`, thực thi theo quy trình Pre-Deploy Verification và Smoke Test thay vì BA feature pipeline thông thường.
-8. **Step 8**: Chỉ đánh `[x]` sau khi `e2e-runner` pass, `tech-doc-architect` xong, và `user-guide-creator` đã lưu ảnh Playwright thật.
+Tái sử dụng AC/bằng chứng, kiểm tra trạng thái blocker và `Depends-on` trước khi
+triển khai; không làm story khi dependency chưa hoàn thành hoặc business gap còn
+mở. Dùng checkpoint và T1–T7 để chọn lane cho cả setup, story và deployment.
+Chỉ Full mới có scoped delegation và Full artifacts sau approval gates. Không
+suy lane từ Effort/Context-budget hoặc suy approval từ thứ tự roadmap.
