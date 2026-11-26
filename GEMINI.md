@@ -1,6 +1,6 @@
 # GEMINI.md
 
-Behavioural deltas for Gemini-family models. **The pipeline, gates, tier lanes,
+Behavioural deltas for Gemini-family models. **The pipeline, gates, lane rules,
 token budgets and delegation contract live in [`AGENTS.md`](./AGENTS.md) — read
 that first.** This file only adds what is specific to this model family.
 
@@ -15,8 +15,8 @@ use judgment.
   not pick one silently.
 - If a simpler approach exists, say so and push back.
 
-Tier classification and token budgets are defined once in `AGENTS.md` §2. Do not
-re-derive them here.
+Lane selection (Fast default / Full on trigger) and token budgets are defined once
+in `AGENTS.md` §2. Do not re-derive them here.
 
 ## 2. Simplicity — the ladder
 
@@ -82,3 +82,7 @@ model, task scope, output artifact path. Detail in `AGENTS.md` §4.
 These guidelines are working if: diffs contain fewer unnecessary changes, fewer
 rewrites from overcomplication, zero generic AI slop, and clarifying questions
 arrive before implementation rather than after mistakes.
+
+Before implementation, use the concise BA checkpoint in `AGENTS.md` §2. Reuse
+confirmed evidence, ask only material gaps, and apply T1–T7 to roadmap work too.
+Fast uses one context; Full uses baseline and technical approval gates.

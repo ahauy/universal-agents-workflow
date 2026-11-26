@@ -44,39 +44,14 @@ Trong phát triển phần mềm với AI, các lập trình viên thường đ�
 
 **Universal Agents Workflow** giải quyết triệt để các vấn đề trên bằng mô hình **Hai Mặt Phẳng (Two-Plane Architecture)**:
 
-- **Control Plane (Quản trị Vòng đời)**: Ép AI tuân thủ quy trình công nghiệp nghiêm ngặt: _Khảo sát nghiệp vụ IREB (BA Pipeline) → Đặc tả kỹ thuật (SpecKit) → Lập trình kiểm thử trước (TDD) → Phản biện độc lập kép (Dual-Pass Review) → Đóng gói Modular Commit_.
+- **Control Plane (Quản trị Vòng đời)**: Ép AI tuân thủ quy trình công nghiệp nghiêm ngặt: _Khảo sát nghiệp vụ IREB (BA Pipeline) → Đặc tả kỹ thuật (UAW native planning) → Lập trình kiểm thử trước (TDD) → Phản biện độc lập kép (Dual-Pass Review) → Đóng gói Modular Commit_.
 - **Data Plane (Ngữ cảnh & Tri thức)**: Duy trì từ điển thuật ngữ nhất quán ([CONTEXT.md](CONTEXT.md)), ghi vết quyết định kiến trúc bất biến ([adr/](adr/)), và cơ chế **Scan First** — tự động quét tech stack để chỉ nạp đúng kỹ năng cần thiết, tuyệt đối không làm rác dự án.
 
 ---
 
 ## 🚀 Hướng Dẫn Bắt Đầu Nhanh (Quickstart)
 
-### 🌟 Phương Án 0: Tích Hợp Qua Mô Hình MCP (Khuyên dùng — Zero Repo Pollution)
-
-Nếu bạn sử dụng các AI Editor hiện đại (Antigravity IDE, Cursor, Windsurf, Claude Code), bạn không cần sao chép hàng trăm file vào repo. Chỉ cần chạy 1 lệnh để cấu hình:
-
-```bash
-npx -y @universal-agents/mcp-server init
-```
-
-Lệnh này sẽ tự động:
-
-1. Tạo file định tuyến tối giản `AGENTS.md` (~25 dòng) và kho lưu trữ tri thức `CONTEXT.md`, `adr/`.
-2. Hướng dẫn thêm cấu hình MCP Server vào AI Editor của bạn:
-   ```json
-   {
-     "mcpServers": {
-       "universal-agents": {
-         "command": "npx",
-         "args": ["-y", "@universal-agents/mcp-server@latest"]
-       }
-     }
-   }
-   ```
-
-Toàn bộ Kỹ năng (Prompts), Công cụ tự động hóa (Tools) và Tri thức mẫu (Resources) sẽ được nạp động thông qua **Model Context Protocol**, giúp repo của bạn luôn sạch 100%.
-
----
+Framework được tải về dưới dạng file trong dự án qua `install.sh` hoặc `install.ps1`. Các kỹ năng và tài liệu chạy trực tiếp từ file; không cần cấu hình UAW MCP hay cài gói npm.
 
 ### Phương Án 1: Tích Hợp File-Based Vào Dự Án Đang Có (Brownfield)
 
@@ -140,7 +115,7 @@ graph LR
 
 1. **Gõ lệnh trực tiếp vào khung chat**:
    - `/skill-setup` → Quét Tech Stack và nạp bộ kỹ năng phù hợp.
-   - `/generate-backlog` → Phỏng vấn 6 câu và tự sinh Roadmap chuẩn v1.1 từ ý tưởng thô.
+   - `/generate-backlog` → Phỏng vấn nghiệp vụ theo scope và tự sinh Roadmap chuẩn v1.2 từ ý tưởng thô.
    - `/command-continue-project` → Quét Roadmap và tự động làm tiếp User Story kế tiếp.
    - `/command-git-push` → Tự động kiểm tra chất lượng, chia Modular Commits và push an toàn.
    - `/update` → Nâng cấp framework an toàn với động cơ 3-Way Hash.
@@ -163,20 +138,22 @@ graph TD
     Trigger["Yêu cầu công việc mới"] --> Env{"Ngữ cảnh làm việc"}
 
     Env -->|🏢 Doanh nghiệp / Brownfield| Ticket["Nhận Task/Ticket từ Jira/Linear"]
-    Ticket --> Classify{"Độ phức tạp (intake-classifier)"}
-    Classify -->|Sửa lỗi / Việc nhỏ < 30 dòng| FT["⚡ Fast-Track TDD (Surgical Fix)<br/>Bỏ qua BA, chỉ viết test & sửa thẳng"]
-    Classify -->|Tính năng vừa / Bounded| Light["📝 Bounded Flow<br/>Hỏi nhanh 2-3 câu -> Spec ngắn -> TDD"]
+    Ticket --> Checkpoint["Checkpoint nghiệp vụ: outcome, behavior, scope, evidence, unknowns, AC"]
+    Checkpoint --> Lane{"Trigger? (AGENTS.md §2)"}
+    Lane -->|Không| FT["⚡ Fast lane (mặc định)<br/>Đọc → Plan 5 dòng → Test đỏ → Code → Verify → Self-check"]
+    Lane -->|Có T1–T7| Full["📝 Full lane<br/>Baseline (Gate 1) → Spec/Plan (Gate 2) → Slice → Review → Docs"]
 
-    Env -->|🚀 Dự án cá nhân / Greenfield| Backlog["💡 /generate-backlog<br/>Phỏng vấn 6 câu -> Tự sinh Roadmap v1.1"]
+    Env -->|🚀 Dự án cá nhân / Greenfield| Backlog["💡 /generate-backlog<br/>Phỏng vấn nghiệp vụ theo scope -> Tự sinh Roadmap v1.2"]
     Backlog --> Roadmap["File docs/PRODUCT_BACKLOG_ROADMAP.md"]
-    Roadmap --> Auto["🤖 Chạy lệnh /continue (/command-continue-project)<br/>Tự động quét [ ] -> Làm trọn vẹn -> Tích [x]"]
+    Roadmap --> Checkpoint
+    Roadmap --> Auto["🤖 /continue (/command-continue-project)<br/>Fast lane mặc định → escalate khi chạm trigger"]
 ```
 
 | Tiêu Chí           | 🏢 Doanh Nghiệp (Task Lẻ)                                       | 🚀 Dự Án Cá Nhân (Roadmap)                              |
 | :----------------- | :-------------------------------------------------------------- | :------------------------------------------------------ |
 | **Nguồn yêu cầu**  | Ticket từ Jira / Linear / Redmine / Asana.                      | File `docs/PRODUCT_BACKLOG_ROADMAP.md`.                 |
 | **Cách kích hoạt** | Paste nội dung Ticket vào chat kèm mã task.                     | 1. `/generate-backlog` → 2. `/continue` → 3. `/push`.   |
-| **Thủ tục**        | Tối giản, ưu tiên **Fast-Track** để giải quyết nhanh.           | Đầy đủ từ A đến Z (BA → Spec → TDD → Guide).            |
+| **Thủ tục**        | Tối giản, ưu tiên **Fast lane** để giải quyết nhanh.            | **Fast lane** mặc định; **Full lane** chỉ khi chạm trigger (auth, schema breaking, > 250 dòng…). |
 | **Chế độ Git**     | Dùng **`local`** hoặc **`stealth`** (giấu sạch file AI).        | Dùng **`team`** (theo dõi cả roadmap & spec trên Git).  |
 | **Commit Message** | Gắn Ticket ID: `fix(invoice): handle null customer (JIRA-892)`. | Gắn Story ID: `feat(auth): implement US-002 login JWT`. |
 
@@ -220,26 +197,33 @@ Mọi ngôn ngữ mở rộng đều tuân thủ nghiêm ngặt **The Language Q
 
 ## 🔄 Vòng Đời Phát Triển Chuẩn 7 Bước (End-to-End Pipeline)
 
-Mọi tính năng quan trọng đều được vận hành qua 7 bước chuẩn công nghiệp với các cổng kiểm soát (Gates) nghiêm ngặt:
+Mọi yêu cầu triển khai có checkpoint nghiệp vụ: mục tiêu, hành vi, scope, bằng chứng,
+điểm chưa rõ và AC. Dùng lại câu trả lời đã xác nhận, chỉ hỏi phần trọng yếu còn thiếu.
+**2 làn**: Fast cho hành vi hiện có đã rõ; Full khi chạm T1–T7, gồm nghiệp vụ mới/chưa rõ.
+Roadmap S/M không bỏ qua auth/PII hay trigger khác. Research chỉ đọc không cần lặp BA.
+Luật lane nằm trong `AGENTS.md` §2. Full lane giữ nguyên 7 bước và 4 cổng dưới đây:
 
 ```mermaid
 flowchart TD
-    S1["1. /skill-setup<br/>(Quét Stack & Bơm Skill)"] --> S2["2. Phase 1: BA Pipeline<br/>(Phỏng vấn 6 Trụ cột & Ký duyệt Baseline)"]
-    S2 -->|🛑 Gate 1: Baseline Signed-Off| S3["3. Phase 2-4: SpecKit<br/>(spec.md, plan.md, tasks.md)"]
+    S1["1. BA checkpoint<br/>(Bằng chứng, hành vi, scope, AC & câu hỏi còn thiếu)"] --> L{"Có trigger T1–T7?"}
+    L -->|Không| F["⚡ Fast lane: Đọc → Plan 5 dòng → Red → Green → Verify → Self-check"]
+    L -->|Có| S2["2. Phase 1: BA Pipeline<br/>(Phỏng vấn 6 Trụ cột & Ký duyệt Baseline)"]
+    S2 -->|🛑 Gate 1: Baseline Signed-Off| S3["3. Phase 2-4: UAW Native Planning<br/>(spec.md, plan.md, tasks.md)"]
     S3 -->|🛑 Gate 2: Tech Plan Approved| S4["4. Phase 5: TDD Implementation<br/>(Red -> Green -> Refactor theo Slice)"]
     S4 --> S5["5. Phase 6A: Tri-Pass Review<br/>(Bảo mật, Spec & Tối giản hoá Anti-Overengineering)"]
     S5 --> S6["6. Phase 6B: Docs & User Guide<br/>(Diataxis Docs + Ảnh chụp Playwright thật)"]
     S6 --> S7["7. /command-git-push<br/>(Modular Commits chuẩn Conventional)"]
+    F --> S7
 ```
 
 | Bước  | Tên Giai Đoạn                    | Kỹ Năng / Subagent Đảm Nhiệm                               | Đầu Ra Bắt Buộc (Artifacts)                                                                |
 | :---: | :------------------------------- | :--------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
 | **1** | **Onboarding Stack**             | `/skill-setup`, `setup-workspace`                          | `.agents/catalog.json`, skills, rules & subagents theo stack.                              |
-| **2** | **Nghiệp Vụ (BA Pipeline)**      | `intake-classifier`, `elicitation-interview`, `grilling`   | `.specify/features/<slug>/baseline.md` (**Ký duyệt v1.0**).                                |
-| **3** | **Đặc Tả & Thiết Kế**            | `speckit-specify`, `speckit-plan`, `speckit-tasks`         | `spec.md`, `plan.md`, `data-model.md`, `tasks.md`.                                         |
-| **4** | **Lập Trình TDD**                | `code-explorer`, `backend-developer`, `frontend-developer` | `test-plan.md`, Unit Tests đỏ → xanh, Code tối giản theo The Ladder.                       |
-| **5** | **Phản Biện Độc Lập (Tri-Pass)** | `code-reviewer`, `ui-design-review`, `ponytail-review`     | Báo cáo 3 tầng: Bảo mật, Spec fidelity & Tối giản hoá mã nguồn (`net: -N lines possible`). |
-| **6** | **Tài Liệu Hóa**                 | `tech-doc-architect`, `command-user-guide`, `archify`      | `docs/features/<slug>/README.md`, `docs/user-guides/<slug>.md`, Share Cards.               |
+| **2** | **Nghiệp Vụ (Full lane)**        | `intake-classifier`, `elicitation-interview`, `grilling`   | `.specify/features/<slug>/baseline.md` (**Ký duyệt v1.0**).                                |
+| **3** | **Đặc Tả & Thiết Kế (Full lane)**| `technical-spec`, `implementation-plan`, `task-breakdown`         | `spec.md`, `plan.md`, `data-model.md`, `tasks.md`.                                         |
+| **4** | **Lập Trình TDD**                | `code-explorer`, `backend-developer`, `frontend-developer` | Fast: không file thủ tục. Full: `test-plan.md` + Unit Tests đỏ → xanh.                     |
+| **5** | **Phản Biện (Full lane)**        | `code-reviewer`, `ui-design-review`, `ponytail-review`     | Báo cáo 3 tầng: Bảo mật, Spec fidelity & Tối giản hoá mã nguồn.                            |
+| **6** | **Tài Liệu Hóa (Full lane)**     | `tech-doc-architect`, `command-user-guide`      | `docs/features/<slug>/README.md`, `docs/user-guides/<slug>.md`, sơ đồ Mermaid.               |
 | **7** | **Đóng Gói & Đẩy Mã**            | `/command-git-push`                                        | Tự động chia Modular Commits theo tầng và push an toàn.                                    |
 
 > 📖 **Xem hướng dẫn thao tác chi tiết từng bước 1 tại**: [📘 .agents/docs/workflow-step-by-step.md](.agents/docs/workflow-step-by-step.md)
@@ -279,7 +263,7 @@ flowchart TD
 | Lệnh / Trigger            | Bí Danh           | Mục Đích Sử Dụng                                                         |
 | :------------------------ | :---------------- | :----------------------------------------------------------------------- |
 | **`/skill-setup`**        | `/setup`          | Quét manifest dự án và tự động cấu hình bộ kỹ năng phù hợp.              |
-| **`/generate-backlog`**   | `/create-roadmap` | Phỏng vấn 6 câu và tự sinh roadmap chuẩn chống hallucination.            |
+| **`/generate-backlog`**   | `/create-roadmap` | Phỏng vấn nghiệp vụ theo scope và tự sinh roadmap chuẩn chống hallucination.            |
 | **`/continue`**           | `/next`           | Quét roadmap, phỏng vấn gỡ blocker `[!]` và kích hoạt làm story kế tiếp. |
 | **`/command-git-push`**   | `/push`, `/ship`  | Kiểm tra cổng tài liệu, phân tách Modular Commits và push an toàn.       |
 | **`/command-user-guide`** | `/guide`          | Mở Playwright chụp ảnh giao diện thật và viết hướng dẫn sử dụng.         |
@@ -310,7 +294,11 @@ Framework tích hợp các script hook kiểm soát cơ học tại [.agents/scr
 
 ## 🔄 Cập Nhật & Nâng Cấp Thông Minh (Smart Update & 3-Way Hash Engine)
 
-Hệ thống cập nhật thông minh giải quyết triệt để bài toán **nâng cấp framework mà không làm mất dữ liệu dự án hoặc custom code của người dùng**:
+Cài mới/cài lại/cập nhật dùng chung cơ chế hash cho core và pack đã chọn. File
+tùy chỉnh hoặc thiếu bằng chứng sở hữu được giữ; update không tự thêm pack hay
+xóa file nguồn cũ ở dự án của bạn. Index, adapter copy/symlink và hooks được đồng
+bộ sau pack với cùng quy tắc bảo vệ dữ liệu. Báo cáo phân biệt xung đột, pack
+thiếu nguồn và bước chưa chạy; cần đọc kết quả trước khi coi cập nhật hoàn tất.
 
 ### 3 Cách Kích Hoạt Cập Nhật Nhanh Chóng:
 
@@ -346,7 +334,7 @@ Thư mục dự án:
 │   ├── SKILLS.md                       # 📑 Mục lục toàn bộ kỹ năng (sinh tự động)
 │   ├── catalog.json                    # Kho đăng ký động kỹ năng theo stack
 │   ├── skills/                         # Hot set: entry point + slash command (được index)
-│   ├── skill-library/                  # Cold set: 57 kỹ năng đọc theo nhu cầu
+│   ├── skill-library/                  # Cold set: đọc theo nhu cầu, tra SKILLS.md
 │   ├── agents/                         # Danh mục subagents chuyên môn hóa
 │   ├── rules/                          # Quy chuẩn coding style theo ngôn ngữ
 │   ├── hooks.json                      # Cấu hình khóa bảo vệ Git & an toàn dữ liệu
