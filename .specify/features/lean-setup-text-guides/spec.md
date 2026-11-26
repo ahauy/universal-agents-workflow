@@ -1,0 +1,3 @@
+# Technical specification
+
+Reuse the existing safe update/derived engine without deletion-policy changes. Merge onboarding into the setup command using an on-demand reference to keep hot context short; merge agent authoring into a technical-documentation reference; add debt scope to ponytail-review. Replace screenshot skill tree with user-guide (text SKILL/template only), and reduce command-user-guide to a link plus scope handoff. Delete source capture-only scripts/plans/setup and test-capture-screenshots.mjs. Update active user-guide agent/openai.yaml and command-git-push advisory; no browser call for guides. Retain UI review/e2e artifact checks. Source catalog index generated in isolated root without adopting customer provenance.

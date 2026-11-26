@@ -1,0 +1,2003 @@
+--- before/.agents/SKILLS.md
++++ after/.agents/SKILLS.md
+@@ -7,7 +7,7 @@
+ | Tier | Location | Cost | Contents |
+ | --- | --- | --- | --- |
+ | Hot | `.agents/skills/` | name + description on every request | 9 entry points and slash commands |
+-| Cold | `.agents/skill-library/` | zero until read | 44 on-demand skills |
++| Cold | `.agents/skill-library/` | zero until read | 41 on-demand skills |
+ 
+ Regenerate with `node .agents/scripts/build-skill-index.mjs`; verify with `--check`.
+ 
+@@ -28,7 +28,7 @@
+ | Bug reproduced, root cause unknown | `diagnosing-bugs` |
+ | Over-engineered diff / bloated repo | `ponytail-review` |
+ | Need an architecture or sequence diagram | `technical-documentation` |
+-| Feature ships, needs docs + screenshots | `technical-documentation` |
++| Need a plain-language user guide | `user-guide` |
+ | Unsure which skill or phase applies | `skills-index` |
+ 
+ ## Hot set — already in the system prompt (9)
+@@ -38,9 +38,9 @@
+ | `command-continue-project` | Continue the roadmap in the Fast lane by default; escalate to the Full lane only on a hard trigger. | `.agents/skills/engineering/command-continue-project/SKILL.md` |
+ | `command-generate-backlog` | Interview the user and render docs/PRODUCT_BACKLOG_ROADMAP.md: MoSCoW, RICE, dependency chain, effort, context budget,… | `.agents/skills/engineering/command-generate-backlog/SKILL.md` |
+ | `command-git-push` | Inspect changes, write Conventional Commits by layer, push the branch, and emit an English PR brief. | `.agents/skills/engineering/command-git-push/SKILL.md` |
+-| `command-skill-setup` | Scan project manifests, match compatible skills and rules from the catalog, confirm with the user, then activate… | `.agents/skills/engineering/command-skill-setup/SKILL.md` |
++| `command-skill-setup` | Inspect and onboard a project, then activate confirmed catalog skills and rules safely through registered mappings. | `.agents/skills/engineering/command-skill-setup/SKILL.md` |
+ | `command-update` | Update the framework through the 3-Way Hash engine; protects project data and user-added skills (Zero Deletion Policy). | `.agents/skills/engineering/command-update/SKILL.md` |
+-| `command-user-guide` | Verify the dev server, capture real Playwright screenshots, and write docs/user-guides/<slug>.md in non-technical… | `.agents/skills/engineering/command-user-guide/SKILL.md` |
++| `command-user-guide` | Write or update a concise text guide in docs/user-guides/<slug>.md using confirmed feature behavior. | `.agents/skills/engineering/command-user-guide/SKILL.md` |
+ | `intake-classifier` | BA checkpoint and lane selector: reuse confirmed evidence; Fast for bounded existing behavior, Full on risk or… | `.agents/skills/engineering/intake-classifier/SKILL.md` |
+ | `ponytail` | Laziest solution that works: YAGNI, stdlib before custom, native before deps, one line before fifty. | `.agents/skills/engineering/ponytail/SKILL.md` |
+ | `skills-index` | Skill catalog router. | `.agents/skills/engineering/skills-index/SKILL.md` |
+@@ -94,7 +94,7 @@
+ | --- | --- | --- |
+ | `ui-design-review` | Use as the independent visual and design review step whenever a UI slice has been implemented — whether inside… | `.agents/skill-library/engineering/ui-design-review/SKILL.md` |
+ | `technical-documentation` | MANDATORY when writing, updating, or reviewing technical documentation, architecture docs, feature docs, API… | `.agents/skill-library/engineering/technical-documentation/SKILL.md` |
+-| `user-guide-with-screenshots` | Creates or updates a user-facing guide (non-technical language, real screenshots) for a feature that was just built or… | `.agents/skill-library/engineering/user-guide-with-screenshots/SKILL.md` |
++| `user-guide` | Create or update concise text instructions for end users from confirmed behavior. | `.agents/skill-library/engineering/user-guide/SKILL.md` |
+ | `verification-before-completion` | Verify completion against the selected Fast or Full lane, acceptance criteria, relevant automated checks and zero… | `.agents/skill-library/engineering/verification-before-completion/SKILL.md` |
+ 
+ ## UI & Design (4)
+@@ -106,23 +106,20 @@
+ | `motion-design` | Use this skill whenever building, reviewing, or refining UI/web animation — hover effects, scroll reveals, page… | `.agents/skill-library/engineering/motion-design/SKILL.md` |
+ | `frontend-a11y` | MANDATORY when building any interactive React UI component, form, modal, dropdown, or navigation element. | `.agents/skill-library/engineering/frontend-a11y/SKILL.md` |
+ 
+-## Minimal code (ponytail) (2)
++## Minimal code (ponytail) (1)
+ 
+ | Skill | When | Path |
+ | --- | --- | --- |
+-| `ponytail-review` | Diff or whole-repository review focused exclusively on over-engineering. | `.agents/skill-library/engineering/ponytail-review/SKILL.md` |
+-| `ponytail-debt` | Harvest every `ponytail:` comment in the codebase into a debt ledger, so the deliberate shortcuts and deferrals… | `.agents/skill-library/engineering/ponytail-debt/SKILL.md` |
++| `ponytail-review` | Diff/repository complexity review or a debt ledger of deliberate ponytail shortcuts. | `.agents/skill-library/engineering/ponytail-review/SKILL.md` |
+ 
+-## Productivity & meta (6)
++## Productivity & meta (4)
+ 
+ | Skill | When | Path |
+ | --- | --- | --- |
+ | `wait-what` | Use immediately when an explanation, architectural rationale, or decision does not land or feels confusing. | `.agents/skill-library/productivity/wait-what/SKILL.md` |
+ | `handoff` | Compact the current session context, in-flight work, decisions made, and immediate next actions into a structured… | `.agents/skill-library/productivity/handoff/SKILL.md` |
+ | `retro` | Conduct a retrospective on a coding session or project milestone to continuously improve the agent's operating… | `.agents/skill-library/productivity/retro/SKILL.md` |
+-| `setup-workspace` | One-time repository onboarding and self-configuration skill (replacing `setup-matt-pocock-skills`). | `.agents/skill-library/productivity/setup-workspace/SKILL.md` |
+ | `setup-subagents` | Detect which models each installed harness actually exposes, decide which of them the user is permitted to use, and… | `.agents/skill-library/engineering/setup-subagents/SKILL.md` |
+-| `writing-for-agents` | Guidelines and standards for authoring documentation, skill descriptions, agent prompts, and architecture guides… | `.agents/skill-library/engineering/writing-for-agents/SKILL.md` |
+ 
+ ## How to use a cold skill
+ 
+--- before/.agents/agents/openai.yaml
++++ after/.agents/agents/openai.yaml
+@@ -130,7 +130,7 @@
+   user-guide-creator:
+     interface:
+       display_name: "User Guide Creator"
+-      short_description: "Generates end-user visual guides with real browser screenshots and red callout badges"
++      short_description: "Writes concise end-user text guides from confirmed feature behavior"
+       default_model: "gemini-3.7-flash"
+     policy:
+       allow_implicit_invocation: true
+--- before/.agents/agents/user-guide-creator.md
++++ after/.agents/agents/user-guide-creator.md
+@@ -1,90 +1,28 @@
+ ---
+ name: user-guide-creator
+-description: "End-user guide specialist producing docs/user-guides with step-by-step instructions and real browser screenshots."
+-tools: Read, Write, Edit, Bash, Grep, Glob
++description: "End-user documentation specialist producing concise text instructions in docs/user-guides."
++tools: Read, Write, Edit, Grep, Glob
+ model: inherit
+ subagent: true
+ inheritMcp: false
+ commandExecutionPolicy: auto
+ ---
+ 
+-# User Guide Creator (End-User Visual Documentation)
++# User Guide Creator
+ 
+-You are the End-User Documentation Specialist. Your mission is to produce beautiful, easy-to-understand, visual guides for end-users using the application.
++Write clear, concise instructions for everyday users using the
++`user-guide` skill at `.agents/skill-library/engineering/user-guide/SKILL.md`.
++Read only its current workflow and the relevant confirmed feature evidence.
+ 
+-You execute the User Guide stage of Phase 6 by applying the `user-guide-with-screenshots` skill.
++Run when a guide is requested or release documentation requires it. A UI change
++alone is not a documentation gate. Use actual control names, numbered actions
++and confirmed results without technical implementation detail or invented rules.
+ 
+----
++Read existing guides first. Preserve unrelated custom content, image references
++and assets; edit only the requested sections. This is a text-only task: do not
++start the application, open a browser, capture images or add annotation tooling.
++UI review/E2E evidence requirements belong to their respective workflows.
+ 
+-## Operating Principles
+-
+-1. **Non-Technical Tone**:
+-   - Write for everyday end-users.
+-   - **NEVER** mention technical implementation details like database names, API endpoints, DTOs, frameworks, or code variables.
+-   - Use clear, action-oriented verbs (e.g. 'Click', 'Select', 'Navigate to', 'Submit').
+-2. **100% Mandatory Real Screenshots**:
+-   - Every guide MUST include real UI screenshots captured directly from the running web application.
+-   - No placeholder divs, mocked ASCII diagrams, or missing images.
+-3. **Visual Highlights & Red Callout Boxes**:
+-   - Highlight key interactive elements using bright red callout borders (`#EF4444`, 3px solid, rounded corners).
+-   - Use numbered red badges (, , ) mapped to step-by-step instructions below the image.
+-4. **Target Destination**:
+-   - Save user guides strictly to `docs/user-guides/<feature-slug>.md`.
+-   - Save captured screenshots to `docs/user-guides/images/<feature-slug>/`.
+-
+----
+-
+-## Workflow
+-
+-### 1. Pre-Flight Server Check
+-
+-Ensure the local frontend dev server is running and accessible.
+-
+-### 2. Plan Screenshot Interactions
+-
+-Define screenshot requirements in a plan:
+-
+-- Target route/URL
+-- Element selectors to focus on or interact with
+-- Callout bounding boxes and labels
+-- Badge numbers and accompanying descriptive text
+-
+-### 3. Capture Screenshots
+-
+-Capture screenshots using the project's browser automation tools or subagents.
+-
+-### 4. Write User Guide Document
+-
+-Structure the guide following the standard user-facing template:
+-
+-```markdown
+-# How to Use: <Feature Title>
+-
+-A quick, visual guide to using <feature title>.
+-
+----
+-
+-## 1. Getting Started
+-
+-![Feature Overview](./images/<feature-slug>/01-overview.png)
+-
+-1. Navigate to the **<Feature Section>** from the main navigation bar.
+-2. Select your target item or action.
+-
+----
+-
+-## 2. Step-by-Step Walkthrough
+-
+-![Step 1 Interaction](./images/<feature-slug>/02-interaction.png)
+-
+-**Action Button**: Click here to initiate the action.  
+-**Status Indicator**: Displays current status and progress.  
+-**Detail Panel**: View and edit attributes.
+-
+----
+-
+-## 3. Helpful Tips & FAQs
+-
+-- **Tip**: Common shortcut or best practice for this feature.
+-- **FAQ**: Answers to frequently asked end-user questions.
+-```
++Write `docs/user-guides/<slug>.md`, update an existing guide index when applicable,
++validate local links and report the output path plus any unverified behavior.
++Follow the `user-guide` skill rather than maintaining a second procedure here.
+--- before/.agents/catalog.json
++++ after/.agents/catalog.json
+@@ -605,22 +605,11 @@
+       "id": "ponytail-review",
+       "name": "Ponytail Review — Diff and Repository Audit",
+       "category": "Anti-Overengineering",
+-      "short_description": "Read-only over-engineering review of a diff or whole repository. Choose /ponytail-review diff or /ponytail-review repo. Identify justified deletions, stdlib/native replacements and simpler code with file locations and consumer evidence. Report estimated reductions without applying fixes or claiming benchmark-based project savings.",
++      "short_description": "Read-only over-engineering review of a diff or whole repository, plus a deliberate-shortcut debt ledger. Use /ponytail-review diff, repo or debt. Debt reports file/line, ceiling, upgrade trigger and missing triggers from ponytail comments; review proposes evidence-backed cuts without applying changes or claiming benchmark-based savings.",
+       "detection_markers": [],
+       "source_path": ".agents/skill-library/engineering/ponytail-review",
+       "target_type": "skill",
+       "target_path": ".agents/skill-library/engineering/ponytail-review",
+-      "recommendation": "recommended"
+-    },
+-    {
+-      "id": "ponytail-debt",
+-      "name": "Ponytail Debt — Shortcut Ledger",
+-      "category": "Anti-Overengineering",
+-      "short_description": "Harvests every `ponytail:` comment in the codebase into a debt ledger so deliberate shortcuts don't quietly rot into 'later means never'. Grep-based scan, one row per marker with ceiling and upgrade path. Flags no-trigger entries. MIT license — bundled from DietrichGebert/ponytail.",
+-      "detection_markers": [],
+-      "source_path": ".agents/skill-library/engineering/ponytail-debt",
+-      "target_type": "skill",
+-      "target_path": ".agents/skill-library/engineering/ponytail-debt",
+       "recommendation": "recommended"
+     }
+   ]
+--- before/.agents/docs/failure-modes.md
++++ after/.agents/docs/failure-modes.md
+@@ -16,7 +16,7 @@
+ | _"Modules feel shallow, coupled, or leaky cross-imports"_          | Architectural erosion           | `improve-codebase-architecture` / `setup-deep-modules`                 |
+ | _"Session ended; want to optimize agent environment or rule bloat"_| Feedback loop missing           | `retro` (`productivity/retro`)                                         |
+ | _"Agent context window is filling up or session is ending"_        | Memory bloat & drift            | `handoff` (`productivity/handoff`)                                     |
+-| _"Writing new system skills, rules, or instructions"_              | Unfocused agent documentation   | `writing-for-agents` (`engineering/writing-for-agents`)                |
++| _"Writing new system skills, rules, or instructions"_              | Unfocused agent documentation   | `technical-documentation` (`engineering/technical-documentation`), agent-authoring reference                |
+ | _"Starting a new repo or onboarding project from scratch"_         | Manual configuration burden     | `/command-skill-setup` (`engineering/command-skill-setup`)             |
+ | _"Upgrading framework or syncing upstream changes safely"_         | Framework evolution & drift     | `/command-update` (`engineering/command-update`)                       |
+ | _"Reviewing code or catching regressions before merge"_            | Unstructured code review        | `code-reviewer` agent (dual pass: Standards + Spec)                    |
+@@ -24,5 +24,5 @@
+ | _"AI is adding flatpickr/moment/wrapper class for a date input"_   | Over-engineering / bloat        | `ponytail` (`engineering/ponytail`) — The Ladder                       |
+ | _"Agent generated 200+ lines for a task stdlib covers in 5"_       | Unnecessary complexity          | `ponytail-review` (`engineering/ponytail-review`)                      |
+ | _"Want to audit the whole codebase for bloat and deletable code"_  | Structural over-engineering     | `ponytail-review` — repository scope (`engineering/ponytail-review`)                        |
+-| _"Need to track deliberate shortcuts before they silently rot"_    | Unmanaged technical debt        | `ponytail-debt` (`engineering/ponytail-debt`)                          |
++| _"Need to track deliberate shortcuts before they silently rot"_    | Unmanaged technical debt        | `ponytail-review debt` (`engineering/ponytail-review`)                          |
+ | _"Every task feels slow; too much ceremony before code"_            | Wrong lane / no escalation rule | `intake-classifier` (`engineering/intake-classifier`) — Fast by default |
+--- before/.agents/docs/pipeline-detail.md
++++ after/.agents/docs/pipeline-detail.md
+@@ -179,7 +179,7 @@
+ feature index. Update `docs/architecture/` + an ADR only when the feature changes
+ architecture (new entity, service, or contract).
+ 
+-`user-guide-with-screenshots` runs **per release, not per feature**.
++`user-guide` runs only when requested or selected for release documentation. Write text instructions from confirmed behavior; no browser capture, annotations or server startup is required.
+ 
+ `agent-evaluator` is **not** part of the default delivery path. Run it via
+ `/retro` when you want a meta-review of the workflow itself.
+--- before/.agents/docs/ponytail-usage.md
++++ after/.agents/docs/ponytail-usage.md
+@@ -9,7 +9,7 @@
+ | `/ponytail ultra` | Challenge speculative additions before implementing the smallest confirmed scope. |
+ | `/ponytail-review diff` | Read-only review of the requested changes for unnecessary complexity. |
+ | `/ponytail-review repo` | Read-only whole-repository audit, ranked by justified cuts. |
+-| `/ponytail-debt` | Report deliberate `ponytail:` shortcuts with their ceiling and upgrade trigger. |
++| `/ponytail-review debt` | Report deliberate `ponytail:` shortcuts with their ceiling and upgrade trigger. |
+ 
+ A selected level lasts for the session until changed. Say `stop ponytail` or
+ `normal mode` to deactivate it; invoke `/ponytail` to resume. Never simplify away
+--- before/.agents/docs/skills-cheatsheet.md
++++ after/.agents/docs/skills-cheatsheet.md
+@@ -18,7 +18,7 @@
+ | **`/command-generate-backlog`** | `/generate-backlog`, `/create-roadmap` | Checkpoint nghiệp vụ theo scope và tự sinh roadmap chuẩn schema v1.2 chống hallucination.                                      | Bắt đầu dự án mới hoặc khi có ý tưởng sản phẩm từ đầu.   |
+ | **`/command-continue-project`** | `/continue`, `/next`                   | Quét `PRODUCT_BACKLOG_ROADMAP.md`, phỏng vấn `grilling` gỡ blocker `[!]` và kích hoạt chu trình làm tính năng tiếp theo. | Trong dự án cá nhân/greenfield phát triển theo roadmap.  |
+ | **`/command-git-push`**         | `/push`, `/ship`                       | Kiểm tra cổng tài liệu, phân tách commit theo tầng (Modular Commit) và push an toàn.                                     | Khi hoàn thành tính năng hoặc sửa lỗi cần đẩy lên Git.   |
+-| **`/command-user-guide`**       | `/user-guide`, `/guide`                | Khởi chạy Playwright chụp ảnh giao diện thực tế và viết tài liệu hướng dẫn.                                              | Sau khi hoàn thiện giao diện người dùng.                 |
++| **`/command-user-guide`**       | `/user-guide`, `/guide`                | Viết hướng dẫn sử dụng bằng văn bản từ hành vi đã xác nhận; không cần chụp ảnh.                                              | Khi được yêu cầu hoặc cần tài liệu cho release.                 |
+ | **`/command-update`**           | `/update`, `/upgrade`                  | Cập nhật framework an toàn với động cơ 3-Way Hash; bảo vệ 100% dữ liệu dự án và giữ nguyên custom skill.                 | Khi có bản phát hành mới hoặc muốn đồng bộ framework.    |
+ 
+ ---
+@@ -85,8 +85,8 @@
+ | :----------------------------------- | :---------------------------------------------------------------------------------------------------------- | :------------------------------------------------------ |
+ | **`verification-before-completion`** | Thu thập bằng chứng kiểm thử thực tế (test output, log) chứng minh code hoạt động trước khi chốt task.      | Bước cuối cùng của Phase 6 trước khi tạo commit.        |
+ | **`technical-documentation`**        | Soạn thảo tài liệu kỹ thuật tính năng theo chuẩn 4 góc Diataxis (Tutorial, How-To, Reference, Explanation). | Phase 6B: Lưu vào `docs/features/<slug>/README.md`.     |
+-| **`user-guide-with-screenshots`**    | Khởi chạy Playwright chụp ảnh màn hình thật và viết tài liệu hướng dẫn cho người dùng cuối.                 | Phase 6B: Lưu vào `docs/user-guides/<slug>.md`.         |
+-| **`writing-for-agents`**             | Kỹ thuật viết tài liệu, rules và hướng dẫn được tối ưu hóa cho AI Agents dễ hiểu và làm theo.               | Khi bổ sung kỹ năng mới hoặc viết prompts cho subagent. |
++| **`user-guide`**    | Viết hướng dẫn văn bản cho người dùng cuối; cập nhật đúng phần đã đổi, giữ nội dung tùy chỉnh.                 | Phase 6B: Lưu vào `docs/user-guides/<slug>.md`.         |
++| **`technical-documentation` (agent-authoring reference)**             | Kỹ thuật viết tài liệu, rules và hướng dẫn được tối ưu hóa cho AI Agents dễ hiểu và làm theo.               | Khi bổ sung kỹ năng mới hoặc viết prompts cho subagent. |
+ 
+ ---
+ 
+--- before/.agents/docs/workflow-step-by-step.md
++++ after/.agents/docs/workflow-step-by-step.md
+@@ -114,7 +114,7 @@
+ 
+ - `tech-doc-architect`: `docs/features/<slug>/README.md` + cập nhật index. Chỉ tạo
+   ADR khi kiến trúc thay đổi thật.
+-- `user-guide-with-screenshots`: **theo release, không theo feature**.
++- `user-guide`: **khi được yêu cầu hoặc được chọn cho tài liệu release**; viết hướng dẫn văn bản, không có bước chụp ảnh hay chạy ứng dụng bắt buộc.
+ - `agent-evaluator`: chạy qua `/retro`, không nằm trong đường giao mặc định.
+ 
+ ## Bước 7 — Ship (cả 2 làn, chỉ khi bạn gõ lệnh)
+--- before/.agents/rules/common/agents.md
++++ after/.agents/rules/common/agents.md
+@@ -22,7 +22,7 @@
+ | **`code-reviewer`**       | Adversarial dual-pass code review (Standards & Spec fidelity)                     |     **Phase 6A**    | `inherit` |
+ | **`ui-ux-reviewer`**      | Adversarial UI/UX review (Anti-AI-slop, 4 UX states, WCAG AA, motion)             |     **Phase 6A**    | `inherit` |
+ | **`tech-doc-architect`**  | Diataxis technical docs, feature READMEs, Architecture/Algorithm sync             |     **Phase 6B**    | `inherit` |
+-| **`user-guide-creator`**  | End-user guides with browser screenshots & Red Callout boxes (#EF4444)            |     **Phase 6B**    | `inherit` |
++| **`user-guide-creator`**  | Concise text user guides when requested or required for release            |     **Phase 6B**    | `inherit` |
+ | **`agent-evaluator`**     | 5-axis agent quality evaluation, session friction & rule refinement               | **Phase 6B / Meta** | `inherit` |
+ 
+ ---
+--- before/.agents/scripts/build-skill-index.mjs
++++ after/.agents/scripts/build-skill-index.mjs
+@@ -87,7 +87,7 @@
+   "Review, Docs & Delivery": [
+     "ui-design-review",
+     "technical-documentation",
+-    "user-guide-with-screenshots",
++    "user-guide",
+     "verification-before-completion",
+   ],
+   "UI & Design": [
+@@ -98,15 +98,12 @@
+   ],
+   "Minimal code (ponytail)": [
+     "ponytail-review",
+-    "ponytail-debt",
+   ],
+   "Productivity & meta": [
+     "wait-what",
+     "handoff",
+     "retro",
+-    "setup-workspace",
+     "setup-subagents",
+-    "writing-for-agents",
+   ],
+ };
+ 
+@@ -125,7 +122,7 @@
+   ["Bug reproduced, root cause unknown", "diagnosing-bugs"],
+   ["Over-engineered diff / bloated repo", "ponytail-review"],
+   ["Need an architecture or sequence diagram", "technical-documentation"],
+-  ["Feature ships, needs docs + screenshots", "technical-documentation"],
++  ["Need a plain-language user guide", "user-guide"],
+   ["Unsure which skill or phase applies", "skills-index"],
+ ];
+ 
+--- before/.agents/scripts/test/test-capture-screenshots.mjs
++++ after/.agents/scripts/test/test-capture-screenshots.mjs
+@@ -1,73 +0,0 @@
+-import assert from 'node:assert/strict';
+-import fs from 'node:fs';
+-import os from 'node:os';
+-import path from 'node:path';
+-import { spawnSync } from 'node:child_process';
+-import { fileURLToPath } from 'node:url';
+-import test from 'node:test';
+-
+-const script = fileURLToPath(new URL('../../skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs', import.meta.url));
+-
+-function capture(actions, failure = '', screenshot = {}) {
+-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'uaw-capture-'));
+-  try {
+-    fs.copyFileSync(script, path.join(root, 'capture.mjs'));
+-    const moduleDir = path.join(root, 'node_modules/playwright');
+-    fs.mkdirSync(moduleDir, { recursive: true });
+-    fs.writeFileSync(path.join(moduleDir, 'package.json'), JSON.stringify({ type: 'module', exports: './index.js' }));
+-    fs.writeFileSync(path.join(moduleDir, 'index.js'), `
+-      import fs from 'node:fs';
+-      async function call(name) {
+-        fs.appendFileSync('events.jsonl', JSON.stringify(name) + '\\n');
+-        if (process.env.CAPTURE_FAILURE === name) throw new Error('fixture ' + name + ' failure');
+-      }
+-      const page = Object.fromEntries(['goto', 'click', 'fill', 'hover', 'waitForSelector', 'waitForTimeout', 'screenshot'].map(name => [name, () => call(name)]));
+-      page.locator = () => ({ screenshot: () => call('elementScreenshot') });
+-      export const chromium = { launch: async () => ({
+-        newContext: async () => { await call('newContext'); return { newPage: async () => page }; },
+-        close: () => call('close')
+-      }) };
+-    `);
+-    fs.writeFileSync(path.join(root, 'plan.json'), JSON.stringify({
+-      baseUrl: 'http://localhost:4321', outDir: 'images',
+-      steps: [{ name: 'step-01', url: '/example', actions, screenshot }],
+-    }));
+-    const result = spawnSync(process.execPath, ['capture.mjs', 'plan.json'], {
+-      cwd: root, encoding: 'utf8', env: { ...process.env, CAPTURE_FAILURE: failure },
+-    });
+-    const events = fs.readFileSync(path.join(root, 'events.jsonl'), 'utf8').trim().split('\n').map(JSON.parse);
+-    return { ...result, events };
+-  } finally {
+-    fs.rmSync(root, { recursive: true, force: true });
+-  }
+-}
+-
+-for (const [label, actions, failure] of [
+-  ['failed action', [{ type: 'click', selector: '#missing' }], 'click'],
+-  ['unknown action', [{ type: 'invented' }], ''],
+-  ['navigation failure', [], 'goto'],
+-  ['capture failure', [], 'screenshot'],
+-  ['context failure', [], 'newContext'],
+-]) {
+-  test(`${label} exits nonzero and closes browser without success`, () => {
+-    const result = capture(actions, failure);
+-    assert.notEqual(result.status, 0);
+-    assert.equal(result.events.at(-1), 'close');
+-    assert.doesNotMatch(result.stdout, /Saved:|Done!/);
+-    if (failure !== 'screenshot') assert.ok(!result.events.includes('screenshot'));
+-  });
+-}
+-
+-test('successful supported actions capture and close', () => {
+-  const result = capture(['click', 'fill', 'hover', 'waitForSelector', 'wait'].map(type => ({ type, selector: '#target', value: 'text', ms: 1 })));
+-  assert.equal(result.status, 0, result.stderr);
+-  assert.deepEqual(result.events, ['newContext', 'goto', 'click', 'fill', 'hover', 'waitForSelector', 'waitForTimeout', 'screenshot', 'close']);
+-  assert.match(result.stdout, /Done!/);
+-});
+-
+-test('element screenshot uses the requested selector', () => {
+-  const result = capture([], '', { selector: '#target' });
+-  assert.equal(result.status, 0, result.stderr);
+-  assert.ok(result.events.includes('elementScreenshot'));
+-  assert.equal(result.events.at(-1), 'close');
+-});
+--- before/.agents/scripts/test/test-catalog.mjs
++++ after/.agents/scripts/test/test-catalog.mjs
+@@ -11,7 +11,8 @@
+ test('retired tools and utilities have no selectable catalog owner',()=>{
+  const items=JSON.parse(fs.readFileSync(authority)).items;
+  const retired=new Set(['archify','ponytail-audit','ponytail-gain','ponytail-help',
+-   'route','frontend-design','ui-taste-pro']);
++   'route','frontend-design','ui-taste-pro','setup-workspace',
++   'writing-for-agents','ponytail-debt','user-guide-with-screenshots']);
+  assert.equal(items.some(item=>retired.has(item.id)||item.id.startsWith('speckit-')),false);
+ });
+ test('catalog maintenance command detects stale mirror and regenerates exact bytes',t=>{
+--- before/.agents/scripts/test/test-distribution-cleanup.py
++++ after/.agents/scripts/test/test-distribution-cleanup.py
+@@ -1,25 +1,24 @@
+ """Source cleanup and bundled tooling smoke tests (no application/network needed)."""
+ import json
+ from pathlib import Path
+-import subprocess
+ import unittest
+ 
+ ROOT = Path(__file__).resolve().parents[3]
+-GUIDE = Path('.agents/skill-library/engineering/user-guide-with-screenshots')
++GUIDE = Path('.agents/skill-library/engineering/user-guide')
+ ARCHIFY = Path('.agents/skill-library/engineering/archify')
+ 
+ 
+ class DistributionCleanupTests(unittest.TestCase):
+-    def test_general_guide_remains_without_app_capture_scripts(self):
+-        scripts = ROOT / GUIDE / 'scripts'
+-        self.assertEqual([], list(scripts.glob('capture-*-screenshots.mjs')))
+-        self.assertFalse((scripts / 'verify-extension-live.mjs').exists())
+-        self.assertTrue((scripts / 'capture-screenshots.mjs').is_file())
+-        plan = json.loads((scripts / 'screenshot-plan.example.json').read_text())
+-        self.assertTrue(plan['steps'])
+-        self.assertTrue((ROOT / GUIDE / 'templates/user-guide-template.md').is_file())
+-        self.assertFalse((ROOT / GUIDE / 'templates/user-guide-example-card-creation.md').exists())
+-        subprocess.run(['node', '--check', str(scripts / 'capture-screenshots.mjs')], check=True)
++    def test_text_guide_has_no_capture_tooling_or_image_template(self):
++        self.assertTrue((ROOT / GUIDE / 'SKILL.md').is_file())
++        template = ROOT / GUIDE / 'templates/user-guide-template.md'
++        self.assertTrue(template.is_file())
++        self.assertNotIn('![', template.read_text())
++        self.assertFalse((ROOT / GUIDE / 'scripts').exists())
++        self.assertFalse((ROOT / '.agents/skill-library/engineering/user-guide-with-screenshots').exists())
++        command = ROOT / '.agents/skills/engineering/command-user-guide/SKILL.md'
++        self.assertIn('user-guide/SKILL.md', command.read_text())
++        self.assertLessEqual(len(command.read_text().splitlines()), 40)
+ 
+     def test_removed_tools_are_not_distributed(self):
+         self.assertFalse((ROOT / ARCHIFY).exists())
+@@ -29,6 +28,14 @@
+             items = json.loads((ROOT / catalog).read_text())['items']
+             self.assertFalse(any(item['id'] == 'archify' for item in items))
+ 
++    def test_active_instructions_do_not_route_to_retired_capture_owner(self):
++        for path in (ROOT / '.agents').rglob('*.md'):
++            if '.cache' in path.parts:
++                continue
++            with self.subTest(path=str(path.relative_to(ROOT))):
++                self.assertNotIn('`user-guide-with-screenshots`', path.read_text())
++                self.assertNotIn('user-guide-with-screenshots/SKILL.md', path.read_text())
++
+     def test_approved_transient_files_removed(self):
+         for rel in ['.agents/.cache', '.agents/handoffs/2026-11-25-fast-lane-default.md',
+                     '.specify/metrics/active 2.json']:
+--- before/.agents/scripts/test/test-installers.py
++++ after/.agents/scripts/test/test-installers.py
+@@ -163,7 +163,10 @@
+                     self.assertIn('wait-what', skills)
+                     self.assertFalse(any(name.startswith('speckit-') for name in skills))
+                     self.assertFalse(skills.intersection({'route', 'frontend-design', 'ui-taste-pro',
+-                                                         'ponytail-audit', 'ponytail-help', 'ponytail-gain'}))
++                                                         'ponytail-audit', 'ponytail-help', 'ponytail-gain',
++                                                         'setup-workspace', 'writing-for-agents', 'ponytail-debt',
++                                                         'user-guide-with-screenshots'}))
++                    self.assertIn('user-guide', skills)
+ 
+ 
+ if __name__ == "__main__":
+--- before/.agents/scripts/test/test-local-instructions.py
++++ after/.agents/scripts/test/test-local-instructions.py
+@@ -8,13 +8,13 @@
+ 
+ ROOT = Path(__file__).resolve().parents[3]
+ SETUP = ROOT / '.agents/skills/engineering/command-skill-setup/SKILL.md'
+-WORKSPACE = ROOT / '.agents/skill-library/productivity/setup-workspace/SKILL.md'
++WORKSPACE = ROOT / '.agents/skills/engineering/command-skill-setup/references/onboarding.md'
+ VERIFY = ROOT / '.agents/skill-library/engineering/verification-before-completion/SKILL.md'
+ 
+ 
+ class LocalInstructionsTests(unittest.TestCase):
+     def test_activation_uses_registered_explicit_catalog_mappings(self):
+-        text = SETUP.read_text()
++        text = WORKSPACE.read_text()
+         for required in ('--sync', '--extra-ship', 'source_path', 'target_path',
+                          'selectedPacks', 'last-written', 'cold', '--yes'):
+             self.assertIn(required, text)
+@@ -22,7 +22,9 @@
+         self.assertNotIn('~/.agents/', text)
+         self.assertNotIn('Archify', text)
+         self.assertIn('Do not use `--detect-packs`', text)
+-        self.assertIn('command-skill-setup', WORKSPACE.read_text())
++        self.assertIn('CONTEXT.md', WORKSPACE.read_text())
++        self.assertIn('adr/', WORKSPACE.read_text())
++        self.assertIn('references/onboarding.md', SETUP.read_text())
+ 
+     def test_fast_verification_does_not_require_full_artifacts(self):
+         text = VERIFY.read_text()
+--- before/.agents/scripts/test/test-update-integration.py
++++ after/.agents/scripts/test/test-update-integration.py
+@@ -12,7 +12,8 @@
+ DEST = '.agents/skill-library/engineering/go-patterns'
+ RETIRED = ['speckit-' + name for name in ('specify', 'plan', 'tasks', 'analyze',
+            'clarify', 'checklist', 'implement', 'converge', 'constitution', 'taskstoissues')]
+-RETIRED += ['ponytail-gain', 'ponytail-help', 'ponytail-audit', 'frontend-design', 'ui-taste-pro', 'route']
++RETIRED += ['ponytail-gain', 'ponytail-help', 'ponytail-audit', 'frontend-design', 'ui-taste-pro', 'route', 'setup-workspace',
++            'writing-for-agents', 'ponytail-debt', 'user-guide-with-screenshots']
+ 
+ 
+ class FullUpdateIntegration(unittest.TestCase):
+@@ -53,6 +54,8 @@
+             shutil.copy2(ROOT / '.github/copilot-instructions.md', source / '.github/copilot-instructions.md')
+             protected = {
+                 'CONTEXT.md': 'custom domain language\n',
++                'docs/user-guides/local-guide.md': '# Custom guide\n\n![Existing image](images/local/step.png)\n',
++                '.agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs': 'custom legacy capture code\n',
+                 '.env': 'LOCAL_FIXTURE=unchanged\n',
+                 '.specify/features/custom/baseline.md': 'SIGNED-OFF custom baseline\n',
+                 'adr/accepted.md': 'accepted project decision\n',
+@@ -66,6 +69,10 @@
+                 file = target / rel
+                 file.parent.mkdir(parents=True, exist_ok=True)
+                 file.write_text(text)
++            image = target / 'docs/user-guides/images/local/step.png'
++            image.parent.mkdir(parents=True, exist_ok=True)
++            image_bytes = b'\x89PNG\r\n\x1a\ncustom image bytes'
++            image.write_bytes(image_bytes)
+             engine = source / '.agents/scripts/update-engine.py'
+ 
+             def sync(extra=False):
+@@ -82,7 +89,7 @@
+             # Install an older inventory first, then retire its source trees.
+             retired_paths = []
+             for name in RETIRED:
+-                category = 'productivity' if name == 'route' else 'engineering'
++                category = 'productivity' if name in ('route', 'setup-workspace') else 'engineering'
+                 rel = f'.agents/skill-library/{category}/{name}/SKILL.md'
+                 file = source / rel
+                 file.parent.mkdir(parents=True, exist_ok=True)
+@@ -107,6 +114,10 @@
+             retained_file = target / retained
+             retained_file.write_text(retained_file.read_text() + '\nCustom explanation conventions.\n')
+             protected[retained] = retained_file.read_text()
++            guide = '.agents/skill-library/engineering/user-guide/SKILL.md'
++            guide_file = target / guide
++            guide_file.write_text(guide_file.read_text() + '\nCustom guide policy.\n')
++            protected[guide] = guide_file.read_text()
+             adapter = '.claude/agents/code-reviewer.md'
+             self.assertTrue((target / adapter).is_file())
+             (target / adapter).write_text((target / adapter).read_text() + '\nUser adapter customization.\n')
+@@ -127,11 +138,13 @@
+             for revision in (2, 3):
+                 (source / PACK / 'SKILL.md').write_text('---\nname: go-patterns\ndescription: Go\n---\nUpstream revision ' + str(revision))
+                 (source / retained).write_text((source / retained).read_text() + '\nUpstream revision.\n')
++                (source / guide).write_text((source / guide).read_text() + '\nUpstream revision.\n')
+                 (source / safe_file).write_text('safe revision ' + str(revision))
+                 (source / '.agents/agents/code-reviewer.md').write_text(
+                     (source / '.agents/agents/code-reviewer.md').read_text() + '\nUpstream change.\n')
+                 current = sync()
+                 self.assertEqual('safe revision ' + str(revision), (target / safe_file).read_text())
++                self.assertEqual(image_bytes, image.read_bytes())
+                 for rel, text in protected.items():
+                     self.assertEqual(text, (target / rel).read_text(), rel)
+                 updated_settings = json.loads(settings.read_text())
+@@ -142,6 +155,7 @@
+                 key = PACK + '/SKILL.md=>' + DEST + '/SKILL.md'
+                 self.assertEqual(first['fileHashes'][key], current['fileHashes'][key])
+                 self.assertEqual(first['fileHashes'][retained], current['fileHashes'][retained])
++                self.assertEqual(first['fileHashes'][guide], current['fileHashes'][guide])
+                 for rel in retired_paths:
+                     self.assertEqual(first['fileHashes'][rel], current['fileHashes'][rel], rel)
+             for rel in ['.agents/handoffs', '.specify/metrics', 'adr/0003-download-only-distribution.md',
+--- before/.agents/scripts/test/test-workflow.py
++++ after/.agents/scripts/test/test-workflow.py
+@@ -9,7 +9,8 @@
+ NATIVE = ("technical-spec", "implementation-plan", "task-breakdown", "technical-consistency-review")
+ LEGACY = ("specify", "plan", "tasks", "analyze", "clarify", "checklist", "implement", "converge", "constitution", "taskstoissues")
+ RETIRED = tuple('speckit-' + name for name in LEGACY) + (
+-    'ponytail-gain', 'ponytail-help', 'ponytail-audit', 'route', 'frontend-design', 'ui-taste-pro')
++    'ponytail-gain', 'ponytail-help', 'ponytail-audit', 'route', 'frontend-design', 'ui-taste-pro', 'setup-workspace',
++    'writing-for-agents', 'ponytail-debt', 'user-guide-with-screenshots')
+ 
+ 
+ class WorkflowStructure(unittest.TestCase):
+@@ -25,8 +26,9 @@
+                 self.assertIsNotNone(match, str(p))
+                 names.append(match.group(1))
+         self.assertEqual(len(names), len(set(names)), "Duplicate discoverable skill identities")
+-        self.assertEqual(len(names), 53)
++        self.assertEqual(len(names), 50)
+         self.assertIn('wait-what', names)
++        self.assertIn('user-guide', names)
+         self.assertFalse(set(names).intersection(RETIRED))
+         self.assertEqual(len(list((ROOT / ".agents/skills").glob("*/*/SKILL.md"))), 9)
+ 
+--- before/.agents/skill-library/engineering/ponytail-debt/SKILL.md
++++ after/.agents/skill-library/engineering/ponytail-debt/SKILL.md
+@@ -1,44 +0,0 @@
+----
+-name: ponytail-debt
+-description: >
+-  Harvest every `ponytail:` comment in the codebase into a debt ledger, so the
+-  deliberate shortcuts and deferrals ponytail leaves behind get tracked instead
+-  of rotting into "later means never". Use when the user says "ponytail debt",
+-  "/ponytail-debt", "what did ponytail defer", "list the shortcuts", "ponytail
+-  ledger", or "what did we mark to do later". One-shot report, changes nothing.
+----
+-
+-Every deliberate ponytail shortcut is marked with a `ponytail:` comment naming
+-its ceiling and upgrade path. This collects them into one ledger so a deferral
+-can't quietly become permanent.
+-
+-## Scan
+-
+-Grep the repo for comment markers, skipping `node_modules`, `.git`, and build
+-output:
+-
+-`grep -rnE '(#|//) ?ponytail:' .` (add other comment prefixes if your stack uses them)
+-
+-Each hit is one ledger row. The comment prefix keeps prose that merely mentions
+-the convention out of the ledger.
+-
+-## Output
+-
+-One row per marker, grouped by file:
+-
+-`<file>:<line>, <what was simplified>. ceiling: <the limit named>. upgrade: <the trigger to revisit>.`
+-
+-The convention is `ponytail: <ceiling>, <upgrade path>`, so pull the ceiling
+-and the trigger straight from the comment. Want an owner per row too? add
+-`git blame -L<line>,<line>`.
+-
+-Flag the rot risk: any `ponytail:` comment that names no upgrade path or
+-trigger gets a `no-trigger` tag, those are the ones that silently rot.
+-
+-End with `<N> markers, <M> with no trigger.` Nothing found: `No ponytail: debt. Clean ledger.`
+-
+-## Boundaries
+-
+-Reads and reports only, changes nothing. To persist it, ask and it writes the
+-ledger to a file (e.g. `PONYTAIL-DEBT.md`). One-shot. "stop ponytail-debt" or
+-"normal mode" to revert.
+--- before/.agents/skill-library/engineering/ponytail-review/SKILL.md
++++ after/.agents/skill-library/engineering/ponytail-review/SKILL.md
+@@ -1,7 +1,7 @@
+ ---
+ name: ponytail-review
+ description: >
+-  Diff or whole-repository review focused exclusively on over-engineering. Finds what to delete:
++  Diff/repository complexity review or a debt ledger of deliberate ponytail shortcuts. Finds what to delete:
+   reinvented standard library, unneeded dependencies, speculative abstractions,
+   dead flexibility. One line per finding: location, what to cut, what replaces
+   it. Use when the user says "review for over-engineering", "what can we
+@@ -21,6 +21,8 @@
+   request. Scan source, dependencies and callers across the repository; exclude
+   dependency/vendor trees, build outputs, Git internals and generated artifacts.
+   Rank findings by the largest justified reduction first.
++- **Debt**: `/ponytail-review debt` or a request to list deferred shortcuts.
++  Follow the debt ledger section below; no complexity-cut review is implied.
+ - If the requested scope is unclear, clarify it before a repository-wide scan.
+ 
+ Look for dependencies covered by stdlib/native features, single-implementation
+@@ -65,6 +67,25 @@
+ 
+ If there is nothing to cut, say `Lean already. Ship.` and stop.
+ 
++## Debt ledger
++
++For debt mode, scan comment markers such as `# ponytail:` or `// ponytail:`;
++exclude dependencies/vendor trees, .git and build/generated output. Use rg first,
++for example `rg -n '(#|//) ?ponytail:'` over the relevant source paths, adding
++comment prefixes appropriate to the actual language. Prose that merely mentions
++the convention is not a debt item.
++
++Group one row per marker by file. Report `<file>:<line>`, what was simplified,
++`ceiling: <limit>`, and `upgrade: <trigger>`, using only the marker's evidence.
++Flag a missing upgrade trigger as `no-trigger`; do not invent a deadline or owner.
++Read-only `git blame` may supply an owner when requested. End with `<N> markers,
++<M> with no trigger`; if none, report `No ponytail: debt. Clean ledger.` This mode
++does not use the estimated-lines-reduction score above.
++
++Report without changing files. Persist a ledger only when explicitly requested,
++then preserve existing custom content and use the requested destination. The mode
++ends after the report; `normal mode` returns to ordinary review behavior.
++
+ ## Boundaries
+ 
+ Scope: over-engineering and complexity only. Correctness bugs, security holes,
+--- before/.agents/skill-library/engineering/technical-documentation/SKILL.md
++++ after/.agents/skill-library/engineering/technical-documentation/SKILL.md
+@@ -42,7 +42,7 @@
+    - Diataxis Framework: Tutorial | How-To | Reference | Explanation
+    - Agent-Friendly: Real paths (clickable), concrete commands, explicit boundaries
+       ↓
+-4. Execute (Follow references/build.md or references/review.md)
++4. Execute (Follow references/build.md or references/review.md; for agent instructions, read only the needed section of references/writing-for-agents.md)
+       ↓
+ 5. Validate Quality & Link Integrity (IEEE / Markdown lint pass)
+ ```
+@@ -64,6 +64,12 @@
+ 
+ ## Agent & Contributor Governance Rules (`AGENTS.md` / `CONTRIBUTING.md`)
+ 
++For skills, prompts, rules or agent-facing docs, read the relevant section of
++[writing for agents](references/writing-for-agents.md) on demand. Keep terminology,
++short pointers, concrete failure modes, inputs and exit checks aligned with the
++actual project; do not preload the other documentation references.
++
++
+ 1. **Canonical Source of Truth**:
+    - `AGENTS.md` (or `.agents/AGENTS.md`) is the canonical authority for AI workflows.
+    - All tool-specific files (`.cursorrules`, `.cursor/rules/*`, `CLAUDE.md`) must act as compatibility aliases or symlinks to maintain **DRY**.
+@@ -73,7 +79,7 @@
+    - **`Never`**: Hardcoding credentials/secrets, committing broken builds, swallowing errors silently.
+ 3. **Concrete & Actionable**:
+    - Always provide exact runnable CLI commands (`pnpm test`, `npx prisma migrate dev`).
+-   - Use exact clickable file paths (`file:///absolute/path/to/file` or repo-relative links).
++   - Use exact clickable file paths (absolute local file links or valid repo-relative links).
+ 
+ ---
+ 
+@@ -100,3 +106,5 @@
+ - [`references/agent-and-contributing.md`](./references/agent-and-contributing.md): Canonical/alias governance for AGENTS.md and CONTRIBUTING.md.
+ - [`references/build.md`](./references/build.md): Playbook for writing fresh technical docs.
+ - [`references/review.md`](./references/review.md): Audit rubric and review checklist.
++
++- [`references/writing-for-agents.md`](./references/writing-for-agents.md): Dense agent-facing instructions, concrete failure modes, vocabulary and skill template.
+--- before/.agents/skill-library/engineering/technical-documentation/references/writing-for-agents.md
++++ after/.agents/skill-library/engineering/technical-documentation/references/writing-for-agents.md
+@@ -0,0 +1,60 @@
++# Writing for agents
++
++Use for skills, prompts, project rules and other agent-facing documentation.
++Keep instructions short, precise and verifiable; read only the needed section.
++
++## Source pointers and density
++
++Link the authoritative file instead of copying schemas, config or policy into
++multiple locations. Use valid local Markdown paths and exact section/line pointers
++when helpful; remove placeholder links before publishing. Cut preambles and vague
++advice. Prefer direct actions, small tables or a diagram only when they improve
++understanding. Never duplicate an entire reference in a hot skill.
++
++## Failure modes and shared vocabulary
++
++Name the concrete failure and recovery rather than a slogan. For example, prohibit
++silent catch blocks and raw database stack traces in client responses; require an
++explicit safe error response and project-appropriate diagnostic evidence instead.
++Do not invent an AppException class, logging system or business rule to fit an
++example. Use existing CONTEXT.md terms consistently; clarify conflicts instead of
++adding synonyms for the same concept.
++
++## Verifiable boundaries
++
++State exact inputs, preconditions, necessary tool order, expected artifacts and
++observable exit checks. Use auditable checkboxes for gates. Distinguish always,
++ask-first and never boundaries using the actual project contract. Unknowns remain
++visible; do not turn a model's suggested default into approved policy. Reuse already
++confirmed choices and avoid redundant approval or repeated interviews.
++
++## Skill authoring shape
++
++```markdown
++---
++name: <kebab-case-name>
++invocation: user | model
++description: <when to invoke and what failure this prevents>
++---
++
++# <Title>
++
++## Purpose
++<problem addressed>
++
++## Protocol
++1. Check <real prerequisite>.
++2. Perform <scoped actions>.
++3. Verify <observable result>.
++
++## Boundaries
++<prohibited behavior and material unknowns>
++
++## Output
++<artifact path and concise result shape>
++```
++
++Match frontmatter and invocation behavior to the supported harness. Link larger
++references and load one relevant section at a time. Validate names, paths and
++checklists against source before publishing; keep custom content and signed
++historical artifacts intact.
+--- before/.agents/skill-library/engineering/user-guide-with-screenshots/SETUP.md
++++ after/.agents/skill-library/engineering/user-guide-with-screenshots/SETUP.md
+@@ -1,34 +0,0 @@
+-# Use the screenshot guide skill
+-
+-The authoritative instructions are in
+-[SKILL.md](SKILL.md), under
+-`.agents/skill-library/engineering/user-guide-with-screenshots/`.
+-This is a cold skill: open it through `.agents/SKILLS.md` when needed. Harness
+-adapters expose it according to the project's harness configuration.
+-
+-The reusable files are:
+-
+-- `scripts/capture-screenshots.mjs`: capture from a running app with Playwright.
+-- `scripts/screenshot-plan.example.json`: generic route/action/selector plan.
+-- `templates/user-guide-template.md`: non-technical guide template.
+-
+-Check the target project's manifests for Playwright and use its existing package
+-manager/setup. This framework does not assume an `apps/web` package or install a
+-browser globally. Before capture, start the app and replace the sample `baseUrl`,
+-route and selectors with actual values from that app.
+-
+-From the project root:
+-
+-```bash
+-node .agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs path/to/capture-plan.json
+-```
+-
+-Review the real screenshots, then save the guide under
+-`docs/user-guides/<slug>.md` with its images. Reuse the generic template; no
+-application-specific scripts or prefilled product guide are required.
+-
+-The generic script supports `click`, `fill`, `hover`, `waitForSelector` and `wait`.
+-A failed or unknown action exits nonzero; browser cleanup runs even if capture
+-fails. Fix the plan and rerun before reporting completion. The script does not
+-add highlights or numbered badges: use a browser automation step before capture
+-or annotate the real image afterward, then visually inspect it.
+--- before/.agents/skill-library/engineering/user-guide-with-screenshots/SKILL.md
++++ after/.agents/skill-library/engineering/user-guide-with-screenshots/SKILL.md
+@@ -1,120 +0,0 @@
+----
+-invocation: model
+-name: user-guide-with-screenshots
+-description: >
+-  Creates or updates a user-facing guide (non-technical language, real
+-  screenshots) for a feature that was just built or modified.
+-  Use whenever: (1) a feature / user story ships, (2) any UI screen is
+-  changed (layout, flow, added/removed fields), (3) the user asks for
+-  "user guide", "end-user docs", "how-to guide", or "instructions for
+-  feature X" — even without the exact phrase "user guide".
+-  This document is SEPARATE from the technical README — never edit the
+-  technical README; always create/update a dedicated end-user file.
+-triggers:
+-  - "create user guide"
+-  - "update user guide"
+-  - "write user documentation"
+-  - "end-user docs"
+-  - "user-facing guide"
+-  - "feature is done, document it"
+-  - "user guide with screenshots"
+-  - "how-to guide"
+-  - "instructions for"
+-  - "done, now document"
+-  - "screenshot docs"
+----
+-
+-# Skill: User Guide with Real Screenshots
+-
+-## When to Activate
+-
+-- A feature / user story has just been completed and is ready to ship
+-- A UI screen was edited (layout changed, flow updated, fields added/removed)
+-- The user says "write user guide", "create docs for this feature", "done, document it", "instructions for X"
+-- UAW implementation finishes a UI slice (Fast in one context; Full via `implementation-orchestrator`)
+-- **Definition of Done check**: any UI feature cannot be closed without this guide
+-
+-## Core Principles
+-
+-1.  **Readers are non-technical.** Avoid words like API, DTO, endpoint, component,
+-    transaction, payload. Use plain language — write as if explaining to a friend
+-    who is not a developer. Replace "modal" with "popup window", etc.
+-2.  **Screenshots must be 100% real** — captured from the running app via Playwright/Browser. Never use mockups or imagined layouts.
+-3.  **Visual Annotations & Red Highlights (MANDATORY ON ALL SCREENSHOTS)**:
+-    - Every captured step **MUST feature vibrant red highlights** (`outline: 3.5px solid #EF4444; box-shadow: 0 0 0 7px rgba(239, 68, 68, 0.3)`) bounding the target button, input, or container.
+-    - Attach a circular red numbered badge (**①, ②, ③**) with bold white text at the top-left corner of the highlighted element.
+-    - The generic capture script does not inject annotations. Add highlights/badges in a browser automation step before capture or annotate the real captured image afterward; visually verify them. There are no annotation fields in the generic capture plan.
+-    - In the guide text, every instructional bullet point must explicitly reference the corresponding badge number (e.g. `① Click the button...`, `② Enter the term...`).
+-4.  **One action = one annotated screenshot + 1–2 sentences.** Do not write a long paragraph and then drop a screenshot at the end.
+-5.  **Always kept separate** from the technical README. Output file goes to
+-    `docs/user-guides/<slug>.md`, images to `docs/user-guides/images/<slug>/`.
+-
+----
+-
+-## 5-Step Process
+-
+-### Step 1 — Identify the scope of changes
+-
+-Read the technical feature README / description (or run `git diff` if no
+-description exists) to determine: the user-friendly name of the feature,
+-which screens/routes are involved, and the main actions a user can take.
+-
+-### Step 2 — List the steps that need screenshots (the flow)
+-
+-List the user actions in order, e.g.:
+-open page → click button X → fill form → see result → click save.
+-Each action maps to one screenshot. Prioritize the happy path (normal usage).
+-Add one extra screenshot for any important edge-case state (e.g. duplicate
+-warning) only if the user needs to know about it.
+-
+-### Step 3 — Run the app & capture real screenshots
+-
+-- Read the actual project manifest, lockfile, workspace/app configuration and documented start command. Use its package manager and verify the listening URL from server output; do not assume a port or `web` package.
+-- Make sure the app responds at that URL. Reuse its existing Playwright/browser setup or an available browser tool. If missing, report the blocker and follow the project’s dependency approval policy before installation.
+-- Write a JSON capture plan (see `scripts/screenshot-plan.example.json` in this
+-  skill folder as a reference — each step from Step 2 becomes one entry in `steps`).
+-- Run: `node .agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs <path-to-plan.json>`
+-- The script opens each screen, performs the actions (click / fill / hover),
+-  and saves images to the `outDir` declared in the plan. Supported action types are
+-  `click`, `fill`, `hover`, `waitForSelector` and `wait`; it does not add annotations.
+-- Any failed or unsupported action stops the run with a nonzero exit. Do not claim
+-  completion or use a partial capture as proof; fix the plan and rerun.
+-- Review the captured images — if a screenshot shows the wrong state (e.g. the
+-  form is empty instead of filled), fix the `actions` in the plan and re-run.
+-
+-### Step 4 — Write the guide
+-
+-Use `templates/user-guide-template.md` (in this skill folder) as the base.
+-For each step from Step 2, embed the corresponding screenshot using a relative
+-path, followed by 1–2 sentences in plain language (e.g. "Click here to…",
+-"The screen will show…"). Add a "Tips" section and "FAQ" section if relevant.
+-
+-### Step 5 — Updating when the feature is refined later
+-
+-If `docs/user-guides/<slug>.md` already exists: read it first, update only
+-the steps and images that actually changed (do not rewrite from scratch),
+-overwrite old images with the same filename, and prepend one note at the top
+-of the file:
+-`> Updated <date>: <short description of what changed>`.
+-
+----
+-
+-## Reference Files
+-
+-Located at `.agents/skill-library/engineering/user-guide-with-screenshots/`:
+-
+-- `scripts/capture-screenshots.mjs` — Playwright script; reads a JSON plan and captures screenshots.
+-- `scripts/screenshot-plan.example.json` — generic plan; replace the route/selectors with those of the running app.
+-- `templates/user-guide-template.md` — blank guide template.
+-
+----
+-
+-## How This Skill Gets Triggered
+-
+-Tools like Antigravity match skills by description and trigger keywords. Two
+-reliable ways to ensure this skill runs consistently:
+-
+-1. After finishing a feature, type: _"Done, now create/update the user guide
+-   using the user-guide-with-screenshots skill."_
+-2. Follow the target project’s documentation gates. Do not assume every harness
+-   automatically invokes this skill; request it explicitly when needed.
+--- before/.agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs
++++ after/.agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs
+@@ -1,79 +0,0 @@
+-// scripts/capture-screenshots.mjs
+-//
+-// Launches the running app, performs actions (click / fill / hover),
+-// and captures real screenshots for the user-facing guide.
+-//
+-// Setup: use the target project's existing Playwright and browser setup.
+-// Read its manifest, package manager and server configuration first.
+-//
+-// Usage:
+-//   node .agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs <path-to-plan.json>
+-//
+-// See scripts/screenshot-plan.example.json for the plan file structure.
+-
+-import { chromium } from 'playwright';
+-import fs from 'node:fs';
+-import path from 'node:path';
+-
+-const planPath = process.argv[2];
+-if (!planPath) {
+-  console.error('Usage: node capture-screenshots.mjs <path-to-plan.json>');
+-  process.exit(1);
+-}
+-
+-const plan = JSON.parse(fs.readFileSync(planPath, 'utf-8'));
+-const outDir = path.resolve(plan.outDir || 'docs/user-guides/assets');
+-fs.mkdirSync(outDir, { recursive: true });
+-
+-const browser = await chromium.launch();
+-try {
+-  const context = await browser.newContext({
+-    viewport: plan.viewport || { width: 1280, height: 800 },
+-  });
+-  const page = await context.newPage();
+-
+-  for (const step of plan.steps) {
+-    console.log(`→ ${step.name}`);
+-    await page.goto(new URL(step.url, plan.baseUrl).toString(), {
+-      waitUntil: 'networkidle',
+-    });
+-
+-    for (const action of step.actions || []) {
+-      try {
+-        switch (action.type) {
+-          case 'click':
+-            await page.click(action.selector, { timeout: action.timeout ?? 5000 });
+-            break;
+-          case 'fill':
+-            await page.fill(action.selector, action.value ?? '');
+-            break;
+-          case 'hover':
+-            await page.hover(action.selector);
+-            break;
+-          case 'waitForSelector':
+-            await page.waitForSelector(action.selector, { timeout: action.timeout ?? 5000 });
+-            break;
+-          case 'wait':
+-            await page.waitForTimeout(action.ms ?? 500);
+-            break;
+-          default:
+-            throw new Error(`Unsupported action type: ${action.type}`);
+-        }
+-      } catch (err) {
+-        console.error(`  ✖ Error at action ${action.type} (${action.selector ?? ''}): ${err.message}`);
+-        throw err;
+-      }
+-    }
+-
+-    const file = path.join(outDir, `${step.name}.png`);
+-    if (step.screenshot?.selector) {
+-      await page.locator(step.screenshot.selector).screenshot({ path: file });
+-    } else {
+-      await page.screenshot({ path: file, fullPage: step.screenshot?.fullPage ?? true });
+-    }
+-    console.log(`  ✔ Saved: ${file}`);
+-  }
+-} finally {
+-  await browser.close();
+-}
+-console.log('\nDone! All screenshots saved to:', outDir);
+--- before/.agents/skill-library/engineering/user-guide-with-screenshots/scripts/screenshot-plan.example.json
++++ after/.agents/skill-library/engineering/user-guide-with-screenshots/scripts/screenshot-plan.example.json
+@@ -1,23 +0,0 @@
+-{
+-  "baseUrl": "http://localhost:3000",
+-  "outDir": "docs/user-guides/images/example",
+-  "viewport": {
+-    "width": 1280,
+-    "height": 800
+-  },
+-  "steps": [
+-    {
+-      "name": "01-page",
+-      "url": "/",
+-      "actions": [
+-        {
+-          "type": "waitForSelector",
+-          "selector": "main"
+-        }
+-      ],
+-      "screenshot": {
+-        "selector": "main"
+-      }
+-    }
+-  ]
+-}
+--- before/.agents/skill-library/engineering/user-guide-with-screenshots/templates/user-guide-template.md
++++ after/.agents/skill-library/engineering/user-guide-with-screenshots/templates/user-guide-template.md
+@@ -1,44 +0,0 @@
+-# How to Use: <Feature name in plain user language — not the US-XXX code>
+-
+-> Last updated: <date>
+-
+-## What does this feature do?
+-
+-<1–2 short paragraphs, no technical jargon. Answer: "What do I use this for,
+-and how does it help me with my work or learning?">
+-
+-## How to use it
+-
+-### Step 1: <Step name, e.g. "Open your vocabulary deck">
+-
+-![Screenshot description](../user-guides/assets/<slug>/01-....png)
+-
+-<1–2 sentences: what you see on screen and what to do next>
+-
+-### Step 2: <Step name>
+-
+-![Screenshot description](../user-guides/assets/<slug>/02-....png)
+-
+-<1–2 sentences describing this step>
+-
+-### Step 3: <Step name>
+-
+-![Screenshot description](../user-guides/assets/<slug>/03-....png)
+-
+-<1–2 sentences describing this step>
+-
+-<Repeat until the flow is complete>
+-
+-## Tips
+-
+-- <Tip 1, e.g. a faster way, keyboard shortcut, or recommended order>
+-- <Tip 2>
+-
+-## Frequently asked questions
+-
+-**Q:** <A question users commonly ask>
+-**A:** <Short, plain-language answer>
+-
+-## Not yet supported (if applicable)
+-
+-- <Something users might expect but that isn't available yet — state clearly to avoid confusion>
+--- before/.agents/skill-library/engineering/user-guide/SKILL.md
++++ after/.agents/skill-library/engineering/user-guide/SKILL.md
+@@ -0,0 +1,41 @@
++---
++invocation: model
++name: user-guide
++description: "Create or update concise text instructions for end users from confirmed behavior. Use when a guide is requested or required for release documentation."
++---
++
++# User Guide
++
++Write plain-language instructions in `docs/user-guides/<slug>.md`. This is a
++text documentation workflow, separate from the technical feature README.
++
++## Workflow
++
++1. Identify the requested feature, audience, slug and scope. Read its confirmed
++   requirements, relevant source and existing guide; reuse established answers.
++   Ask only for material gaps in user actions, permissions or observable results.
++   Never invent UI labels, behavior, business rules or success claims.
++2. Describe the user's goal, required access and the shortest useful sequence of
++   actions. Use actual control labels and explain each meaningful result. Add
++   recovery advice only where the source or approved requirements supports it.
++3. Use [the text template](templates/user-guide-template.md) as needed. Keep one
++   user action per numbered step and use everyday language. Include tips or FAQ
++   only when relevant; omit empty sections and implementation detail.
++4. Update an existing guide surgically: read it first, keep unrelated custom
++   notes and existing image references/assets, and change only affected steps.
++   Do not regenerate the whole document or delete guides, images or scripts.
++   When preservation is unclear, ask rather than overwrite.
++5. Check action names, behavior and relative document links against available
++   evidence. Update an existing `docs/user-guides/README.md` index entry when
++   applicable, preserving other entries. Report the guide path and any unverified
++   behavior honestly; reading source is not proof of live interaction.
++
++## Boundaries
++
++Run on request or for the target project's release documentation, not after every
++feature or UI edit. No server startup, browser session, screenshot plan, capture,
++annotation or new dependency is part of this workflow. Existing visual assets
++remain project data. UI review and E2E testing keep their own verification rules.
++
++Do not modify the technical feature README as a substitute for the requested
++end-user guide. No Git writes are authorized by this skill.
+--- before/.agents/skill-library/engineering/user-guide/templates/user-guide-template.md
++++ after/.agents/skill-library/engineering/user-guide/templates/user-guide-template.md
+@@ -0,0 +1,21 @@
++# How to use <feature>
++
++<One or two sentences describing the user's goal and benefit.>
++
++## Before you start
++
++<Only the confirmed access, account state or preparation needed for this task.>
++
++## Steps
++
++1. <Action using the actual screen/control name.> <Expected result, if useful.>
++2. <Next action.> <Confirmed observable result.>
++
++## If something goes wrong
++
++<Relevant confirmed warning or failure, and the supported recovery action. Omit
++this section if no evidenced guidance is available.>
++
++## Tips
++
++<Optional practical advice grounded in the feature. Omit if unnecessary.>
+--- before/.agents/skill-library/engineering/verification-before-completion/SKILL.md
++++ after/.agents/skill-library/engineering/verification-before-completion/SKILL.md
+@@ -79,8 +79,8 @@
+ - Update affected architecture/algorithm documents only when those behaviors
+   changed; preserve accepted ADRs and signed requirements.
+ - For UI, reuse existing authorization and confirmed screen evidence. If a guide
+-  is required by the approved scope, invoke `user-guide-with-screenshots` through
+-  `.agents/SKILLS.md` with real screenshots. Ask only for a still-missing material
++  is required by the approved scope, invoke the text-only `user-guide` through
++  `.agents/SKILLS.md`; guide production requires no browser capture or app startup. Ask only for a still-missing material
+   decision or required authorization; do not repeat an answered confirmation.
+ - Append completion evidence to the feature `CHANGELOG.md`; update the requested
+   roadmap story only after all applicable gates pass.
+--- before/.agents/skill-library/engineering/writing-for-agents/SKILL.md
++++ after/.agents/skill-library/engineering/writing-for-agents/SKILL.md
+@@ -1,95 +0,0 @@
+----
+-name: writing-for-agents
+-invocation: model
+-description: >
+-  Guidelines and standards for authoring documentation, skill descriptions, agent prompts,
+-  and architecture guides intended for AI agents to read. Focuses on high token efficiency,
+-  unambiguous failure modes, pointer-based architecture, and executable invariants rather
+-  than prose meant for human leisure reading. Model-invoked when creating or editing skills,
+-  AGENTS.md sections, rules, or system documentation.
+-metadata:
+-  origin: mattpocock/skills (adapted)
+-  plane: data
+----
+-
+-# Writing for Agents — High-Leverage Documentation
+-
+-## Purpose
+-
+-Documentation for humans prioritizes gentle onboarding, narrative flow, and persuasion.
+-Documentation for AI agents prioritizes **low token cost, zero ambiguity, fast retrieval,
+-and verifiable invariants**. Writing agent-readable documentation maximizes model adherence
+-and prevents hallucinated shortcuts.
+-
+----
+-
+-## Core Rules for Agent Documentation
+-
+-### 1. Pointers Over Prose
+-
+-- **Do not** replicate full API schemas, configs, or rules across multiple files.
+-- **Do** link to the authoritative source file (e.g. `See [CONTEXT.md](file:///path/to/CONTEXT.md)`).
+-- If an agent needs a snippet, provide the exact line reference or file path rather than paraphrasing.
+-
+-### 2. High Information Density (Anti-Fluff)
+-
+-- Cut polite preamble ("In this section, we will explore...", "It is important to remember that...").
+-- Replace multi-sentence explanations with concise tables, structured lists, or Mermaid diagrams.
+-- Write direct imperative instructions: _"Run X before Y"_, not _"You may want to consider running X"_.
+-
+-### 3. Lead With Concrete Failure Modes
+-
+-- Models respond significantly better to negative constraints and explicit failure modes than to abstract ideals.
+-- Instead of: _"Write clean, maintainable error handling."_
+-- Write:
+-  - ❌ _Silent swallowing of catch errors (`catch (e) {}`)_
+-  - ❌ _Returning raw database stack traces to HTTP clients_
+-  - ✅ _Catch, wrap in domain `AppException`, log with trace ID, return sanitized error DTO._
+-
+-### 4. Anchored Vocabulary
+-
+-- Strictly use the project's canonical terms from `CONTEXT.md`.
+-- Never introduce synonyms for existing domain concepts. If the project calls it a `seam`, do not switch between `boundary`, `adapter-zone`, and `junction` arbitrarily.
+-
+-### 5. Deterministic Gates & Checklists
+-
+-- Format verification requirements as binary checkboxes `[ ]` that can be audited.
+-- Define exact inputs, preconditions, tool invocation order, and explicit exit criteria.
+-
+----
+-
+-## Template for Agent Skills (`SKILL.md`)
+-
+-```markdown
+----
+-name: <kebab-case-name>
+-invocation: user | model
+-description: >
+-  <One-paragraph active description stating when to invoke, what problem it solves,
+-  and the exact trigger phrases or preconditions.>
+-metadata:
+-  plane: control | data
+----
+-
+-# <Title>
+-
+-## Purpose
+-
+-<1-2 sentences on what failure mode this skill prevents>
+-
+-## Protocol / Loop
+-
+-1. **Pre-check:** <what must exist before running>
+-2. **Action sequence:** <exact steps with minimal prose>
+-3. **Verification:** <how to prove it succeeded>
+-
+-## Boundaries & Non-Goals
+-
+-- ❌ <Anti-pattern 1>
+-- ❌ <Anti-pattern 2>
+-- ✅ <Required invariant>
+-
+-## Output Format
+-
+-<Exact markdown template or schema expected>
+-```
+--- before/.agents/skill-library/productivity/setup-workspace/SKILL.md
++++ after/.agents/skill-library/productivity/setup-workspace/SKILL.md
+@@ -1,89 +0,0 @@
+----
+-name: setup-workspace
+-invocation: user
+-description: >
+-  One-time repository onboarding and self-configuration skill (replacing `setup-matt-pocock-skills`).
+-  Inspects the active repository to detect tech stack, package manager, git remote, issue tracker,
+-  and testing frameworks. Populates `CONTEXT.md` with initial domain shorthands, sets up `adr/`,
+-  and configures environment hooks. Trigger when you say "setup this workspace", "configure project
+-  for this repo", or "run self-config".
+-metadata:
+-  origin: mattpocock/skills (adapted)
+-  plane: data
+----
+-
+-# Setup Workspace — One-Time Repository Onboarding
+-
+-## Purpose
+-
+-Instead of manually copy-pasting configuration files, editing hardcoded tech stack tables,
+-or guessing project setup, `setup-workspace` runs once per repository to discover context
+-and tailor the Universal Agents Workflow to the target codebase.
+-
+----
+-
+-## 4-Step Discovery Loop
+-
+-```mermaid
+-flowchart TD
+-    A["1. Inspect Project Roots"] --> B["2. Shared Language & ADR Prep"]
+-    B --> C["3. Optional Stack Linking"]
+-    C --> D["4. Summary & Verification"]
+-```
+-
+-### Step 1: Inspect Project Roots
+-
+-1. **Manifest Discovery**:
+-   - Node/TypeScript: `package.json`, `pnpm-workspace.yaml`, `tsconfig.json`
+-   - Python: `pyproject.toml`, `requirements.txt`
+-   - Go: `go.mod`
+-   - Rust: `Cargo.toml`
+-   - Java/Kotlin: `pom.xml`, `build.gradle`
+-2. **Git & Issue Tracker**:
+-   - Detect git remote URL (`git remote -v`).
+-   - Identify issue tracking convention (GitHub Issues, Linear, Jira, or local markdown).
+-3. **Testing & Linting Tooling**:
+-   - Detect test runners (`vitest`, `jest`, `playwright`, `pytest`, `cargo test`).
+-   - Detect formatting/linting (`biome`, `prettier`, `eslint`, `ruff`).
+-
+-### Step 2: Initialize Shared Language, ADRs & Git Tracking
+-
+-1. **`CONTEXT.md` Initialization**:
+-   - If `CONTEXT.md` contains default placeholders, populate the initial components and packages found during Step 1.
+-   - Seed project-specific terminology from `README.md` and high-level docs.
+-2. **`adr/` Setup**:
+-   - Ensure `adr/` exists at workspace root with `adr-template.md`.
+-   - Seed `adr/0001-record-architecture-decisions.md` if not already present.
+-3. **Git Tracking Configuration (Team vs Local-Only vs Stealth vs Hybrid)**:
+-   - Reuse the confirmed tracking mode from project metadata/session; otherwise use `command-skill-setup` to obtain the choice before changing ignore configuration.
+-   - Apply only that selected mode, preserving existing ignore entries. Do not infer private/global setup from a stack marker.
+-
+-### Step 3: Polyglot Stack & Framework Linking (Powered by catalog.json)
+-
+-1. Load [.agents/catalog.json](../../../catalog.json) and match items against the detected technology stack:
+-   - **Language Skills & Rules**:
+-     - Python: `python-patterns`, `python-importlinter`
+-     - Go: `go-patterns`, `go-rules`, `go-depguard`
+-     - Rust: `rust-patterns`
+-     - TypeScript/Node: `typescript-patterns`, `ts-dependency-cruiser`
+-   - **Frameworks & UI**:
+-     - NestJS: `nestjs-patterns`
+-     - Prisma ORM: `prisma-patterns`
+-     - React / Next.js: `react-rules`, `frontend-patterns`, `liquid-glass-design`
+-   - **Infrastructure & Intelligence (MCP)**:
+-     - Docker & Postgres: `docker-patterns`, `postgres-patterns`
+-     - MCP Code Intelligence: `code-review-graph` (Tree-sitter SQLite graph for token reduction)
+-2. **Render Selection Table with Concise Summaries**:
+-   Always display a structured Markdown table including the **Concise Summary** column for every detected skill so the user understands its exact benefit.
+-3. Reuse any explicit selections already confirmed in this session; otherwise confirm the proposed choices. Activate through [command-skill-setup](../../../skills/engineering/command-skill-setup/SKILL.md), using the verified source engine `--sync --extra-ship` with exact catalog `source_path=target_path` mappings. Skills stay cold in `.agents/skill-library/`; never copy directories into the hot tier or manually adopt registry/hash state. Check the exit status and derived report before reporting activation success. Optional MCP configuration is project-local and requires its own selection.
+-
+-### Step 4: Verification & Handoff
+-
+-Output a clean onboarding report:
+-
+-- Detected Stack & Package Manager
+-- Active Branch & Git Remote
+-- Initialized `CONTEXT.md` and `adr/`
+-- Git Tracking Status (`team`, `local`, `stealth`, or `hybrid`)
+-- Activated Skills, Rules & MCP Servers (with short descriptions)
+-- Recommended first skill to run (e.g. `skills-index`, `intake-classifier`, or `improve-codebase-architecture`).
+--- before/.agents/skills/engineering/command-git-push/SKILL.md
++++ after/.agents/skills/engineering/command-git-push/SKILL.md
+@@ -93,8 +93,8 @@
+ After successful push, output a concise status and ready-to-copy PR Brief in GitHub markdown:
+ 
+ 1. **Non-Blocking UI User Guide Advisory**:
+-   - If changes modified frontend UI files (`web/`, `frontend/`, `components/`) and `docs/user-guides/<slug>.md` has not been updated with screenshots:
+-     > 💡 **Advisory Notice:** UI changes committed. If this completes a customer-facing flow, remember to run `/command-user-guide <slug>` to capture Playwright screenshots before merging. _(Push completed successfully — this does not block your work)._
++   - If changes modified frontend UI files (`web/`, `frontend/`, `components/`) and the target release requires an end-user guide that has not been updated:
++     > 💡 **Advisory Notice:** UI changes committed. If this completes a customer-facing flow, run `/command-user-guide <slug>` when needed to update the concise text instructions. _(Push completed successfully — this does not block your work)._
+ 
+ 2. **Generated PR Brief (English)**:
+ 
+--- before/.agents/skills/engineering/command-skill-setup/SKILL.md
++++ after/.agents/skills/engineering/command-skill-setup/SKILL.md
+@@ -1,7 +1,7 @@
+ ---
+ invocation: user
+ name: command-skill-setup
+-description: "Scan project manifests, match compatible skills and rules from the catalog, confirm with the user, then activate skills, linters and optional MCP."
++description: "Inspect and onboard a project, then activate confirmed catalog skills and rules safely through registered mappings."
+ triggers:
+   - "/skill-setup"
+   - "/setup-workspace"
+@@ -12,160 +12,9 @@
+   - "configure project skills"
+ ---
+ 
+-# Command: Adaptive Project Setup (/skill-setup)
++# Project setup
+ 
+-This command skill automatically inspects the target codebase, detects active programming languages, frameworks, ORMs, and container tools, matches them against the **Curated Skill Catalog** ([.agents/catalog.json](../../../catalog.json)), and presents an interactive selection table with a **concise summary** for each skill before activation.
+-
+----
+-
+-## 4-Step Execution Loop
+-
+-```mermaid
+-flowchart TD
+-    A["1. Fast Manifest & Stack Scanner"] --> B["2. Catalog Matching & Table with Summaries"]
+-    B --> C["3. Interactive Confirmation Gate"]
+-    C --> D["4. Skill Activation, Rules & MCP Setup"]
+-```
+-
+----
+-
+-### Step 1: Fast Manifest & Stack Scanner
+-
+-Scan the project root directory to identify technology detection markers with zero excessive token reading overhead:
+-
+-1. **Programming Languages**:
+-   - Flutter / Dart: `pubspec.yaml`, `*.dart`, `.flutter-plugins`
+-   - Swift / Apple: `Package.swift`, `project.yml`, `*.xcodeproj`, `*.xcworkspace`, `*.swift`
+-   - Go: `go.mod`, `main.go`
+-   - Python: `pyproject.toml`, `requirements.txt`, `Pipfile`, `poetry.lock`, `setup.py`
+-   - Rust: `Cargo.toml`
+-   - TypeScript/Node: `tsconfig.json`, `package.json`
+-2. **Frameworks & Libraries**:
+-   - NestJS: `nest-cli.json`, `@nestjs/core` string in `package.json`
+-   - React / Next.js: `next.config.*`, `"react"` or `"next"` string in `package.json`
+-   - Tailwind CSS: `tailwind.config.*`, `"tailwindcss"` string in `package.json`
+-3. **Databases & DevOps**:
+-   - Prisma: `prisma/schema.prisma`
+-   - PostgreSQL: `"postgres"` string in `docker-compose.yml`, `package.json` (`pg`), or `requirements.txt` (`psycopg2`)
+-   - Docker: `Dockerfile`, `docker-compose.yml`, `compose.yaml`
+-4. **Git System & Code Intelligence**:
+-   - Check `.git/` directory to prepare for `code-review-graph` MCP Server.
+-
+----
+-
+-### Step 2: Match Catalog & Display Table with Concise Summaries
+-
+-Read [.agents/catalog.json](../../../catalog.json). For each entry matching the scan results from Step 1, extract:
+-
+-- **Skill / Tool Name (`name`)**
+-- **Category (`category`)**
+-- **Recommendation Level (`recommendation`)**: `Recommended` or `Optional`
+-- **Concise Summary (`short_description`)**: A succinct 1–2 sentence explanation of the skill's concrete value.
+-
+-#### Mandatory Output Format:
+-
+-The Agent **MUST** display a clean, visual Markdown table to the user following this format:
+-
+-```markdown
+-### 🔍 Project Tech Stack Analysis:
+-
+-- **Primary Language(s)**: [e.g., TypeScript / Go]
+-- **Frameworks**: [e.g., React, Next.js, Tailwind]
+-- **Database & DevOps**: [e.g., PostgreSQL, Docker]
+-
+-### 📦 Recommended Skills & Tooling:
+-
+-| Skill / Tool          | Category     | Status            | Concise Summary                                                                                                                                                        |
+-| :-------------------- | :----------- | :---------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+-| **go-patterns**       | Language     | 🎯 Recommended    | Enforces Go idioms: internal/ package boundaries, minimal consumer-defined interfaces, structured error wrapping, and anti-anemic domain models.                       |
+-| **go-rules**          | Language     | 🎯 Recommended    | Coding standards for Go: naming conventions, concurrency safety, table-driven unit testing, and defer cleanup rules.                                                   |
+-| **go-depguard**       | Boundary     | 🎯 Recommended    | Golangci-lint boundary checker configuration preventing unauthorized cross-package imports and keeping domain packages isolated.                                       |
+-| **docker-patterns**   | DevOps       | 🎯 Recommended    | Production container standards: distroless base image, non-root user, multi-stage caching, and healthcheck.                                                            |
+-| **code-review-graph** | Intelligence | 💡 Optional (MCP) | Builds local Tree-sitter + SQLite code graph allowing subagents (code-explorer, code-reviewer) to query caller/callee and blast-radius with up to 26x token reduction. |
+-```
+-
+-> [!NOTE]
+-> If no technology markers match (for example, an unsupported stack), the agent informs the user that no optional language skills are required, keeping the project 100% clean with zero unused skill directories.
+-
+----
+-
+-### Step 3: Interactive Confirmation Gate
+-
+-Reuse explicit selections and Git tracking mode already confirmed in this session or project metadata. Ask only for missing choices using direct questions or interactive chat:
+-
+-1. **Confirm activation of recommended skills**:
+-   - The user can accept all, or request to drop/add specific skills from the catalog.
+-2. **Activate `code-review-graph` MCP Server**:
+-   - Ask user: _"Would you like to activate the `code-review-graph` MCP Server to enable subagents to analyze function/class call graphs and reduce token usage during reviews?"_
+-3. **Git Management Mode for Universal Agents Workflow in this project**:
+-   - Ask user how they wish Git to handle the workflow files:
+-     - **🌐 1) Team Mode (Shared)**: Track all in Git to share rules, skills, and configs with the team on GitHub/GitLab (no additions to `.gitignore`).
+-     - **🔒 2) Local-Only Mode (Private)**: Automatically add `.agents/`, `.specify/`, `CONTEXT.md`, and rules to `.gitignore` to keep the remote repo 100% clean.
+-     - **🕶️ 3) Stealth Mode (Private Local)**: Add workflow files to `.git/info/exclude` (leaves the repository's `.gitignore` untouched).
+-     - **⚖️ 4) Hybrid Mode (Shared Docs, Private Engine)**: Track `CONTEXT.md`, `adr/`, `.specify/` in Git; ignore `.agents/` and rules in `.gitignore`.
+-
+----
+-
+-### Step 4: Activation & Injection
+-
+-Once confirmed by the user, the agent performs automated setup:
+-
+-1. **Activate selected catalog mappings through the update engine**:
+-   - Resolve a verified workflow source checkout from `.agents/workflow-source.json` (`sourcePath`) or a source checkout supplied by the user. Verify it contains `.agents/scripts/update-engine.py` and `optional-stack-skills/catalog.json`; if unavailable, obtain that checkout before activation. Never guess a global source directory.
+-   - Match each explicitly approved non-MCP choice to its exact catalog `source_path` and `target_path`. Keep skill destinations in the catalog's **cold** `.agents/skill-library/` tier; do not promote them into `.agents/skills/`. Rules and configs retain their own catalog destinations.
+-   - Run the verified source engine with `--sync`, `--source`, `--target`, and `--extra-ship` containing only approved `source_path=target_path` mappings (comma-separated). Do not use `--detect-packs` to add unapproved choices or `--ship` to replace the core install set.
+-     ```bash
+-     # Example only: substitute verified absolute source/target paths and approved mappings.
+-     python3 /verified/uaw/.agents/scripts/update-engine.py --sync \
+-       --source /verified/uaw --target /project \
+-       --extra-ship 'optional-stack-skills/languages/go/go-patterns=.agents/skill-library/engineering/go-patterns,optional-stack-skills/languages/go/rules/coding-style.md=.agents/rules/go-coding-style.md'
+-     ```
+-   - The engine records `selectedPacks`, source-to-target mappings and **last-written** hashes in `.agents/workflow-source.json`, then regenerates index, adapters and hooks. Never copy packs manually or edit the registry/hash state to adopt existing files. `--yes` keeps conflicts; it does not authorize overwriting user changes.
+-   - Inspect the engine exit status and derived-phase report. Retained custom files, unavailable packs, conflicts or failed generators must be reported accurately; do not claim every requested pack was activated when it was kept or unavailable. The target receives selected files, not the source `optional-stack-skills/` tree.
+-2. **Project-local `code-review-graph` MCP (only if selected)**:
+-   - Check the existing `uvx` executable. If absent, report the prerequisite and obtain approval for any dependency installation; do not install globally as part of pack activation.
+-   - Merge only the selected server into the project's supported MCP configuration, preserving existing servers. Do not run an auto-installer that rewrites other projects or global harness settings.
+-     ```json
+-     {
+-       "mcpServers": {
+-         "code-review-graph": {
+-           "command": "uvx",
+-           "args": ["code-review-graph", "serve"],
+-           "type": "stdio"
+-         }
+-       }
+-     }
+-     ```
+-   - Run `uvx code-review-graph build` in the target project only when its runtime is available and the selected setup authorizes fetching it. Report a failed build as incomplete.
+-3. **Configure Git Tracking Mode (based on Step 3 selection)**:
+-   - **Local-Only Mode**: Append the following block to `.gitignore`:
+-     ```gitignore
+-     # --- Universal Agents Workflow (Local-Only Mode) ---
+-     .agents/
+-     .specify/
+-     adr/
+-     CONTEXT.md
+-     GEMINI.md
+-     CLAUDE.md
+-     AGENTS.md
+-     .cursorrules
+-     .windsurfrules
+-     ```
+-   - **Stealth Mode**: Append the block above to `.git/info/exclude` to keep `.gitignore` untouched.
+-   - **Hybrid Mode**: Append the following block to `.gitignore`:
+-     ```gitignore
+-     # --- Universal Agents Workflow (Hybrid Mode: Private Engine) ---
+-     .agents/
+-     GEMINI.md
+-     CLAUDE.md
+-     AGENTS.md
+-     .cursorrules
+-     .windsurfrules
+-     ```
+-   - **Team Mode**: Only ignore temporary log files: `.agents/scripts/hooks/*.log`.
+-4. **Update `CONTEXT.md`**:
+-   - Populate detected tech stack, frameworks, and package managers in the **Components & Services Overview** table in `CONTEXT.md`.
+-5. **Completion Notification**:
+-   - Report the list of successfully activated skills.
+-   - Report the applied Git tracking mode.
+-   - Suggest the next action (e.g., run `/continue` or initiate Phase 1 BA pipeline via `intake-classifier`).
++Read [the onboarding and activation protocol](references/onboarding.md) on demand.
++Reuse confirmed stack evidence, selections and Git tracking mode; ask only for
++missing material choices. Follow that reference for safe CONTEXT/ADR preparation,
++registered project-local activation and truthful completion reporting.
+--- before/.agents/skills/engineering/command-skill-setup/references/onboarding.md
++++ after/.agents/skills/engineering/command-skill-setup/references/onboarding.md
+@@ -0,0 +1,96 @@
++# Project onboarding and activation
++
++Use this protocol for first-time onboarding or a requested change to selected
++project skills. Read only the relevant section; existing confirmed setup is reused.
++
++## 1. Discover existing evidence
++
++Inspect root/workspace manifests and lockfiles to identify languages, frameworks,
++package manager, databases, container tooling, test runners and linters. Examples:
++package.json/tsconfig, pyproject/requirements, go.mod, Cargo.toml, pom/build.gradle,
++Flutter/Swift manifests, Prisma schema and Docker/Compose files. Do not infer a
++stack or create optional skill directories when no marker matches.
++
++Read repository docs for terminology, components and existing conventions. Inspect
++Git branch/remote and issue-tracker convention when present; read-only discovery
++does not authorize Git writes or issue creation. A .git file can identify a worktree.
++
++## 2. Prepare project context and ADRs safely
++
++Read existing CONTEXT.md and adr/ before writing. Preserve custom text and accepted
++ADRs. Add only confirmed facts from manifests, README and owner evidence to the
++relevant component/terminology sections; do not regenerate the document. Fill a
++recognized placeholder only with established facts, retaining unrelated sections.
++For conflicting terminology or ambiguous content, ask rather than replace it.
++
++Create missing CONTEXT.md from the framework template with confirmed facts and
++leave unknown business content unresolved. Ensure adr/ and its adr-template.md
++exist; copy the verified template only when absent. Do not replace an existing
++template or record an architectural choice that has not been made. If recording
++adoption of ADRs is needed, create a new unused numbered file only for that
++confirmed decision; never reuse or overwrite an existing decision path.
++
++## 3. Match catalog and reuse selections
++
++Read the runtime [catalog](../../../../catalog.json). Match detection markers;
++show matching choices in a compact table with name, category, recommendation and
++short_description so the owner can understand their value. Use catalog source_path
++and target_path as authority, not hardcoded pack copies or benchmark claims.
++
++Reuse explicit selections and Git tracking mode already confirmed in this session
++or project metadata. Ask only for missing choices. Optional third-party MCP needs
++its own explicit selection and project-local configuration; never infer activation
++from a .git directory or a language marker.
++
++## 4. Activate confirmed mappings
++
++Resolve the verified framework source checkout from workflow-source.json sourcePath
++or an explicitly supplied checkout. Verify update-engine.py and the catalog exist;
++if unavailable, report the missing source rather than guess a global directory.
++
++For approved non-MCP items, run the verified source engine with --sync, --source,
++--target and --extra-ship containing only approved source_path=target_path mappings.
++Keep skill destinations in the cold .agents/skill-library tier; rules/configs keep
++their catalog targets. Do not use `--detect-packs` to add unapproved choices or
++`--ship` to replace the core set. Example only, substitute verified paths/mappings:
++
++```bash
++python3 /verified/uaw/.agents/scripts/update-engine.py --sync \
++  --source /verified/uaw --target /project \
++  --extra-ship 'optional-stack-skills/languages/go/go-patterns=.agents/skill-library/engineering/go-patterns'
++```
++
++The engine records selectedPacks and last-written hashes, then refreshes index,
++adapters and hooks. Never copy packs manually or edit registry/hash state to adopt
++existing files. --yes keeps conflicts; it never permits overwriting custom data.
++Inspect exit status and phase reports; distinguish activated, kept/customized,
++unavailable and failed work. Do not claim a kept or unavailable item was activated.
++The customer receives selected files, not the optional-stack-skills source tree.
++
++For selected code-review-graph MCP, check existing uvx first. Missing dependencies
++need their own approval; no global install or cross-project configuration changes.
++Merge only the selected server into the supported project config, preserving all
++other servers. Use command uvx with args [code-review-graph, serve], type stdio.
++Run uvx code-review-graph build in that project only if fetching/running the
++selected runtime is authorized, and report build failures as incomplete.
++
++## 5. Apply only the confirmed Git tracking mode
++
++Preserve existing ignore entries; append only missing relevant entries. Never
++rewrite ignore files or change a previously confirmed mode as a side effect.
++Use the project's installer mode contract instead of inventing different coverage:
++
++- Team: keep framework files shared; ignore temporary hook logs if needed.
++- Local-only: add framework paths to .gitignore.
++- Stealth: use .git/info/exclude; leave .gitignore unchanged.
++- Hybrid: share CONTEXT.md, adr/ and .specify/; ignore the framework engine/rules.
++
++If the mode is unknown, obtain the choice before editing ignore configuration.
++These selections do not authorize git add, commit, push or modifying Git history.
++
++## 6. Verify and report
++
++Check preserved context/ADRs and ignore content, source exit/phase reports and the
++actual activated paths. Report detected stack/package manager and test/lint tools,
++Git branch/remote/tracking mode, context/ADR changes, successful and retained or
++blocked selections, and a relevant next step such as skills-index or intake.
+--- before/.agents/skills/engineering/command-user-guide/SKILL.md
++++ after/.agents/skills/engineering/command-user-guide/SKILL.md
+@@ -1,7 +1,7 @@
+ ---
+ invocation: user
+ name: command-user-guide
+-description: "Verify the dev server, capture real Playwright screenshots, and write docs/user-guides/<slug>.md in non-technical language."
++description: "Write or update a concise text guide in docs/user-guides/<slug>.md using confirmed feature behavior."
+ triggers:
+   - "/command-user-guide"
+   - "/user-guide"
+@@ -12,100 +12,12 @@
+   - "user documentation"
+ ---
+ 
+-# Command: User Guide Generator Workflow (/command-user-guide)
++# Command: User Guide
+ 
+-This command skill automates the creation and maintenance of end-user documentation with real application screenshots in compliance with [user-guide-with-screenshots](../../../skill-library/engineering/user-guide-with-screenshots/SKILL.md).
++Read [user-guide](../../../skill-library/engineering/user-guide/SKILL.md) on demand.
++Pass the requested feature/slug, confirmed behavior and existing guide path to it.
++That skill owns the writing workflow; do not duplicate its instructions here.
+ 
+----
+-
+-## Core Principles (User-First)
+-
+-1. **Non-Technical Language**: Avoid developer jargon (e.g., _API, DTO, Endpoint, Database, State, Component, Payload_). Explain features plainly as if talking to an everyday user (e.g., use "popup window" instead of "modal").
+-2. **100% Real Screenshots (MANDATORY - NO TEXT-ONLY WORKAROUNDS)**: Capture images directly from the running web application (using the verified project URL). Never use fabricated mockups or write text-only guides for features with UI changes.
+-3. **Visual Annotations & Red Highlights (Red Highlights `#EF4444` & Badges ①, ②, ③)**:
+-   - Every screenshot **MUST FEATURE VIBRANT RED HIGHLIGHTS** (`outline: 3.5px solid #EF4444; box-shadow: 0 0 0 7px rgba(239, 68, 68, 0.3)`) bounding the target button, input, or container.
+-   - Attach a circular red numbered badge (**①, ②, ③**) with bold white text at the top-left corner of the highlighted element.
+-   - The generic capture script saves screenshots only; it does not inject highlights or badges. Add these in a browser automation step before capture or annotate the real captured image, then visually verify the result. Do not invent capture-plan fields for annotations.
+-   - In the guide text, every instructional bullet point must explicitly reference the corresponding badge number (e.g. `① Click the button...`, `② Enter the term...`).
+-4. **Visual Clarity**: 1 user action = 1 clear annotated screenshot + 1–2 concise explanatory sentences.
+-5. **File Locations**:
+-   - Document: `docs/user-guides/<slug>.md`
+-   - Images: `docs/user-guides/images/<slug>/` or `docs/user-guides/assets/<slug>/`
+-
+----
+-
+-## 5-Step Execution Workflow
+-
+-### Step 1: Identify Feature & Scope
+-
+-1. Determine the `<slug>` of the target feature from command arguments (e.g. `/command-user-guide card-creation`) or recent UI changes in the actual project source tree.
+-2. Identify key screens, popups, and the main user flow (Happy path: navigate to page -> click action -> fill inputs -> confirm & save).
+-
+-### Step 2: Verify Running Application
+-
+-1. Read the target project manifest, lockfile, workspace configuration and app/server configuration. Identify the existing app package, start command and configured URL; confirm the actual listening URL from server output.
+-2. Check that URL. If the app is not running, start it using its documented command and package manager. Do not assume a port, `apps/web`, or a `web` workspace. Resolve any material unknown before capturing.
+-3. Use the project’s existing Playwright/browser setup or the available browser tool. If setup is missing, report the blocker and follow the project’s dependency approval policy before installing anything.
+-
+-### Step 3: Plan & Capture Screenshots
+-
+-1. Create a temporary screenshot plan (e.g., `<slug>-plan.json`) using the verified app URL, routes and selectors.
+-2. Run the automated Playwright capture script:
+-   ```bash
+-   node .agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs <slug>-plan.json
+-   ```
+-   _(Or use the browser tool to capture screenshots for each step into `docs/user-guides/images/<slug>/`)_.
+-
+-3. A nonzero capture exit means the guide is not complete. Fix the failed action or unsupported action type and rerun; inspect every image for the intended state and required annotations.
+-
+-### Step 4: Author User Guide Document
+-
+-Create or update `docs/user-guides/<slug>.md` following the standard template:
+-
+-```markdown
+-# 📖 User Guide: [Feature Name]
+-
+-> **Audience:** End users  
+-> **Last Updated:** [Current Date]
+-
+----
+-
+-## 🎯 Overview
+-
+-[2-3 plain-language sentences describing how this feature helps learners]
+-
+----
+-
+-## 🚀 Step-by-Step Instructions
+-
+-### Step 1: [Step Title, e.g., Open Deck Details]
+-
+-![Open Deck Details](./images/<slug>/step-01.png)
+-
+-- [Action instruction 1]
+-- [Action instruction 2]
+-
+-### Step 2: [Step Title, e.g., Fill in Word Details]
+-
+-![Fill in Word Details](./images/<slug>/step-02.png)
+-
+-- [Action instruction]
+-
+----
+-
+-## 💡 Tips & Shortcuts
+-
+-- **Tip 1:** ...
+-- **Tip 2:** ...
+-
+----
+-
+-## ❓ Frequently Asked Questions (FAQ)
+-
+-- **Q:** [Common Question]  
+-  **A:** [Direct, plain explanation]
+-```
+-
+-### Step 5: Update User Guides Index
+-
+-Add or update the link in `docs/user-guides/README.md` if an index exists. Report completion with the file path to the user.
++Run when requested or when the target project's release documentation requires it.
++A UI change alone does not trigger guide generation. Keep this task text-only;
++no app startup, browser capture or annotation step is required.
+--- before/.agents/skills/engineering/skills-index/SKILL.md
++++ after/.agents/skills/engineering/skills-index/SKILL.md
+@@ -38,10 +38,10 @@
+   documentation → user-triggered shipping. Gate requirements remain authoritative.
+ - Common recovery routes: unclear explanation → `wait-what`; full context →
+   `handoff`; failing tests → `diagnosing-bugs`; external decision →
+-  `to-questionnaire`; onboarding → `setup-workspace`; throwaway design check →
++  `to-questionnaire`; onboarding → `command-skill-setup`; throwaway design check →
+   `prototype`; architectural friction → `improve-codebase-architecture`;
+   authorized conflict resolution → `resolving-merge-conflicts`; authoring agent
+-  instructions → `writing-for-agents`. Resolve paths through the catalog.
++  instructions → `technical-documentation`. Resolve paths through the catalog.
+ 
+ ## Layout
+ 
+--- before/.specify/features/README.md
++++ after/.specify/features/README.md
+@@ -1,8 +1,8 @@
+ # Feature documentation
+ 
+-Current implementation: [Skill consolidation](skill-consolidation/README.md).
++Current implementation: [Lean setup and text guides](lean-setup-text-guides/README.md).
+ Older feature reports below describe the state accepted at their own completion;
+-Later baselines and ADRs 0005/0006 supersede earlier source-retention decisions.
++Later baselines and ADRs 0005–0007 supersede earlier source-retention decisions.
+ 
+ 
+ - [Download-only distribution](download-only-distribution/README.md) — remove UAW MCP,
+@@ -18,3 +18,6 @@
+ 
+ - [Skill consolidation](skill-consolidation/README.md) — retire redundant source
+   identities, merge navigation/lean/UI guidance and preserve installed customizations.
++
++- [Lean setup and text guides](lean-setup-text-guides/README.md) — merge three owners,
++  remove guide screenshot tooling and retain installed custom data.
+--- before/README.md
++++ after/README.md
+@@ -211,14 +211,14 @@
+     S2 -->|🛑 Gate 1: Baseline Signed-Off| S3["3. Phase 2-4: UAW Native Planning<br/>(spec.md, plan.md, tasks.md)"]
+     S3 -->|🛑 Gate 2: Tech Plan Approved| S4["4. Phase 5: TDD Implementation<br/>(Red -> Green -> Refactor theo Slice)"]
+     S4 --> S5["5. Phase 6A: Tri-Pass Review<br/>(Bảo mật, Spec & Tối giản hoá Anti-Overengineering)"]
+-    S5 --> S6["6. Phase 6B: Docs & User Guide<br/>(Diataxis Docs + Ảnh chụp Playwright thật)"]
++    S5 --> S6["6. Docs (Full); User Guide khi cần<br/>(Hướng dẫn văn bản từ hành vi đã xác nhận)"]
+     S6 --> S7["7. /command-git-push<br/>(Modular Commits chuẩn Conventional)"]
+     F --> S7
+ ```
+ 
+ | Bước  | Tên Giai Đoạn                    | Kỹ Năng / Subagent Đảm Nhiệm                               | Đầu Ra Bắt Buộc (Artifacts)                                                                |
+ | :---: | :------------------------------- | :--------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
+-| **1** | **Onboarding Stack**             | `/skill-setup`, `setup-workspace`                          | `.agents/catalog.json`, skills, rules & subagents theo stack.                              |
++| **1** | **Onboarding Stack**             | `/skill-setup`                          | `.agents/catalog.json`, skills, rules & subagents theo stack.                              |
+ | **2** | **Nghiệp Vụ (Full lane)**        | `intake-classifier`, `elicitation-interview`, `grilling`   | `.specify/features/<slug>/baseline.md` (**Ký duyệt v1.0**).                                |
+ | **3** | **Đặc Tả & Thiết Kế (Full lane)**| `technical-spec`, `implementation-plan`, `task-breakdown`         | `spec.md`, `plan.md`, `data-model.md`, `tasks.md`.                                         |
+ | **4** | **Lập Trình TDD**                | `code-explorer`, `backend-developer`, `frontend-developer` | Fast: không file thủ tục. Full: `test-plan.md` + Unit Tests đỏ → xanh.                     |
+@@ -250,7 +250,7 @@
+ 
+ - **`ponytail`**: Kích hoạt tư duy tối giản xuyên suốt toàn bộ phiên làm việc (`/ponytail lite|full|ultra`).
+ - **`ponytail-review`**: Rà git diff (`/ponytail-review diff`) hoặc toàn repository (`/ponytail-review repo`) với 5 thẻ `delete:`, `stdlib:`, `native:`, `yagni:`, `shrink:`; chỉ báo cáo đề xuất, không tự xóa.
+-- **`ponytail-debt`**: Quét và lập bảng theo dõi vi nợ kỹ thuật từ các comment `// ponytail: <ceiling>, <upgrade-trigger>`.
++- **`ponytail-review debt`**: Quét và lập bảng theo dõi vi nợ kỹ thuật từ các comment `// ponytail: <ceiling>, <upgrade-trigger>`.
+ Hướng dẫn chế độ và cách dùng: [Ponytail quick reference](.agents/docs/ponytail-usage.md). Không suy ra mức tiết kiệm của dự án từ benchmark bên ngoài.
+ 
+ 📂 **Xem thư viện ví dụ đối chiếu thực tế (Before & After) tại**: [📑 docs/examples/README.md](docs/examples/README.md)
+@@ -265,11 +265,11 @@
+ | **`/generate-backlog`**   | `/create-roadmap` | Phỏng vấn nghiệp vụ theo scope và tự sinh roadmap chuẩn chống hallucination.            |
+ | **`/continue`**           | `/next`           | Quét roadmap, phỏng vấn gỡ blocker `[!]` và kích hoạt làm story kế tiếp. |
+ | **`/command-git-push`**   | `/push`, `/ship`  | Kiểm tra cổng tài liệu, phân tách Modular Commits và push an toàn.       |
+-| **`/command-user-guide`** | `/guide`          | Mở Playwright chụp ảnh giao diện thật và viết hướng dẫn sử dụng.         |
++| **`/command-user-guide`** | `/guide`          | Viết hướng dẫn sử dụng bằng văn bản, không có bước chụp ảnh.         |
+ | **`/update`**             | `/upgrade`        | Cập nhật framework an toàn với động cơ 3-Way Hash.                       |
+ | **`/ponytail`**           | `/be-lazy`        | Kích hoạt tư duy tối giản Senior Dev (chế độ: lite / full / ultra).      |
+ | **`/ponytail-review diff`** | `review diff` | Rà soát code thừa trong thay đổi hiện tại. |
+-| **`/ponytail-debt`**      | `/debt-ledger`    | Thu hoạch vi nợ kỹ thuật từ các comment ponytail trong codebase.         |
++| **`/ponytail-review debt`**      | `/debt-ledger`    | Thu hoạch vi nợ kỹ thuật từ các comment ponytail trong codebase.         |
+ | **`/ponytail-review repo`** | `audit repository` | Quét toàn bộ repository tìm mã over-engineering cần loại bỏ. |
+ | **`skills-index`** | `bước tiếp theo?` | Đọc catalog, chọn đúng skill và chỉ dẫn bước tiếp theo. |
+ | **`/wait-what`**          | `nói dễ hiểu hơn` | Yêu cầu AI giải thích lại thuật ngữ bằng ngôn ngữ đời thường.            |
+@@ -277,11 +277,12 @@
+ > 📑 **Mục lục kỹ năng (nguồn chuẩn)**: [`.agents/SKILLS.md`](.agents/SKILLS.md) — sinh tự động từ frontmatter, có `--check` chống lệch.
+ > Giải thích tiếng Việt chi tiết: [`.agents/docs/skills-cheatsheet.md`](.agents/docs/skills-cheatsheet.md).
+ 
+-Bộ nguồn hiện có **53 skill: 9 hot và 44 cold**. Các skill `speckit-*` đã
++Bộ nguồn hiện có **50 skill: 9 hot và 41 cold**. Các skill `speckit-*` đã
+ ngừng cung cấp; dùng `technical-spec`, `implementation-plan`, `task-breakdown`
+ và `technical-consistency-review` trong quy trình UAW. Định tuyến chuyển về
+ `skills-index`, audit toàn repo chuyển về `ponytail-review repo`; hướng dẫn
+-Ponytail nằm trong tài liệu. `wait-what` tiếp tục được giữ nguyên.
++Ponytail nằm trong tài liệu. Onboarding được gộp vào `command-skill-setup`, hướng dẫn viết cho agent nằm trong reference của `technical-documentation`, và debt ledger dùng `ponytail-review debt`. `wait-what` tiếp tục được giữ nguyên.
++User guide dùng skill `user-guide` theo yêu cầu/tài liệu release, không bắt buộc chụp ảnh, đánh dấu ảnh hay chạy ứng dụng.
+ Các tên lệnh cũ đã loại bỏ không còn được hỗ trợ ở bản cài mới. Khi cập nhật,
+ framework giữ nguyên bản cũ đã cài và dữ liệu tùy chỉnh; không tự xóa chúng.
+ 
+@@ -331,7 +332,7 @@
+ ├── docs/                               # 🟢 100% TÀI LIỆU HỆ THỐNG DỰ ÁN CỦA BẠN (Diataxis)
+ │   ├── architecture/                   # Kiến trúc hệ thống, ERD, Language Pack & Model Contracts
+ │   ├── features/                       # Tài liệu kỹ thuật từng tính năng sản phẩm
+-│   ├── user-guides/                    # Hướng dẫn sử dụng app có ảnh chụp thật
++│   ├── user-guides/                    # Hướng dẫn sử dụng bằng văn bản
+ │   └── PRODUCT_BACKLOG_ROADMAP.md      # Roadmap phát triển sản phẩm (dự án cá nhân)
+ │
+ ├── .agents/                            # 🤖 BỘ NÃO & ĐỘNG CƠ CỦA AI FRAMEWORK
+--- before/adr/0007-lean-setup-and-text-guides.md
++++ after/adr/0007-lean-setup-and-text-guides.md
+@@ -0,0 +1,13 @@
++# 0007: Lean setup and text guides
++
++Status: Accepted
++Date: 2026-11-26
++Authority: owner approved three remaining skill merges and explicitly removed screenshots from user-guide production.
++
++## Decision
++
++Merge setup-workspace into command-skill-setup through an on-demand onboarding reference, preserving confirmed stack/selections, CONTEXT and accepted ADRs. Merge writing-for-agents into technical-documentation references. Merge ponytail-debt into ponytail-review debt. Replace user-guide-with-screenshots and its capture tooling with user-guide text instructions and a thin command router. Guides run only when requested or selected for release documentation, with no browser/server/capture/annotation requirement. UI review and E2E testing keep their own evidence checks.
++
++## Consequences
++
++The current source library contains 50 identities (9 hot/41 cold), superseding ADR 0006's inventory count. Its other source-retirement and customer-preservation rules remain. Existing installed skills, guide images, capture scripts and custom domain/config files are not deleted. Keep accepted historical records unchanged; report missing selected source packs as unavailable/partial rather than inventing successful migration. No new runtime/global setup or monetary-saving claim is introduced.
+--- before/adr/README.md
++++ after/adr/README.md
+@@ -9,4 +9,5 @@
+ | [0003: Download-only distribution](0003-download-only-distribution.md) | Accepted |
+ | [0004: BA-first UAW with native technical planning](0004-ba-first-uaw-workflow.md) | Accepted; source-alias retention superseded by 0006 |
+ | [0005: Project-local workflow and Mermaid diagrams](0005-project-local-mermaid-workflow.md) | Accepted |
+-| [0006: Consolidated native skill library](0006-consolidated-native-skill-library.md) | Accepted |
++| [0006: Consolidated native skill library](0006-consolidated-native-skill-library.md) | Accepted; inventory count superseded by 0007 |
++| [0007: Lean setup and text guides](0007-lean-setup-and-text-guides.md) | Accepted |
+--- before/docs/features/README.md
++++ after/docs/features/README.md
+@@ -1,3 +1,4 @@
+ # Feature guides
+ 
+ - [Consolidated UAW skills](skill-consolidation/README.md) — current skill owners and safe upgrades.
++- [Lean setup and text guides](lean-setup-text-guides/README.md) — current setup/debt/authoring owners and text-only guides.
+--- before/docs/features/lean-setup-text-guides/README.md
++++ after/docs/features/lean-setup-text-guides/README.md
+@@ -0,0 +1,23 @@
++# Lean setup and text guides
++
++Status: Implemented; verification evidence recorded in the feature acceptance report.
++Last updated: 2026-11-26
++
++UAW ships 50 skills (9 hot/41 cold). Three duplicate owners are merged, and end-user guide writing now uses concise text instructions without a screenshot workflow. BA gates, native planning, wait-what and update preservation remain.
++
++## Current entry points
++
++| Need | Owner |
++| --- | --- |
++| First-time onboarding or change selected skills | command-skill-setup, loading its onboarding reference only as needed |
++| Write agent instructions, skills or rules | technical-documentation, using its agent-authoring reference |
++| List deliberate shortcut debt | ponytail-review debt |
++| Write/update an end-user guide | command-user-guide → user-guide |
++
++Use the [catalog](../../../.agents/SKILLS.md) for paths. A guide request produces docs/user-guides/<slug>.md from confirmed source/requirements; it does not require launching the app, opening a browser or generating annotated pictures. A UI change alone does not trigger guide generation. Existing image references and custom notes remain during targeted edits. UI review and E2E evidence checks have their own scopes.
++
++## Safe updates
++
++Old source owners and capture tools are not supplied in fresh installs. Existing installed copies, customized skills/scripts, guides/images, hooks/settings and domain data remain protected by the unchanged update engine. Existing projects may therefore show more skills than a fresh install. Missing previously selected source packs remain unavailable/partial for review; never delete or re-adopt custom files to force the new inventory.
++
++[ADR 0007](../../../adr/0007-lean-setup-and-text-guides.md) records the current decision without rewriting earlier accepted history. [Acceptance evidence](../../../.specify/features/lean-setup-text-guides/acceptance-report.md) links executed tests, preservation checks and review. PowerShell execution was unavailable; local fixtures do not certify live customer or Windows updates.
+--- before/docs/features/skill-consolidation/README.md
++++ after/docs/features/skill-consolidation/README.md
+@@ -3,7 +3,9 @@
+ Status: Implemented & Verified
+ Last updated: 2026-11-26
+ 
+-UAW ships 53 skills: 9 hot entry points and 44 cold skills read on demand. BA-first Fast/Full behavior and the four native planning skills remain; wait-what is retained unchanged.
++At this feature completion UAW shipped 53 skills: 9 hot entry points and 44 cold skills read on demand. BA-first Fast/Full behavior and the four native planning skills remain; wait-what is retained unchanged.
++
++Current setup/debt/authoring and text-guide behavior supersedes the corresponding owners below; see [lean setup and text guides](../lean-setup-text-guides/README.md).
+ 
+ ## Use the retained owners
+ 
+--- before/optional-stack-skills/catalog.json
++++ after/optional-stack-skills/catalog.json
+@@ -605,22 +605,11 @@
+       "id": "ponytail-review",
+       "name": "Ponytail Review — Diff and Repository Audit",
+       "category": "Anti-Overengineering",
+-      "short_description": "Read-only over-engineering review of a diff or whole repository. Choose /ponytail-review diff or /ponytail-review repo. Identify justified deletions, stdlib/native replacements and simpler code with file locations and consumer evidence. Report estimated reductions without applying fixes or claiming benchmark-based project savings.",
++      "short_description": "Read-only over-engineering review of a diff or whole repository, plus a deliberate-shortcut debt ledger. Use /ponytail-review diff, repo or debt. Debt reports file/line, ceiling, upgrade trigger and missing triggers from ponytail comments; review proposes evidence-backed cuts without applying changes or claiming benchmark-based savings.",
+       "detection_markers": [],
+       "source_path": ".agents/skill-library/engineering/ponytail-review",
+       "target_type": "skill",
+       "target_path": ".agents/skill-library/engineering/ponytail-review",
+-      "recommendation": "recommended"
+-    },
+-    {
+-      "id": "ponytail-debt",
+-      "name": "Ponytail Debt — Shortcut Ledger",
+-      "category": "Anti-Overengineering",
+-      "short_description": "Harvests every `ponytail:` comment in the codebase into a debt ledger so deliberate shortcuts don't quietly rot into 'later means never'. Grep-based scan, one row per marker with ceiling and upgrade path. Flags no-trigger entries. MIT license — bundled from DietrichGebert/ponytail.",
+-      "detection_markers": [],
+-      "source_path": ".agents/skill-library/engineering/ponytail-debt",
+-      "target_type": "skill",
+-      "target_path": ".agents/skill-library/engineering/ponytail-debt",
+       "recommendation": "recommended"
+     }
+   ]

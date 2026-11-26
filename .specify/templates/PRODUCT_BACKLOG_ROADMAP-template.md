@@ -13,6 +13,10 @@ schema-version: "1.2"
 
 # Product Backlog & Execution Roadmap
 
+> `[x]` xác nhận story DEV_COMPLETE theo AC, không xác nhận đã deploy. Khi có
+> release, dẫn tới docs/releases/<version>.md để ghi RELEASE_READY và kết quả
+> PRODUCTION_VERIFIED hoặc thất bại/phục hồi; không tạo hồ sơ release cho từng task.
+
 > **Sản phẩm:** `<Tên và mô tả đã xác nhận>`
 > **Cập nhật:** `<YYYY-MM-DD>`
 > **Nguồn quyết định:** `<Câu trả lời, tài liệu hoặc bằng chứng đã xác nhận>`
