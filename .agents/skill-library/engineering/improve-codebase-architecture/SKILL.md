@@ -88,7 +88,7 @@ Generate a standalone, interactive visual report saved to the operating system's
    - Output the absolute path clearly to the user.
 
 2. **Report Design & Layout**:
-   - **Tech Stack**: Tailwind CSS CDN + Mermaid JS CDN / Archify HTML Engine.
+   - **Tech Stack**: Tailwind CSS CDN + Mermaid JS CDN.
    - **Structure**:
      - **Header**: Repository name, scan timestamp, and visual legend (Solid box = Module, Dashed line = Seam, Red line = Leakage, Dark card = Deep Module).
      - **Candidate Cards**: One `<article>` per candidate containing:
@@ -98,11 +98,11 @@ Generate a standalone, interactive visual report saved to the operating system's
        - **Problem**: 1–2 sentences pinpointing the exact architectural friction.
        - **Solution**: 1–2 sentences defining the proposed deepened interface.
        - **Wins**: Crisp bullet points highlighting **Leverage**, **Locality**, and interface simplification.
-       - **Before / After Diagram**: Side-by-side visual comparison using Mermaid, or an **Archify Architecture Delta Proof** (`node bin/archify.mjs compare architecture base.json head.json diff.html --json`) showing deterministic `+ / ~ / − / ↔` change classifications.
+       - **Before / After Diagram**: Side-by-side visual comparison using Mermaid, with changes grounded in the inspected code.
        - **ADR Callout**: Warning notice if the proposal revisits an existing ADR, stating why it is now justified.
      - **Top Recommendation**: Prominent card highlighting the highest-leverage candidate to tackle first.
 
-3. **Guidance Reference**: Consult [HTML-REPORT.md](HTML-REPORT.md) and [`archify`](.agents/skill-library/engineering/archify/SKILL.md) for complete HTML templates, CSS classes, badge color schemes, and snapshot diffing.
+3. **Guidance Reference**: Consult [HTML-REPORT.md](HTML-REPORT.md) for report templates, CSS classes and badge color schemes; use Mermaid for before/after diagrams.
 
 4. **Done Criteria**: HTML report generated, opened in default browser, and prompt user: _"Which candidate would you like to explore?"_
 

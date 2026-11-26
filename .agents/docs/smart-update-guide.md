@@ -1,84 +1,68 @@
-# 🔄 Hướng Dẫn Cập Nhật & Nâng Cấp Thông Minh (Smart Update & 3-Way Hash Engine)
+# Cập nhật framework an toàn
 
-> **Mục tiêu**: Giải thích nguyên lý vận hành và hướng dẫn chi tiết cách cập nhật framework lên phiên bản mới nhất mà tuyệt đối không làm mất dữ liệu dự án, không ghi đè mã nguồn và bảo toàn 100% custom code/skills của bạn.
+Cài mới, cài lại và cập nhật dùng cùng cơ chế so sánh nội dung cho core và các
+pack đã được chọn rõ ràng. Mục tiêu là giữ dữ liệu tùy chỉnh; kết quả cập nhật
+có thể còn xung đột hoặc bước chưa chạy, cần đọc báo cáo cuối lệnh.
 
----
+## Cách chạy
 
-## 🛡️ Kiến Trúc Động Cơ 3-Way Hash (3-Way Hash Engine)
-
-Bộ cập nhật hoạt động dựa trên cơ chế đối chiếu mã băm **SHA-256 ba chiều** (Installed Hash vs Upstream Hash vs Current Local Hash) kết hợp với danh sách khóa bảo vệ tuyệt đối (`protectedPaths`):
-
-```mermaid
-flowchart TD
-    Start["Kích hoạt Update (/update hoặc install.sh --update)"] --> ReadProtected["Bước 0: Đọc & Khóa protectedPaths\ntừ workflow-source.json"]
-    ReadProtected --> Scan["Quét SHA-256 Checksum toàn bộ tệp"]
-
-    Scan --> Cat1{"1. Loại Tệp là gì?"}
-
-    Cat1 -->|"🛡️ Project Data Plane\n(CONTEXT.md, adr/, docs/, .specify/features/, src/, .env*)"| KeepData["BẢO VỆ TUYỆT ĐỐI\nBỏ qua 100%, không bao giờ ghi đè\n[PROTECTED]"]
-
-    Cat1 -->|"✨ Custom Skill/Agent do user tự thêm vào .agents/"| KeepCustom["ZERO DELETION POLICY\nGiữ nguyên vẹn 100%, không xóa\n[USER-CUSTOM RETAINED]"]
-
-    Cat1 -->|"🔄 Core Framework File (.agents/, prompts, rules)"| CheckHash{"2. Checksum hiện tại vs Installed Hash"}
-
-    CheckHash -->|"current_hash == installed_hash\n(User CHƯA TỪNG sửa)"| AutoUpdate["✅ SAFE UPDATE\nTự động cập nhật lên bản mới nhất\n[UPDATED]"]
-
-    CheckHash -->|"current_hash != installed_hash\n(User ĐÃ SỬA file này)"| Conflict["⚠️ PHÁT HIỆN XUNG ĐỘT\nDừng lại và hỏi người dùng:"]
-
-    Conflict --> Opt1["[K]eep: Giữ bản tùy biến của bạn"]
-    Conflict --> Opt2["[O]verwrite: Ghi đè bản mới (tạo backup .bak)"]
-    Conflict --> Opt3["[D]iff: Tải bản .upstream để tự merge"]
-```
-
----
-
-## ⚡ 3 Cách Kích Hoạt Cập Nhật
-
-### 1. Trực tiếp trong AI Editor (Khuyên dùng & Nhanh nhất)
-
-Mở ô chat trong bất kỳ AI Editor nào (Antigravity IDE, Cursor, Claude Code, Windsurf) và gõ:
-
-```text
-/update
-```
-
-Agent sẽ tự động gọi kỹ năng [`command-update`](../skills/engineering/command-update/SKILL.md), đối chiếu checksum và áp dụng bản cập nhật mới nhất.
-
-### 2. Qua dòng lệnh Terminal One-Liner (macOS / Linux / Git Bash)
-
-Mở terminal tại thư mục dự án và chạy:
+Trong AI Editor dùng `/update`, hoặc từ thư mục dự án:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.sh | bash -s -- --update
+python3 .agents/scripts/update-engine.py --check
+python3 .agents/scripts/update-engine.py --apply --target .
 ```
 
-_(Nếu bạn đã clone thư mục tool cục bộ: `./install.sh --update`)_.
+`--check` chỉ kiểm tra phiên bản. `--apply --yes` giữ xung đột, không phải quyền
+ghi đè tùy chỉnh. Có thể dùng installer với `--update` (PowerShell: `-Update`).
+Với bản nguồn cục bộ, chạy installer từ checkout đó và chỉ định thư mục đích.
+Python cần cho so sánh an toàn; Node cần cho index, adapter và hooks. Thiếu công
+cụ thì xem bước nào chưa chạy, cài công cụ rồi chạy lại; không dùng copy tay để
+bỏ qua kiểm tra dữ liệu.
 
-### 3. Qua PowerShell (Windows)
+## Quy tắc giữ dữ liệu
 
-```powershell
-irm https://raw.githubusercontent.com/ahauy/universal-agents-workflow/main/install.ps1 | iex -ArgumentList "-Update"
-```
+| Trường hợp | Kết quả |
+| --- | --- |
+| Dữ liệu dự án thuộc protectedPaths | Giữ nguyên nội dung đã có. |
+| File đích chưa có, mapping hợp lệ | Tạo và lưu hash nội dung thực sự đã ghi. |
+| File framework có hash sở hữu hợp lệ, chưa sửa | Cập nhật theo nguồn. |
+| File đã tùy chỉnh hoặc thiếu bằng chứng sở hữu | Giữ và báo xung đột/chưa xác minh; không nhận làm baseline mới. |
+| File user thêm hoặc file nguồn không còn | Không tự xóa file đích. |
+| Metadata lỗi, mapping/path không an toàn | Dừng thao tác không an toàn; không reset metadata để bỏ qua lỗi. |
 
-> [!TIP]
-> Sau khi cập nhật qua CLI hoặc PowerShell, mở AI Editor và gõ `/skill-setup` để Agent nạp lại cấu hình và quy tắc tương thích mới nhất vào phiên làm việc.
+Các đường dẫn dự án được giữ gồm `CONTEXT.md`, roadmap, changelog,
+`adr/`, `docs/features/`, `docs/user-guides/`, `docs/architecture/`,
+`.specify/features/`, `src/`, `.env*` và cấu hình local. Các ngoại lệ template
+framework được liệt kê trong engine vẫn phải qua so sánh hash; không phải quyền
+ngầm ghi đè. Có thể mở rộng protectedPaths trong metadata dự án.
 
----
+## Pack, adapter và các bước sinh lại
 
-## 📊 Bảng Phân Định Ranh Giới Dữ Liệu
+`.agents/workflow-source.json` lưu pack đã chọn, mapping nguồn–đích và hash.
+Update không chọn thêm pack dựa trên tên thư mục hoặc marker công nghệ mới.
+Metadata legacy thiếu lựa chọn cần xác nhận lại; pack thiếu nguồn vẫn được giữ
+ở dự án đích và báo chưa cập nhật.
 
-| Nhóm Tệp                                          | Danh Sách Đường Dẫn                                                                                                                                                                                                                            | Cơ Chế Bảo Vệ Khi Cập Nhật                                                                          |
-| :------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------- |
-| **Project Data Plane**<br/>_(Dữ liệu dự án)_      | `CONTEXT.md`, `PRODUCT_BACKLOG_ROADMAP.md`, `CHANGELOG.md`, `UPGRADE_NOTICE.md`, `adr/` (trừ template), `docs/features/`, `docs/user-guides/`, `docs/architecture/`, `docs/RUN_AND_TEST.md`, `.specify/features/`, `src/`, `.env*`, `*.local*` | 🛡️ **Bảo vệ tuyệt đối**: Bỏ qua 100%, không bao giờ bị chạm vào hay ghi đè.                         |
-| **User Customizations**<br/>_(Tùy biến của bạn)_  | Bất kỳ custom skill/agent/rule nào do user tự tạo thêm trong `.agents/`                                                                                                                                                                        | 👤 **Zero Deletion Policy**: Giữ nguyên vẹn 100%, không bao giờ bị xóa.                             |
-| **Framework Core Files**<br/>_(Mã lõi Framework)_ | `.agents/skills/`, `.agents/skill-library/`, `.agents/SKILLS.md`, `.agents/agents/`, `.agents/scripts/`, `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `.cursorrules`, `.windsurfrules`, `.specify/templates/`, `.specify/workflows/`                                                                | 🔄 **3-Way Hash Checksum**: Tự động update nếu chưa sửa; hỏi xác nhận nếu bạn đã có sửa đổi cục bộ. |
+Sau đồng bộ core/pack, các bước chạy theo thứ tự: tier/index → adapter → hooks.
+Adapter copy được xét từng file; symlink được kiểm tra đích và quyền sở hữu.
+Marker trong file không đủ để chứng minh chưa sửa. Hook/config tùy chỉnh, file
+user thêm và hot/cold khác nội dung dù trùng tên đều được giữ. Lệnh clean cũng
+phải kiểm tra quyền sở hữu; không xóa cả cây thư mục có nội dung user.
 
----
+Một pha sau có thể lỗi khi pha trước đã ghi an toàn. Báo cáo phải chỉ rõ lỗi,
+phần chưa chạy và xung đột; metadata không được ghi nhận phần chưa hoàn thành
+là đã cập nhật. Chạy lại để tiếp tục; không xóa manifest để ép nhận lại baseline.
 
-## 🛠️ Xử Lý Khi Có Xung Đột (Conflict Handling)
+## Nguồn chuẩn và phạm vi dọn dẹp
 
-Nếu bạn đã từng chỉnh sửa trực tiếp một file lõi của framework (ví dụ sửa prompt trong `.agents/agents/backend-developer.md`), khi update hệ thống sẽ phát hiện `current_hash != installed_hash` và hiển thị 3 lựa chọn:
+`optional-stack-skills/catalog.json` là nguồn catalog chuẩn;
+`.agents/catalog.json` là mirror sinh ra cho runtime của dự án đã cài. Mirror
+không phải nơi bảo trì bản thứ hai. Tùy chỉnh mirror ở dự án đích vẫn được giữ.
+Sơ đồ dùng Mermaid. Công cụ hoặc script đã bỏ khỏi nguồn không được tự xóa
+khỏi dự án khách; bản tùy chỉnh cũ tiếp tục được giữ và báo nguồn không còn.
 
-- **`[K]eep`**: Giữ nguyên file tùy biến hiện tại của bạn, bỏ qua bản cập nhật từ upstream.
-- **`[O]verwrite`**: Ghi đè file mới từ upstream, đồng thời tự động tạo bản sao lưu `.bak` (ví dụ `backend-developer.md.bak`) để bạn không bị mất code cũ.
-- **`[D]iff`**: Tải bản mới về với đuôi `.upstream` (ví dụ `backend-developer.md.upstream`) để bạn tự so sánh và gộp thủ công bằng công cụ diff.
+Bản phân phối không mang session notes/cache, metrics, feature artifacts và ADR
+lịch sử của chính dự án framework. Các template dùng lại vẫn còn. Việc loại các
+script ứng dụng riêng/HTML sinh sẵn khỏi nguồn không tự purge bản đã có ở dự án
+khách. Không cần xóa lịch sử hoặc baseline đã duyệt để cập nhật.

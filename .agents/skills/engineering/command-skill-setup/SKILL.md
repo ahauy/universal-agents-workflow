@@ -14,7 +14,7 @@ triggers:
 
 # Command: Adaptive Project Setup (/skill-setup)
 
-This command skill automatically inspects the target codebase, detects active programming languages, frameworks, ORMs, and container tools, matches them against the **Curated Skill Catalog** ([.agents/catalog.json](../../catalog.json)), and presents an interactive selection table with a **concise summary** for each skill before activation.
+This command skill automatically inspects the target codebase, detects active programming languages, frameworks, ORMs, and container tools, matches them against the **Curated Skill Catalog** ([.agents/catalog.json](../../../catalog.json)), and presents an interactive selection table with a **concise summary** for each skill before activation.
 
 ---
 
@@ -55,7 +55,7 @@ Scan the project root directory to identify technology detection markers with ze
 
 ### Step 2: Match Catalog & Display Table with Concise Summaries
 
-Read [.agents/catalog.json](../../catalog.json). For each entry matching the scan results from Step 1, extract:
+Read [.agents/catalog.json](../../../catalog.json). For each entry matching the scan results from Step 1, extract:
 
 - **Skill / Tool Name (`name`)**
 - **Category (`category`)**
@@ -85,29 +85,19 @@ The Agent **MUST** display a clean, visual Markdown table to the user following 
 ```
 
 > [!NOTE]
-> If no technology markers match (e.g. Swift/iOS, Kotlin/Android, C/C++), the agent informs the user that no optional language skills are required, keeping the project 100% clean with zero unused skill directories.
+> If no technology markers match (for example, an unsupported stack), the agent informs the user that no optional language skills are required, keeping the project 100% clean with zero unused skill directories.
 
 ---
 
 ### Step 3: Interactive Confirmation Gate
 
-The Agent pauses and asks the user using direct questions or interactive chat:
+Reuse explicit selections and Git tracking mode already confirmed in this session or project metadata. Ask only for missing choices using direct questions or interactive chat:
 
 1. **Confirm activation of recommended skills**:
    - The user can accept all, or request to drop/add specific skills from the catalog.
 2. **Activate `code-review-graph` MCP Server**:
    - Ask user: _"Would you like to activate the `code-review-graph` MCP Server to enable subagents to analyze function/class call graphs and reduce token usage during reviews?"_
-3. **Install `Archify` CLI (optional external tool)**:
-   - First, check if Archify is already installed:
-     ```bash
-     node ~/.agents/skills/archify/bin/archify.mjs doctor 2>/dev/null && echo "INSTALLED" || echo "NOT_INSTALLED"
-     ```
-   - If **INSTALLED**: Inform user Archify is already available — no action needed.
-   - If **NOT_INSTALLED**: Ask user:
-     _"Would you like to install **Archify** — an interactive architecture diagram tool that generates validated HTML maps and 1200×630 share cards from typed JSON IR? It installs globally to `~/.agents/skills/archify/`. Without it, agents fall back to standard Mermaid diagrams."_
-     - If Yes → run in Step 4: `npx -y skills add tt-a1i/archify --skill archify --global --copy --yes`
-     - If No → agents will use Mermaid fallback automatically (no action needed)
-4. **Git Management Mode for Universal Agents Workflow in this project**:
+3. **Git Management Mode for Universal Agents Workflow in this project**:
    - Ask user how they wish Git to handle the workflow files:
      - **🌐 1) Team Mode (Shared)**: Track all in Git to share rules, skills, and configs with the team on GitHub/GitLab (no additions to `.gitignore`).
      - **🔒 2) Local-Only Mode (Private)**: Automatically add `.agents/`, `.specify/`, `CONTEXT.md`, and rules to `.gitignore` to keep the remote repo 100% clean.
@@ -120,46 +110,24 @@ The Agent pauses and asks the user using direct questions or interactive chat:
 
 Once confirmed by the user, the agent performs automated setup:
 
-1. **Copy / Activate Skills**:
-   - Resolve source repository path from `.agents/workflow-source.json` (or central workflow clone).
-   - Copy ONLY the selected skill directories into `.agents/skills/engineering/<skill-id>/`.
-   - Copy rule files to `.agents/rules/<rule-id>.md`.
-   - Copy linter configuration files (`depguard.yaml`, `.importlinter.ini`, `dependency-cruiser.config.cjs`) to workspace root if not already present.
-   - **Important**: The target repository NEVER contains an `optional-stack-skills/` directory. All activated skills live cleanly inside `.agents/skills/engineering/`.
-2. **Install Archify CLI (if user selected Yes in Step 3)**:
-   - Run the official install command:
+1. **Activate selected catalog mappings through the update engine**:
+   - Resolve a verified workflow source checkout from `.agents/workflow-source.json` (`sourcePath`) or a source checkout supplied by the user. Verify it contains `.agents/scripts/update-engine.py` and `optional-stack-skills/catalog.json`; if unavailable, obtain that checkout before activation. Never guess a global source directory.
+   - Match each explicitly approved non-MCP choice to its exact catalog `source_path` and `target_path`. Keep skill destinations in the catalog's **cold** `.agents/skill-library/` tier; do not promote them into `.agents/skills/`. Rules and configs retain their own catalog destinations.
+   - Run the verified source engine with `--sync`, `--source`, `--target`, and `--extra-ship` containing only approved `source_path=target_path` mappings (comma-separated). Do not use `--detect-packs` to add unapproved choices or `--ship` to replace the core install set.
      ```bash
-     npx -y skills add tt-a1i/archify --skill archify --global --copy --yes
+     # Example only: substitute verified absolute source/target paths and approved mappings.
+     python3 /verified/uaw/.agents/scripts/update-engine.py --sync \
+       --source /verified/uaw --target /project \
+       --extra-ship 'optional-stack-skills/languages/go/go-patterns=.agents/skill-library/engineering/go-patterns,optional-stack-skills/languages/go/rules/coding-style.md=.agents/rules/go-coding-style.md'
      ```
-   - Verify installation succeeded:
-     ```bash
-     node ~/.agents/skills/archify/bin/archify.mjs doctor
-     ```
-   - Report to user: ✅ Archify installed at `~/.agents/skills/archify/` — use `node bin/archify.mjs` from that directory.
-   - If install fails: Report failure clearly and inform user they can retry manually. Agents will use Mermaid fallback in the meantime.
-3. **Automated Setup for `code-review-graph` MCP (if selected Yes)**:
-   - **Prerequisite Check**: Check if Astral's `uv` / `uvx` is installed:
-     ```bash
-     which uvx || which uv
-     ```
-   - **If `uv` is NOT found**, prompt or execute the standard installation:
-     - **macOS / Linux**: `curl -LsSf https://astral.sh/uv/install.sh | sh` (or `brew install uv`)
-     - **Windows PowerShell**: `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`
-   - **Run Official Auto-Configuration & Graph Build**: The agent executes the official one-command setup followed by the graph build:
-     ```bash
-     uvx code-review-graph install -y
-     uvx code-review-graph build
-     ```
-     _`install -y` automatically configures MCP servers across all detected AI tools (Antigravity, Cursor, Windsurf, Claude Code) and adds `.code-review-graph/` to `.gitignore`._
-     _`build` parses the codebase with Tree-sitter and creates the local SQLite AST graph (`.code-review-graph/graph.db`)._
-   - **Workspace MCP Verification**: Ensure `.agents/mcp_config.json` also has the server registered:
+   - The engine records `selectedPacks`, source-to-target mappings and **last-written** hashes in `.agents/workflow-source.json`, then regenerates index, adapters and hooks. Never copy packs manually or edit the registry/hash state to adopt existing files. `--yes` keeps conflicts; it does not authorize overwriting user changes.
+   - Inspect the engine exit status and derived-phase report. Retained custom files, unavailable packs, conflicts or failed generators must be reported accurately; do not claim every requested pack was activated when it was kept or unavailable. The target receives selected files, not the source `optional-stack-skills/` tree.
+2. **Project-local `code-review-graph` MCP (only if selected)**:
+   - Check the existing `uvx` executable. If absent, report the prerequisite and obtain approval for any dependency installation; do not install globally as part of pack activation.
+   - Merge only the selected server into the project's supported MCP configuration, preserving existing servers. Do not run an auto-installer that rewrites other projects or global harness settings.
      ```json
      {
        "mcpServers": {
-         "playwright": {
-           "command": "npx",
-           "args": ["-y", "@playwright/mcp@latest"]
-         },
          "code-review-graph": {
            "command": "uvx",
            "args": ["code-review-graph", "serve"],
@@ -168,7 +136,8 @@ Once confirmed by the user, the agent performs automated setup:
        }
      }
      ```
-4. **Configure Git Tracking Mode (based on Step 3 selection)**:
+   - Run `uvx code-review-graph build` in the target project only when its runtime is available and the selected setup authorizes fetching it. Report a failed build as incomplete.
+3. **Configure Git Tracking Mode (based on Step 3 selection)**:
    - **Local-Only Mode**: Append the following block to `.gitignore`:
      ```gitignore
      # --- Universal Agents Workflow (Local-Only Mode) ---
@@ -194,9 +163,9 @@ Once confirmed by the user, the agent performs automated setup:
      .windsurfrules
      ```
    - **Team Mode**: Only ignore temporary log files: `.agents/scripts/hooks/*.log`.
-5. **Update `CONTEXT.md`**:
+4. **Update `CONTEXT.md`**:
    - Populate detected tech stack, frameworks, and package managers in the **Components & Services Overview** table in `CONTEXT.md`.
-6. **Completion Notification**:
+5. **Completion Notification**:
    - Report the list of successfully activated skills.
    - Report the applied Git tracking mode.
    - Suggest the next action (e.g., run `/continue` or initiate Phase 1 BA pipeline via `intake-classifier`).

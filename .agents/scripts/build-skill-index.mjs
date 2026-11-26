@@ -22,6 +22,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import ownership from "./derived-state.cjs";
 
 const HOT_DIR = ".agents/skills";
 const COLD_DIR = ".agents/skill-library";
@@ -62,6 +63,16 @@ const GROUPS = {
     "wayfinder",
   ],
   "Spec, Plan & Tasks": [
+    "technical-spec",
+    "implementation-plan",
+    "task-breakdown",
+    "technical-consistency-review",
+    "scaffold-architecture",
+    "codebase-design",
+    "setup-deep-modules",
+    "improve-codebase-architecture",
+  ],
+  "Legacy migration aliases": [
     "speckit-specify",
     "speckit-plan",
     "speckit-tasks",
@@ -72,10 +83,6 @@ const GROUPS = {
     "speckit-converge",
     "speckit-implement",
     "speckit-taskstoissues",
-    "scaffold-architecture",
-    "codebase-design",
-    "setup-deep-modules",
-    "improve-codebase-architecture",
   ],
   Implementation: [
     "implementation-orchestrator",
@@ -102,7 +109,6 @@ const GROUPS = {
     "ui-taste-pro",
     "motion-design",
     "frontend-a11y",
-    "archify",
   ],
   "Minimal code (ponytail)": [
     "ponytail-review",
@@ -129,12 +135,14 @@ const PICK_FAST = [
   ["Need AS-IS / TO-BE, RBAC, state machine, ERD", "domain-modeling"],
   ["Turn analysis into requirements.md", "spec-writer"],
   ["Requirements need an IEEE 29148 check", "spec-validator"],
-  ["Turn a spec into plan + tasks", "speckit-plan"],
-  ["Break a plan into ordered tasks", "speckit-tasks"],
-  ["Implement a signed-off feature", "implementation-orchestrator"],
+  ["Design a signed-off Full feature", "technical-spec"],
+  ["Turn a technical spec into an implementation plan", "implementation-plan"],
+  ["Break a plan into ordered tasks", "task-breakdown"],
+  ["Check existing requirements + spec + plan + tasks", "technical-consistency-review"],
+  ["Implement an approved Full feature", "implementation-orchestrator"],
   ["Bug reproduced, root cause unknown", "diagnosing-bugs"],
   ["Over-engineered diff / bloated repo", "ponytail-review"],
-  ["Need an architecture or sequence diagram", "archify"],
+  ["Need an architecture or sequence diagram", "technical-documentation"],
   ["Feature ships, needs docs + screenshots", "technical-documentation"],
   ["Unsure which skill or phase applies", "route"],
 ];
@@ -172,10 +180,17 @@ function collectSkills(dir) {
   const out = [];
   if (!fs.existsSync(dir)) return out;
   for (const group of fs.readdirSync(dir).sort()) {
-    const groupDir = path.join(dir, group);
+    const groupDir = path.posix.join(dir, group);
+    ownership.resolve(process.cwd(),groupDir);
     if (!fs.statSync(groupDir).isDirectory()) continue;
-    for (const name of fs.readdirSync(groupDir).sort()) {
-      const skillFile = path.join(groupDir, name, "SKILL.md");
+    const names = fs.existsSync(path.posix.join(groupDir,"SKILL.md")) ? [""] : fs.readdirSync(groupDir).sort();
+    for (const child of names) {
+      const name = child || group;
+      const skillDir = child ? path.posix.join(groupDir,child) : groupDir;
+      ownership.resolve(process.cwd(),skillDir);
+      if (!fs.statSync(skillDir).isDirectory()) continue;
+      const skillFile = path.posix.join(skillDir, "SKILL.md");
+      ownership.resolve(process.cwd(),skillFile);
       if (!fs.existsSync(skillFile)) continue;
       const frontmatter = parseFrontmatter(fs.readFileSync(skillFile, "utf8"));
       out.push({
@@ -309,12 +324,13 @@ function findStaleHotCopies() {
   const coldNames = new Set(collectSkills(COLD_DIR).map((skill) => skill.name));
 
   for (const group of fs.readdirSync(HOT_DIR)) {
-    const groupDir = path.join(HOT_DIR, group);
+    const groupDir = path.posix.join(HOT_DIR, group);
+    ownership.resolve(process.cwd(),groupDir);
     if (!fs.statSync(groupDir).isDirectory()) continue;
     for (const name of fs.readdirSync(groupDir)) {
-      const dir = path.join(groupDir, name);
+      const dir = path.posix.join(groupDir, name);
       if (!fs.statSync(dir).isDirectory()) continue;
-      if (!fs.existsSync(path.join(dir, "SKILL.md"))) continue;
+      if (!fs.existsSync(path.posix.join(dir, "SKILL.md"))) continue;
       if (HOT_NAMES.has(name)) continue;
       if (coldNames.has(name)) stale.push(dir);
     }
@@ -329,77 +345,122 @@ function findStaleHotCopies() {
  * pack belongs, so relocate exactly those and nothing else — a skill the user
  * added by hand is never moved.
  */
+function readCatalog(file) {
+  const data = JSON.parse(fs.readFileSync(ownership.resolve(process.cwd(),file),"utf8"));
+  if (!ownership.object(data) || !Array.isArray(data.items)) throw new Error("Invalid catalog");
+  const ids = new Set();
+  const destinations = [];
+  for (const item of data.items) {
+    if (!ownership.object(item) || typeof item.id !== "string" || !item.id || ids.has(item.id)) throw new Error("Invalid/duplicate catalog ID");
+    ids.add(item.id);
+    if (!(item.target_type === "mcp" && /^https:\/\//.test(item.source_path))) ownership.relative(item.source_path);
+    ownership.relative(item.target_path);
+    ownership.resolve(process.cwd(),item.target_path,false);
+    if (fs.existsSync(item.source_path)) {
+      ownership.resolve(process.cwd(),item.source_path);
+      const files = fs.statSync(item.source_path).isDirectory() ? treeFiles(item.source_path) : [item.source_path];
+      for (const source of files) {
+        const target = item.target_path + source.slice(item.source_path.length);
+        if (destinations.includes(target)) throw new Error(`Overlapping catalog file: ${target}`);
+        destinations.push(target);
+      }
+    }
+    if (item.included_in_core && item.source_path !== item.target_path) throw new Error("Invalid core catalog mapping");
+  }
+  return data;
+}
 function optionalPackTargets() {
-  const targets = new Map();
-  for (const file of [CATALOG, path.join("optional-stack-skills", "catalog.json")]) {
-    if (!fs.existsSync(file)) continue;
-    let data;
-    try {
-      data = JSON.parse(fs.readFileSync(file, "utf8"));
-    } catch {
-      continue;
-    }
-    for (const item of data.items || []) {
-      const target = item.target_path || "";
-      if (!item.id || !target.startsWith(`${COLD_DIR}/`)) continue;
-      targets.set(item.id, target);
-    }
-  }
-  return targets;
+  const file = fs.existsSync("optional-stack-skills/catalog.json") ? "optional-stack-skills/catalog.json" : CATALOG;
+  if (!fs.existsSync(file)) return new Map();
+  return new Map(readCatalog(file).items.filter(item => item.target_path.startsWith(`${COLD_DIR}/`)).map(item => [item.id,item.target_path]));
 }
-
-function relocateStalePackCopies(quiet) {
-  const targets = optionalPackTargets();
-  if (targets.size === 0) return 0;
-  let moved = 0;
-  if (!fs.existsSync(HOT_DIR)) return moved;
-
-  for (const group of fs.readdirSync(HOT_DIR)) {
-    const groupDir = path.join(HOT_DIR, group);
-    if (!fs.statSync(groupDir).isDirectory()) continue;
-    for (const name of fs.readdirSync(groupDir)) {
-      if (HOT_NAMES.has(name)) continue;
-      const dir = path.join(groupDir, name);
-      if (!fs.statSync(dir).isDirectory()) continue;
-      if (!fs.existsSync(path.join(dir, "SKILL.md"))) continue;
-      const target = targets.get(name);
-      if (!target || fs.existsSync(target)) continue;
-      fs.mkdirSync(path.dirname(target), { recursive: true });
-      fs.renameSync(dir, target);
-      moved += 1;
-      if (!quiet) console.log(`  relocated pack to the cold library: ${dir} -> ${target}`);
-    }
+function registryHashes() {
+  const file = ownership.resolve(process.cwd(),".agents/workflow-source.json");
+  if (!fs.existsSync(file)) return {};
+  const data = JSON.parse(fs.readFileSync(file,"utf8"));
+  if (!ownership.object(data) || (data.schemaVersion !== undefined && data.schemaVersion !== 2)) throw new Error("Invalid source registry");
+  const hashes = data.fileHashes || data.manifest || {};
+  if (!ownership.object(hashes)) throw new Error("Invalid registry hashes");
+  for (const [key, hash] of Object.entries(hashes)) {
+    const pieces = key.split("=>");
+    if (pieces.length > 2 || !/^[a-f0-9]{64}$/.test(hash)) throw new Error("Invalid registry hash");
+    for (const rel of pieces) ownership.relative(rel);
   }
-  return moved;
+  return hashes;
 }
-
-function pruneStaleHotCopies(quiet) {
-  const stale = findStaleHotCopies();
-  for (const dir of stale) {
-    fs.rmSync(dir, { recursive: true, force: true });
-    if (!quiet) console.log(`  pruned duplicate hot copy: ${dir}`);
+function treeFiles(dir) {
+  ownership.resolve(process.cwd(),dir);
+  return fs.readdirSync(dir).flatMap(name => {
+    const rel = `${dir}/${name}`;
+    ownership.resolve(process.cwd(),rel);
+    return fs.statSync(rel).isDirectory() ? treeFiles(rel) : [rel];
+  });
+}
+function provenTree(dir, hashes) {
+  return treeFiles(dir).every(file => ownership.hash(fs.readFileSync(file)) === hashes[file]);
+}
+function pruneStaleHotCopies(quiet, hashes, targets) {
+  let conflicts = 0;
+  let updated = 0;
+  for (const dir of findStaleHotCopies()) {
+    const name = path.posix.basename(dir);
+    const cold = collectSkills(COLD_DIR).find(skill => skill.name === name);
+    const destination = path.posix.dirname(cold.path);
+    const hotFiles = treeFiles(dir);
+    const coldFiles = treeFiles(destination);
+    const equal = hotFiles.length === coldFiles.length && hotFiles.every(file => {
+      const counterpart = destination + file.slice(dir.length);
+      return fs.existsSync(counterpart) && fs.lstatSync(counterpart).isFile() && fs.readFileSync(file).equals(fs.readFileSync(counterpart));
+    });
+    if (!equal || !provenTree(dir,hashes)) { conflicts++; console.log(`Kept unverified/differing hot tree: ${dir}`); continue; }
+    fs.rmSync(dir,{recursive:true});
+    updated++;
   }
-  const moved = relocateStalePackCopies(quiet);
-  if (!quiet && (stale.length > 0 || moved > 0)) {
-    console.log(
-      `Normalized hot tier: removed ${stale.length} duplicate(s), moved ${moved} pack(s) to the library.`,
-    );
+  for (const skill of collectSkills(HOT_DIR)) {
+    const target = targets.get(skill.name);
+    const dir = path.posix.dirname(skill.path);
+    if (HOT_NAMES.has(skill.name) || !target || fs.existsSync(target)) continue;
+    if (!provenTree(dir,hashes)) { conflicts++; console.log(`Kept unverified hot tree: ${dir}`); continue; }
+    ownership.resolve(process.cwd(),target);
+    fs.mkdirSync(path.dirname(target),{recursive:true});
+    fs.renameSync(dir,target);
+    updated++;
   }
-  return stale.length + moved;
+  return {updated,conflicts};
+}
+function mirrorCatalog(write) {
+  const source = "optional-stack-skills/catalog.json";
+  readCatalog(source);
+  const content = fs.readFileSync(source);
+  if (write) ownership.atomic(ownership.resolve(process.cwd(),CATALOG),content);
+  else if (!fs.existsSync(CATALOG) || !fs.readFileSync(CATALOG).equals(content)) throw new Error("Runtime catalog mirror is stale; run --catalog-write in the framework source checkout");
 }
 
 function main() {
+  const rootIndex = process.argv.indexOf("--root");
+  if (rootIndex !== -1) process.chdir(process.argv[rootIndex + 1]);
+  const stateRel = ".agents/derived-state-index.json";
+  const state = ownership.load(process.cwd(),stateRel,rel => rel === OUTPUT);
+  const hashes = registryHashes();
+  const targets = optionalPackTargets();
+  ownership.resolve(process.cwd(),OUTPUT);
+  if (process.argv.includes("--validate-only")) return;
+  if (process.argv.includes("--catalog-check") || process.argv.includes("--catalog-write")) {
+    mirrorCatalog(process.argv.includes("--catalog-write"));
+    return;
+  }
   const checkOnly = process.argv.includes("--check");
   const prune = process.argv.includes("--prune");
   const quiet = process.argv.includes("--quiet");
 
   // Always regenerate after pruning, even when nothing was removed: a stale
   // catalog (a description edited without a re-run) must not survive an install.
-  if (prune) pruneStaleHotCopies(quiet);
+  const normalized = prune && !checkOnly ? pruneStaleHotCopies(quiet,hashes,targets) : {updated:0,conflicts:0};
 
   const { content, hot, cold } = render();
 
   if (checkOnly) {
+    if (fs.existsSync("optional-stack-skills/catalog.json")) mirrorCatalog(false);
     if (!fs.existsSync(OUTPUT)) {
       console.error(`${OUTPUT} is missing. Run without --check to generate it.`);
       process.exit(1);
@@ -432,10 +493,15 @@ function main() {
     return;
   }
 
-  fs.writeFileSync(OUTPUT, content);
-  if (!quiet) {
+  if (!state.outputs[OUTPUT] && hashes[OUTPUT]) state.outputs[OUTPUT] = {kind:"file",source:OUTPUT,hash:hashes[OUTPUT]};
+  const written = ownership.write(process.cwd(),OUTPUT,content,OUTPUT,state);
+  if (written) ownership.store(process.cwd(),stateRel,state);
+  else console.log(`Kept customized or unverified ${OUTPUT}`);
+  ownership.summary("index",normalized.updated + Number(written),normalized.conflicts + Number(!written));
+  if (!quiet && written) {
     console.log(`Wrote ${OUTPUT} (${hot.length} hot + ${cold.length} cold skills).`);
   }
 }
 
-main();
+try { main(); }
+catch (error) { console.error(`build-skill-index: ${error.message}`); ownership.summary("index",0,0,1); process.exitCode=1; }

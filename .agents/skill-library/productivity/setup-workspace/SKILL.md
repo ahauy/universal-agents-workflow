@@ -55,12 +55,12 @@ flowchart TD
    - Ensure `adr/` exists at workspace root with `adr-template.md`.
    - Seed `adr/0001-record-architecture-decisions.md` if not already present.
 3. **Git Tracking Configuration (Team vs Local-Only vs Stealth vs Hybrid)**:
-   - Check if the repository uses Team Mode (all files committed) or Private Mode.
-   - For Private Mode: Append workflow files to `.gitignore` (or `.git/info/exclude` for zero repository footprint).
+   - Reuse the confirmed tracking mode from project metadata/session; otherwise use `command-skill-setup` to obtain the choice before changing ignore configuration.
+   - Apply only that selected mode, preserving existing ignore entries. Do not infer private/global setup from a stack marker.
 
 ### Step 3: Polyglot Stack & Framework Linking (Powered by catalog.json)
 
-1. Load [.agents/catalog.json](../../catalog.json) and match items against the detected technology stack:
+1. Load [.agents/catalog.json](../../../catalog.json) and match items against the detected technology stack:
    - **Language Skills & Rules**:
      - Python: `python-patterns`, `python-importlinter`
      - Go: `go-patterns`, `go-rules`, `go-depguard`
@@ -75,7 +75,7 @@ flowchart TD
      - MCP Code Intelligence: `code-review-graph` (Tree-sitter SQLite graph for token reduction)
 2. **Render Selection Table with Concise Summaries**:
    Always display a structured Markdown table including the **Concise Summary** column for every detected skill so the user understands its exact benefit.
-3. Prompt the user for confirmation (or run `/skill-setup` for the full automated onboarding experience).
+3. Reuse any explicit selections already confirmed in this session; otherwise confirm the proposed choices. Activate through [command-skill-setup](../../../skills/engineering/command-skill-setup/SKILL.md), using the verified source engine `--sync --extra-ship` with exact catalog `source_path=target_path` mappings. Skills stay cold in `.agents/skill-library/`; never copy directories into the hot tier or manually adopt registry/hash state. Check the exit status and derived report before reporting activation success. Optional MCP configuration is project-local and requires its own selection.
 
 ### Step 4: Verification & Handoff
 

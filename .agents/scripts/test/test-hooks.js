@@ -34,7 +34,7 @@ function check(label, cond) {
   }
 }
 
-function execHook(hook, payload, cwd = ROOT) {
+function execHook(hook, payload, cwd = SANDBOX) {
   let stdout = "";
   let exitCode = 0;
   try {
@@ -42,6 +42,7 @@ function execHook(hook, payload, cwd = ROOT) {
       input: JSON.stringify(payload),
       cwd,
       encoding: "utf8",
+      env: { ...process.env, WORKSPACE_ROOT: cwd },
       stdio: ["pipe", "pipe", "pipe"],
     });
   } catch (err) {
@@ -69,7 +70,7 @@ function runAntigravity(hook, toolName, args, cwd) {
 function runClaude(hook, event, toolName, toolInput, cwd) {
   return execHook(
     hook,
-    { hook_event_name: event, tool_name: toolName, tool_input: toolInput, cwd: cwd || ROOT },
+    { hook_event_name: event, tool_name: toolName, tool_input: toolInput, cwd: cwd || SANDBOX },
     cwd,
   );
 }
@@ -229,8 +230,8 @@ console.log("\n# session-context-init.js");
 {
   // The hook caches its output by git fingerprint + TTL, so a run that follows
   // a normal session would skip injection and fail here for the wrong reason.
-  // Force the injection path and drop the cache to keep the test hermetic.
-  fs.rmSync(path.join(ROOT, ".agents", ".cache", "session-context.json"), { force: true });
+  // Force injection in the scratch workspace; never remove the real cache.
+  const previousAlways = process.env.UAW_CONTEXT_ALWAYS;
   process.env.UAW_CONTEXT_ALWAYS = "1";
 
   const cc = runClaude("session-context-init.js", "SessionStart", "", {});
@@ -245,7 +246,10 @@ console.log("\n# session-context-init.js");
   const ag = execHook("session-context-init.js", {});
   check("antigravity SessionStart yields injectSteps", Array.isArray(ag.parsed.injectSteps));
 
-  delete process.env.UAW_CONTEXT_ALWAYS;
+  check("session cache stays in scratch workspace",
+    fs.existsSync(path.join(SANDBOX, ".agents", ".cache", "session-context.json")));
+  if (previousAlways === undefined) delete process.env.UAW_CONTEXT_ALWAYS;
+  else process.env.UAW_CONTEXT_ALWAYS = previousAlways;
 }
 
 console.log("\n# fail-open behavior");

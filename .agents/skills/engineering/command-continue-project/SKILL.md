@@ -1,7 +1,7 @@
 ---
 invocation: user
 name: command-continue-project
-description: "Continue the roadmap: read PRODUCT_BACKLOG_ROADMAP.md, resolve [!] blockers via grilling, then run BA -> Speckit -> TDD -> Docs for the next story."
+description: "Continue the roadmap in the Fast lane by default; escalate to the Full lane only on a hard trigger. Scans PRODUCT_BACKLOG_ROADMAP.md, unblocks [!] stories, then implements the next story."
 triggers:
   - "/command-continue-project"
   - "/continue"
@@ -14,254 +14,183 @@ triggers:
 
 # Command: Continue Project Workflow (/command-continue-project)
 
-This command skill automatically inspects project progress in [PRODUCT_BACKLOG_ROADMAP.md](../../docs/PRODUCT_BACKLOG_ROADMAP.md) and triggers the next development phase in full compliance with [AGENTS.md](../../.agents/AGENTS.md).
+Picks the next story from [PRODUCT_BACKLOG_ROADMAP.md](../../../../docs/PRODUCT_BACKLOG_ROADMAP.md)
+and runs it through the **Fast lane** unless a hard trigger says otherwise.
+Lane rules are owned by [AGENTS.md](../../../../AGENTS.md) §2 — this file only executes them.
 
-**Requires:** `docs/PRODUCT_BACKLOG_ROADMAP.md` following schema-version `1.1` or `1.2`.
-If file is missing or not schema-version 1.1+, instruct user to run `/generate-backlog` first.
-Template: [PRODUCT_BACKLOG_ROADMAP-template.md](../../.specify/templates/PRODUCT_BACKLOG_ROADMAP-template.md)
-
----
-
-## Execution Workflow
-
-### Step 0: Pre-flight Git Sync & Environment Refresh
-
-Before starting analysis or code, ensure the working environment is synced with the latest codebase:
-
-1. **Check Branch & Sync with Remote**:
-   - Fetch remote main: `git fetch origin main`.
-   - If on `main`: Prompt/switch to the designated feature/chore branch (`git checkout -b feat/<slug> origin/main`).
-   - If on an active feature branch: Safely rebase onto latest `origin/main` (`git rebase origin/main`).
-   - _Working tree protection_: If uncommitted changes exist, run `git stash push -m "pre-sync-stash"`, execute rebase, and restore with `git stash pop`.
-
-2. **Monorepo Ecosystem Drift Check**:
-   - If `pnpm-lock.yaml` or `package.json` was updated during sync: Run `pnpm install`.
-   - If `prisma/schema.prisma` or `prisma/migrations/` was updated during sync: Run `pnpm --filter api prisma generate`.
-
-### Step 1: Scan Backlog & Roadmap
-
-1. Read `docs/PRODUCT_BACKLOG_ROADMAP.md`.
-
-2. **Extract YAML Frontmatter** (schema-version 1.1+ / 1.2):
-   - Read `tech-stack` block (language, backend, frontend, database, infra, test).
-   - Store as `$TECH_CONTEXT` and write it once to `.specify/features/<slug>/00-tech-context.md`.
-     Every subagent dispatched in this session (business-analyst, system-architect,
-     backend-developer, frontend-developer) reads that file first - do not paste the blob into
-     the `task` argument (see the Safe `task` argument rule below).
-   - If YAML frontmatter is missing → STOP. Instruct user: _"File chưa đúng schema v1.1+. Chạy
-     `/generate-backlog` để tạo file chuẩn."_
-
-3. **Find the target User Story** — in strict priority order:
-   - First: any story with `[/]` (In Progress — resume before starting new work).
-   - Then: the first `[ ]` from the top of the active Sprint downward.
-   - **Skip `[~]`**: Ignore deferred / future phase items.
-
-4. **🛑 Blocked Story Gate (`[!]`) (MANDATORY)**:
-   - If the candidate story is marked `[!]` (Blocked / Review Needed):
-     - **STOP IMMEDIATELY**. Do not dispatch autonomous implementation pipeline.
-     - Output:
-       ```markdown
-       ⚠️ **Story đang bị chặn / Cần làm rõ:** `[!] <US-ID> - <Story Title>`
-       Story này đã được đánh dấu là đang gặp vướng mắc hoặc cần quyết định kiến trúc trước khi thực thi.
-       👉 Hãy làm rõ yêu cầu hoặc gỡ bỏ rào cản trước khi tiếp tục.
-       ```
-     - **Proactive Unblocking via `grilling`**:
-       - Offer or prompt the user immediately:
-         _"Bạn có muốn kích hoạt phiên phỏng vấn nhanh (`grilling`) để làm rõ khúc mắc nghiệp vụ / trade-off kiến trúc và gỡ trạng thái [!] ngay không?"_
-       - If user confirms: run a focused `grilling` loop (`.agents/skill-library/productivity/grilling`) (2–3 targeted questions with Context, Options A/B, and Recommended), record the resolution into the story notes or `01-elicitation.md`, update status in `docs/PRODUCT_BACKLOG_ROADMAP.md` from `[!]` to `[/]` or `[ ]`, and proceed with the pipeline.
-       - If user declines: wait for user's manual instructions or unblock action.
-
-5. **Dependency Gate (MANDATORY — do NOT skip)**:
-   - Read the story's `Depends-on` field.
-   - For each dependency listed:
-     - Check its checkbox status in the file.
-     - If any dependency is NOT `[x]`:
-       - If dependency is `[!]`: Output: _"🚫 **Blocked:** `<US-ID>` phụ thuộc vào `<Depends-on>` nhưng story đó đang bị chặn `[!]`."_
-       - Else: Output: _"🚫 **Blocked:** `<US-ID>` cannot start until `<Depends-on>` is `[x]`. Recommend working on `<Depends-on>` first."_
-       - **REFUSE** to proceed with the current story.
-   - If `Depends-on: (none)` or all dependencies are `[x]` → proceed.
-
-6. **Extract story metadata**:
-   - US ID (e.g. `US-AUTH-001`), Title, Slug, Priority, Effort, Context-budget, Acceptance Criteria (AC).
-   - **Tasks breakdown** (schema 1.2+): Extract `Tasks (Backend)` and `Tasks (Frontend)` checklist if present.
-
-### Step 2: Inspect Current Story Deliverables
-
-1. Check `.specify/features/<slug>/` and `specs/<num>-<slug>/` to determine the current state:
-   - Domain Baseline (`baseline.md` - is it `SIGNED-OFF`?)
-   - Speckit artifacts (`spec.md`, `plan.md`, `tasks.md`)
-   - Test Plan (`test-plan.md`)
-   - Source code and test implementation progress.
-
-### Step 3: Route & Execute the Appropriate Phase (3-Tier Speed Lanes)
-
-**Auto-routing matrix** (read BEFORE dispatching any subagent):
-
-| Effort | Context-budget | Routing Tier             | Execution Strategy                                                                            | Token & Speed Budget              |
-| :----- | :------------- | :----------------------- | :-------------------------------------------------------------------------------------------- | :-------------------------------- |
-| **S**  | single-session | **Tier 1: Fast-Track**   | **Bypass BA & Speckit**. Direct TDD in single agent turn.                                     | ⏱️ 2–3 mins \| 💰 ~15k tokens     |
-| **M**  | single-session | **Tier 2: Lean Task**    | **Bypass 8 BA Stages**. Read AC & Tasks from roadmap $\rightarrow$ jump to Case C.            | ⏱️ 5–8 mins \| 💰 ~50k–70k tokens |
-| **L**  | single-session | **Tier 3: Full Feature** | Case A (BA Stages 1-8) $\rightarrow$ Case B (Speckit) $\rightarrow$ Case C $\rightarrow$ D.   | ⏱️ 15–20 mins \| 💰 ~150k tokens  |
-| **L**  | multi-session  | **Tier 3: Full Feature** | Invoke `wayfinder` first $\rightarrow$ Full BA $\rightarrow$ Speckit $\rightarrow$ Implement. | ⏱️ 20+ mins \| 💰 ~200k tokens    |
-| **XL** | multi-session  | **Tier 3: Full Feature** | Invoke `wayfinder` first $\rightarrow$ Full BA $\rightarrow$ Speckit $\rightarrow$ Implement. | ⏱️ 20+ mins \| 💰 ~200k tokens    |
-
-> **🛑 ROADMAP-DRIVEN LEAN BYPASS (NON-NEGOTIABLE FOR S & M EFFORT):**
-> If the target User Story from `docs/PRODUCT_BACKLOG_ROADMAP.md` is NOT marked `[!]` and already contains Acceptance Criteria:
->
-> - **For Effort S**: Skip Case A and Case B entirely. Do not create `.specify/features/<slug>/` folder. Jump directly to **Case C: Direct TDD Implementation**.
-> - **For Effort M**: Skip the full BA ceremony and Speckit duplication. Seed a single lightweight `.specify/features/<slug>/test-plan.md` directly from the roadmap AC, and jump directly to **Case C: TDD Implementation**.
-> - **Only Effort L/XL or stories marked `[!]`** require Case A (interactive interview) and Case B (architecture plan).
-
-> **Tech Context Injection (MANDATORY):** Every subagent dispatched in Steps A-D MUST work
-> from the same tech stack facts, otherwise it will hallucinate a stack. Pass those facts by
-> **reference, not by copy**: write `$TECH_CONTEXT` once to
-> `.specify/features/<slug>/00-tech-context.md` in Step 1, and have each subagent read that
-> file as its first action. Never paste the full context blob into the `task` argument.
->
-> **Safe `task` argument (MANDATORY):** The `task` string is serialized as a JSON value, and
-> weaker models (GLM, Qwen, DeepSeek, small local models) break on unescaped quotes, newlines
-> or very long strings. Keep it under 400 characters, single line, plain ASCII: no double
-> quotes, no LaTeX math markers, no emoji, no Markdown tables, no pasted file contents.
-> Reference artifacts by path and let the subagent open them. The agent persona already lives
-> in `.agents/agents/<name>.md` - do not restate it inside `task`.
->
-> **Two-strike fallback (MANDATORY):** If a dispatch fails twice with a tool-call/argument
-> syntax error, or a subagent reports completion without producing its declared artifacts,
-> stop retrying, run that step inline in the primary context, verify the artifacts exist, and
-> tell the user which subagent was bypassed and why. Delegation must never dead-lock the run.
-
-#### Case A: No Domain Baseline (Net-New Epic / Uncharted Feature)
-
-- **Pre-check Roadmap Bypass**: If Effort is `S` or `M` with documented AC $\rightarrow$ **DO NOT EXECUTE Case A**, proceed directly to Case C.
-- **Pre-check wayfinder** (if Effort = L|XL AND Context-budget = multi-session):
-  - Dispatch `wayfinder` skill to map decision tickets before any BA work.
-  - Only proceed to BA after wayfinder map is confirmed by user.
-
-- **MANDATORY AUTOMATIC SUBAGENT DELEGATION (L & XL only)**:
-  - The Orchestrator MUST NEVER run BA stages directly on the primary context.
-  - **Step 1 (Intake)**: Dispatch `business-analyst` via `invoke_subagent` with a short task
-    such as: `Read .specify/features/<slug>/00-tech-context.md and 00-intake.md, then run intake-classifier.`
-    Run `intake-classifier` and create `.specify/features/<slug>/`.
-  - Override classification to match roadmap Effort field: `S`→Micro-Task, `M`→Bounded, `L|XL`→Full Feature.
-
-- **🛑 INTERACTIVE ELICITATION INTERVIEW GATE (Stage 2 — MANDATORY CUSTOMER INTERVIEW)**:
-  - The AI **MUST PAUSE** before domain modeling, gap analysis, or spec writing.
-  - **Delegation to `grilling` Primitive (`.agents/skill-library/productivity/grilling`) & `elicitation-interview`**:
-    - Subagent `business-analyst` conducts the interview following the `grilling` recursive protocol: Frame → Branch → Batch 2–3 questions → Zero silent assumptions.
-    - AI MUST present 2–3 targeted clarification questions directly to the user covering business goals, key state machine transitions, business rules/formulas, and edge cases.
-    - **Anchor on Roadmap AC**: The Acceptance Criteria (AC) already documented in `PRODUCT_BACKLOG_ROADMAP.md` serve as the interview ANCHOR. Only grill on branches that are underspecified, missing, or high-risk (e.g. error recovery, concurrency, RBAC boundaries). Do not re-ask what is already settled in AC.
-    - **Effort-Calibrated Depth**:
-      - `Effort: S` (Fast-Track): Max 1 batch (1–2 concise questions) or skip interview if AC is 100% crystal clear.
-      - `Effort: M` (Bounded Task): 1 batch (2–3 targeted questions) focused on touched domain pillars.
-      - `Effort: L|XL` (Full Feature): Standard multi-batch grilling across 6 domain pillars.
-    - **Standard Question Format**:
-      ```markdown
-      **Question <N>: <Subject>**
-
-      - Context & Why it matters: <impact>
-      - Proposed Options:
-        - Option A: <details>
-        - Option B: <details>
-      - Recommended: <recommendation with rationale>
-      ```
-    - **Strict Zero-Hallucination Policy**: AI is strictly prohibited from inventing business rules or silently making assumptions. Anything ambiguous or unspecified must be asked and confirmed.
-
-- **Step 2 (Domain Modeling & Spec Generation — Stages 3–8)**:
-  - Once the user answers the elicitation questions, dispatch `business-analyst` to execute
-    Stages 3–8 (`gap-analysis`, `domain-modeling`, `risk-contradiction-scanner`, `spec-writer`,
-    `spec-validator`, `handover`) and compile `baseline.md`.
-
-- **🛑 CONFIRMATION GATE 1 — Spec Sign-Off (MANDATORY)**:
-  After `business-analyst` completes and `baseline.md` is drafted, the Orchestrator **MUST STOP** and present a structured summary of the Domain Baseline to the user for review. The AI may **not** proceed to Speckit or any implementation work until the user gives explicit approval.
-
-  **Present to user:**
-  - A concise summary of: scope, key business rules (`BR-`), user stories drafted, risks identified, and anything marked Won't-Have.
-  - Any open questions or assumptions (`ASM-`) that are still unresolved.
-  - Concrete proposals for unresolved items, formatted as selectable options where possible.
-
-  **If the user does NOT confirm (asks questions, requests changes, or is unsure):**
-  - Do NOT proceed and do NOT guess changes silently.
-  - Trigger a focused `grilling` loop (`.agents/skill-library/productivity/grilling`) to isolate the root objection, explore trade-offs, and present concrete options (Option A vs Option B with rationale).
-  - Re-present the updated spec summary and loop back to this gate until the user explicitly says "approve", "confirmed", "let's proceed", or equivalent.
-
-  **Only when the user explicitly approves**: mark `baseline.md` as `SIGNED-OFF v1.0` and advance to Case B.
+**Requires:** `docs/PRODUCT_BACKLOG_ROADMAP.md` with schema-version `1.1` or `1.2`.
+If the file is missing or older, stop and ask the user to run `/generate-backlog`.
 
 ---
 
-#### Case B: Domain Baseline SIGNED-OFF but Technical Plan Missing
+## Step 0 — Pre-flight (read-only)
 
-- **MANDATORY AUTOMATIC SUBAGENT DELEGATION**:
-  - Dispatch `system-architect` via `invoke_subagent` to run the Speckit Pipeline:
-    - Run `speckit-specify` -> create `spec.md`.
-    - Run `speckit-plan` -> create `plan.md`, `data-model.md`, `contracts/`.
-    - Run `speckit-tasks` -> create `tasks.md`.
+Run `git status --short --branch`. **Do not** fetch, rebase, stash, or install
+anything. `AGENTS.md` §0.1 forbids autonomous git.
 
-- **🛑 CONFIRMATION GATE 2 — Technical Plan & Task Sign-Off (MANDATORY)**:
-  After `system-architect` completes, the Orchestrator **MUST STOP** and present the technical plan summary to the user for review. The AI may **not** begin any code writing until the user explicitly approves.
-
-  **Present to user:**
-  - A concise summary of: architecture decisions, data model changes, API contracts, implementation phases from `tasks.md`.
-  - Any technical risks or trade-offs identified during planning.
-  - Proposals for any unresolved design questions.
-
-  **If the user does NOT confirm (asks questions, requests changes, or is unsure):**
-  - Do NOT proceed and do NOT make speculative architecture changes.
-  - Trigger a technical `grilling` loop (`.agents/skill-library/productivity/grilling`) to resolve architectural conflicts or trade-offs with the user.
-  - Update the plan with the architect subagent, and re-present for approval.
-  - Loop back to this gate until the user explicitly approves.
-
-  **Only when the user explicitly approves**: advance to Case C.
+| Finding | Action |
+| --- | --- |
+| Dirty working tree | Report the files and ask whether to continue on top or stop. |
+| Branch diverged from remote | Report it. The user decides: rebase, merge, or ignore. |
+| On `main`/`master` | Ask before creating `feat/<slug>`; never branch silently. |
+| Lockfile or schema drift | Mention it; run installs only after the user agrees. |
 
 ---
 
-#### Case C: Technical Plan Complete & Approved, Ready to Implement
+## Step 1 — Scan the roadmap
 
-- **MANDATORY AUTOMATIC SUBAGENT DELEGATION**:
-  - The Orchestrator is **STRICTLY PROHIBITED** from coding directly.
-  - Create `test-plan.md` mapping User Stories to `TC-###` test cases.
-  - **Task Checklist Delegation** (schema 1.2+):
-    - Pass `Tasks (Backend)` checklist directly to `backend-developer`.
-    - Pass `Tasks (Frontend)` checklist directly to `frontend-developer`.
-  - Dispatch `backend-developer` via `invoke_subagent` for Backend API, DTOs, Services, and Unit/Integration tests.
-  - Dispatch `frontend-developer` via `invoke_subagent` for UI components, state stores, pages, and tests.
-  - Dispatch `slice-implementer` to wire fullstack integration.
-  - Dispatch `build-resolver` to fix any compilation / lint errors.
-  - Follow TDD cycle in each slice: Write failing tests (Red) -> Implement minimal passing code (Green) -> Refactor.
-
-#### Case D: Implementation Finished, Final Review & Documentation (On-Demand Flow)
-
-- **MANDATORY AUTOMATIC SUBAGENT DELEGATION**:
-  - Dispatch `code-reviewer` via `invoke_subagent` for adversarial code quality & security audit (strictly governed by the 4 Stopping Rules).
-  - If the story touched UI components/views: Dispatch `ui-ux-reviewer` via `invoke_subagent` for Anti-AI-slop and WCAG AA review.
-  - **On-Demand User Guide Gate (Zero Screenshot Waste)**:
-    - **UI Stories**: If the story touched or created user-facing screens, dispatch `user-guide-creator` to capture real Playwright screenshots and update [docs/user-guides/<slug>.md](../../docs/user-guides/).
-    - **Backend / API / Logic Stories**: **SKIP `user-guide-creator` entirely**. Do not launch Playwright browser or generate screenshots for non-visual code.
-  - Dispatch `tech-doc-architect` via `invoke_subagent` to update [docs/features/<slug>/README.md](../../docs/features/) or append changelog.
-  - Run full test suites (`pnpm test`).
-  - Mark the User Story as `[x]` in `docs/PRODUCT_BACKLOG_ROADMAP.md`.
-
-#### Case E: Production Hardening & Go-Live Sprints (`US-DEPLOY-###`)
-
-- When the target User Story belongs to a Deployment / Go-Live sprint:
-  - Bypasses standard BA feature pipeline; routes to DevOps & Hardening Verification:
-    1. **Pre-Deploy Security Audit**: Verify zero hardcoded secrets, validate strong JWT secrets, inspect CORS whitelist.
-    2. **Database Migration Verification**: Verify schema migrations (`prisma migrate deploy` or equivalent).
-    3. **Hosting & SPA Routing Fallback**: Verify production Dockerfile/Nginx or CDN SPA fallback routing.
-    4. **Production Smoke Test**: Run automated Playwright smoke tests against target URL.
-  - Update Go-Live checklist in `docs/PRODUCT_BACKLOG_ROADMAP.md` and mark story as `[x]`.
+1. Read `docs/PRODUCT_BACKLOG_ROADMAP.md` (targeted reads; do not load the whole file twice).
+2. Keep the YAML `tech-stack` block in context — it is small and every step needs it.
+   Do **not** write a `00-tech-context.md` file for the Fast lane.
+3. Pick the target story, in order:
+   - first `[/]` (resume in-progress work);
+   - else the first `[ ]` from the top of the active sprint;
+   - skip `[~]` (deferred).
+4. **Blocked story (`[!]`):** this is escalation trigger T5, not a stop. Offer a
+   targeted interview (normally 2–3 questions per batch, no fixed total) to resolve
+   the blocker, record the answers, then continue in the **Full lane**. Do not start
+   implementation while the checkbox is still `[!]`.
+5. **Dependency gate:** if any `Depends-on` entry is not `[x]`, refuse and name the
+   blocking story.
+6. Extract: US id, title, slug, effort, context-budget, AC, and the
+   `Tasks (Backend)` / `Tasks (Frontend)` checklists when present.
 
 ---
 
-## Output Format for User
+## Step 2 — BA checkpoint and lane
 
-When `/command-continue-project` runs, output a concise status summary:
+Establish outcome, affected behavior, scope, existing evidence, material
+unknowns and observable acceptance expectations in chat. Reuse confirmed story
+AC and code/test evidence; ask only unanswered material questions. Record ASM-
+items and never approve business assumptions by selecting an unblocked story.
+Fast is the default for bounded confirmed behavior with no trigger.
+
+| Trigger | Full lane because |
+| --- | --- |
+| T1 — diff > 250 lines or > 8 files | too large for one context |
+| T2 — breaking/structural schema change | migration risk |
+| T3 — auth, RBAC, billing, PII | security review required |
+| T4 — new entity, service, or public contract | design must be recorded |
+| T5 — story marked `[!]` | unresolved decisions |
+| T6 — user typed `/full`, enterprise re-elicitation or audit-grade artifacts | explicit request |
+| T7 — new or unresolved business behavior/rules/defaults/acceptance | baseline decisions required |
+
+Effort `S` and `M` on an unblocked story never trigger Full lane by themselves.
+Announce the choice once:
 
 ```markdown
-🎯 **Target User Story:** [<US ID> - <Story Title>]
-📌 **Epic / Sprint:** [<Epic Name> | Sprint <Number>]
-⚡ **Effort / Budget:** [<S|M|L|XL> / <single-session|multi-session>]
-🔗 **Dependency Gate:** [✅ Clear | 🚫 Blocked by <US-ID>]
-🛠️ **Tech Context:** [<language> + <backend> + <frontend> + <database>]
-📊 **Current Stage:** [Not Started / wayfinder / BA Analysis / Technical Planning / TDD Implementation / Quality Review & Docs]
-🚀 **Next Immediate Action:** [<Specific step the agent is executing now>]
+🎯 <US-ID> — <title>
+⚡ Lane: Fast | Full (<trigger or "no trigger">)
+📋 Effort: <S|M|L|XL> · AC source: roadmap
 ```
+
+If the user disagrees, follow the user and record the override in the story notes.
+
+Record the lane with `node .agents/scripts/metrics.mjs start --lane <fast|full> --story <id>`
+(plus `--trigger T#` when escalating). It costs one line and makes the next review
+evidence-based.
+
+---
+
+## Step 3 — Fast lane (default)
+
+One context. No subagents. No feature folder.
+
+1. **Read before writing**: the files named by the story, the matching tests, and
+   `CONTEXT.md` terms. Stop when you can name the exact files to change.
+2. **Plan in 5 lines or fewer** in chat: files, approach, tests to add, risk.
+3. **Red**: write the failing test (or reproduce the bug) and run it.
+4. **Green**: minimal implementation, then run the focused test.
+5. **Verify**: run the package's test/lint/typecheck for the touched area. If the
+   repo has no runner for it, say so instead of inventing one.
+6. **Self-check** before declaring done:
+   - `[SECURITY]` injection, secrets, authz, unsafe deserialization
+   - `[SPEC_FIDELITY]` every AC covered, no invented business rule
+   - `[RELIABILITY]` unhandled errors, async, null/undefined paths
+7. **Close**: mark the story `[x]` in the roadmap and run
+   `node .agents/scripts/metrics.mjs end`. Commit only when the user asked
+   (`/command-git-push` or explicit approval) — one Conventional Commit.
+
+Write `test-plan.md` only when the story needs more than three test cases. Skip
+`baseline.md`, `00-intake.md`, `CHANGELOG.md`, and `context-pack.md` entirely.
+
+---
+
+## Step 4 — Full lane (triggered or requested)
+
+Only after Step 2 escalated, or the user typed `/full`. Create
+`.specify/features/<slug>/` and run the full pipeline:
+
+### 4a. Domain baseline → **Gate 1**
+
+- `business-analyst` runs `intake-classifier` (records the lane + trigger),
+  then `elicitation-interview` — 2–3 questions per batch, anchored on the roadmap
+  AC. Never re-ask what the AC already settles.
+- `domain-modeling` (+ gap analysis) → `risk-contradiction-scanner` → `spec-writer`
+  (one `requirements.md`, four sections) → `spec-validator` (max 2 loops).
+- `handover` marks `baseline.md` `SIGNED-OFF v1.0` and appends the Dev Handover Brief.
+- **Stop** and present: scope, `BR-` rules, stories, risks, open `ASM-`.
+  Proceed only on explicit approval.
+
+### 4b. Technical plan → **Gate 2**
+
+- `system-architect`: `technical-spec` → `implementation-plan` → `task-breakdown`
+  → `technical-consistency-review` after all three artifacts exist (with `codebase-design`). Write `context-pack.md` before any slice dispatch.
+- **Stop** and present architecture, data model, contracts, task order.
+  Proceed only on explicit approval.
+
+### 4c. Implementation
+
+- Decompose by dependency layer. Dispatch **independent slices in parallel**;
+  serialize only when one consumes another's output.
+- One developer per cohesive slice (Data+Logic+API together, UI separately).
+  Never split a slice into four micro-subagents.
+- Each subagent reads `context-pack.md` + its scoped files, and returns the
+  short slice result — never a transcript.
+- `build-resolver` only on real build/type errors; `code-explorer` only when the
+  affected files cannot be named.
+- TDD per slice: failing test → minimal code → refactor.
+
+### 4d. Review → **Gate 3**
+
+- `code-reviewer` dual-pass (A: standards & security, B: spec fidelity); Pass C
+  only when the diff exceeds 300 lines.
+- `ui-ux-reviewer` only when UI files changed.
+- Max 3 rounds; rounds 2–3 review the incremental diff only.
+- Block on any unresolved `Critical`.
+
+### 4e. Docs → **Gate 4**
+
+- `tech-doc-architect`: `docs/features/<slug>/README.md` + index. ADR only when
+  architecture actually changed.
+- `user-guide-creator` per release, not per story — skip for backend-only work.
+
+### 4f. Close
+
+- Run the repo's full test command once.
+- Mark the story `[x]` in the roadmap.
+- Run `node .agents/scripts/metrics.mjs end --review-rounds <n>`.
+- Commit only on `/command-git-push` or explicit approval.
+
+---
+
+## Output format
+
+```markdown
+🎯 **Story:** <US-ID> — <title>
+📌 **Epic / Sprint:** <epic | sprint>
+⚡ **Lane:** Fast | Full (<trigger>)
+📋 **Effort / Budget:** <S|M|L|XL> · <fast ≤40k | full ≤250k>
+🔗 **Dependency gate:** ✅ clear | 🚫 blocked by <US-ID>
+📊 **Stage:** <read | red | green | verify | review | docs | done>
+🚀 **Next action:** <one concrete step>
+```
+
+## Exit checklist
+
+- [ ] BA checkpoint established; confirmed AC reused and material gaps answered
+- [ ] Lane announced with its trigger (or "no trigger")
+- [ ] Fast lane: no feature folder, no subagents, AC covered by tests
+- [ ] Full lane: Gate 1 and Gate 2 approved before code
+- [ ] Roadmap checkbox updated
+- [ ] No git mutation beyond what the user approved

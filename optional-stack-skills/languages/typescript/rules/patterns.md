@@ -7,7 +7,7 @@ paths:
 ---
 # TypeScript/JavaScript Patterns
 
-> This file extends [common/patterns.md](../common/patterns.md) with TypeScript/JavaScript specific content.
+> These TypeScript/JavaScript rules are self-contained; no unshipped common rule pack is required.
 
 ## API Response Format
 

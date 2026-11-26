@@ -164,196 +164,19 @@ try {
 
     Write-Host "⚙️  Chế độ đã chọn: $Mode" -ForegroundColor Green
 
-    # ------------------------------------------------------------------------------
-    # 3. Copy Workflow Assets
-    # ------------------------------------------------------------------------------
-    Write-Host "`n📦 Đang sao chép các thành phần Universal Agents Workflow..." -ForegroundColor White
-
-    # Project data paths that are NEVER overwritten
-    $protectedDataPaths = @(
-        "CONTEXT.md",
-        "PRODUCT_BACKLOG_ROADMAP.md",
-        "CHANGELOG.md",
-        "UPGRADE_NOTICE.md",
-        "adr",
-        "docs\features",
-        "docs/features",
-        "docs\user-guides",
-        "docs/user-guides",
-        "docs\architecture",
-        "docs/architecture",
-        "docs\RUN_AND_TEST.md",
-        "docs/RUN_AND_TEST.md",
-        ".specify\features",
-        ".specify/features",
-        "src"
-    )
-
-    function Test-IsProjectData ($destPath) {
-        $destRel = $destPath.Replace($Target, "").TrimStart("\", "/").Replace("/", "\")
-        foreach ($p in $protectedDataPaths) {
-            $pNorm = $p.Replace("/", "\")
-            if ($destRel -eq $pNorm -or $destRel.StartsWith($pNorm + "\")) {
-                return $true
-            }
-        }
-        return $false
+    $enginePath = Join-Path $SourceDir ".agents/scripts/update-engine.py"
+    $pythonCmd = Get-Command python3 -ErrorAction SilentlyContinue
+    if (-not $pythonCmd) { $pythonCmd = Get-Command python -ErrorAction SilentlyContinue }
+    if (-not $pythonCmd -or -not (Test-Path $enginePath)) {
+        throw "Python and the update engine are required for safe installation."
     }
-
-    function Copy-WorkflowItem ($src, $dest, $name) {
-        if (-not $dest -or $dest -eq $Target -or $dest -eq "$Target\" -or $dest -eq "$Target/") {
-            Write-Host "  ⚠️  CẢNH BÁO AN TOÀN: Đường dẫn đích không hợp lệ hoặc trỏ vào root: $name. Bỏ qua!" -ForegroundColor Red
-            return
-        }
-        if ((Test-Path $dest) -and (Test-IsProjectData $dest)) {
-            $relPath = $dest.Replace($Target, "").TrimStart("\", "/")
-            Write-Host "  🛡️  Bảo vệ dữ liệu dự án: $name ➔ $relPath (đã tồn tại, bỏ qua)" -ForegroundColor Yellow
-            return
-        }
-        if (Test-Path $src) {
-            if (Test-Path -PathType Container $src) {
-                if (-not (Test-Path $dest)) { New-Item -ItemType Directory -Path $dest -Force | Out-Null }
-                Copy-Item -Path "$src\*" -Destination $dest -Recurse -Force
-            } else {
-                $parent = Split-Path -Parent $dest
-                if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
-                Copy-Item -Path $src -Destination $dest -Force
-            }
-            $relPath = $dest.Replace($Target, "").TrimStart("\", "/")
-            Write-Host "  ✅ Đã tích hợp: $name ➔ $relPath" -ForegroundColor Cyan
-        }
+    $engineArgs = if ($Update) { @("--apply", "--target", $Target) } else {
+        @("--sync", "--source", $SourceDir, "--target", $Target, "--git-mode", $Mode, "--detect-packs", "--installer-paths")
     }
-
-    Copy-WorkflowItem (Join-Path $SourceDir ".agents") (Join-Path $Target ".agents") ".agents/"
-    Copy-WorkflowItem (Join-Path $SourceDir ".specify") (Join-Path $Target ".specify") ".specify/"
-    Copy-WorkflowItem (Join-Path $SourceDir "adr") (Join-Path $Target "adr") "adr/"
-    Copy-WorkflowItem (Join-Path $SourceDir "CONTEXT.md") (Join-Path $Target "CONTEXT.md") "CONTEXT.md"
-    Copy-WorkflowItem (Join-Path $SourceDir "AGENTS.md") (Join-Path $Target "AGENTS.md") "AGENTS.md"
-    Copy-WorkflowItem (Join-Path $SourceDir "GEMINI.md") (Join-Path $Target "GEMINI.md") "GEMINI.md"
-    Copy-WorkflowItem (Join-Path $SourceDir "CLAUDE.md") (Join-Path $Target "CLAUDE.md") "CLAUDE.md"
-    Copy-WorkflowItem (Join-Path $SourceDir ".cursorrules") (Join-Path $Target ".cursorrules") ".cursorrules"
-    Copy-WorkflowItem (Join-Path $SourceDir ".windsurfrules") (Join-Path $Target ".windsurfrules") ".windsurfrules"
-    Copy-WorkflowItem (Join-Path $SourceDir ".github\copilot-instructions.md") (Join-Path $Target ".github\copilot-instructions.md") ".github/copilot-instructions.md"
-
-    # ── Smart Update Mode: delegate to Python engine if -Update was passed ──────
-    if ($Update) {
-        $enginePath = Join-Path $Target ".agents\scripts\update-engine.py"
-        $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
-        if (-not $pythonCmd) { $pythonCmd = Get-Command python3 -ErrorAction SilentlyContinue }
-        if ($pythonCmd) {
-            if (-not (Test-Path $enginePath)) {
-                $engineParent = Split-Path -Parent $enginePath
-                if (-not (Test-Path $engineParent)) { New-Item -ItemType Directory -Path $engineParent -Force | Out-Null }
-                Copy-Item (Join-Path $SourceDir ".agents\scripts\update-engine.py") $enginePath -Force
-            }
-            Write-Host "`n🔄 Chạy Smart Update Engine (3-Way Hash)..." -ForegroundColor White
-            & $pythonCmd.Source $enginePath --apply --target $Target
-            return
-        } else {
-            Write-Host "⚠️ Python không có sẵn. Tiến hành cài đặt bình thường (không có 3-way hash)." -ForegroundColor Yellow
-        }
-    }
-
-    # Record workflow source repository metadata (with full protectedPaths)
-    $installDate = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-    $sourceMetadata = @{
-        sourceRepo = "https://github.com/ahauy/universal-agents-workflow.git"
-        sourcePath = $SourceDir
-        version = "1.1.0"
-        gitMode = $Mode
-        installedAt = $installDate
-        lastCheckedAt = $installDate
-        protectedPaths = @(
-            "CONTEXT.md",
-            "PRODUCT_BACKLOG_ROADMAP.md",
-            "CHANGELOG.md",
-            "UPGRADE_NOTICE.md",
-            "adr/",
-            "!adr/adr-template.md",
-            "docs/features/",
-            "docs/user-guides/",
-            "docs/architecture/",
-            "docs/RUN_AND_TEST.md",
-            ".specify/features/",
-            "src/",
-            ".env",
-            ".env.*",
-            "*.local",
-            "*.local.md"
-        )
-        manifest = @{}
-    } | ConvertTo-Json -Depth 5
-    Set-Content -Path (Join-Path $Target ".agents\workflow-source.json") -Value $sourceMetadata -Force
-
-    # Ensure catalog.json exists inside .agents/
-    $catalogSrc = Join-Path $SourceDir "optional-stack-skills\catalog.json"
-    $catalogDest = Join-Path $Target ".agents\catalog.json"
-    if ((Test-Path $catalogSrc) -and -not (Test-Path $catalogDest)) {
-        Copy-Item -Path $catalogSrc -Destination $catalogDest -Force
-    }
-
-    # ------------------------------------------------------------------------------
-    # 4. Smart Stack Scan & Selective Skill Injection (Registry-Driven Engine)
-    # ------------------------------------------------------------------------------
-    Write-Host "`n🔍 Đang quét Tech Stack của dự án đích (Registry-Driven)..." -ForegroundColor White
-
-    $catalogPath = Join-Path $SourceDir "optional-stack-skills\catalog.json"
-    $matchedItems = @()
-
-    if (Test-Path $catalogPath) {
-        $catalog = Get-Content $catalogPath -Raw | ConvertFrom-Json
-        foreach ($item in $catalog.items) {
-            if ($item.target_type -eq "mcp") { continue }
-            $isMatched = $false
-            foreach ($m in $item.detection_markers) {
-                if ($m -like "*:*") {
-                    $parts = $m -split ":"
-                    $filePath = Join-Path $Target $parts[0]
-                    $kw = $parts[1].Trim('"' , "'")
-                    if (Test-Path $filePath) {
-                        try {
-                            if ((Get-Content $filePath -Raw -ErrorAction SilentlyContinue) -match [regex]::Escape($kw)) {
-                                $isMatched = $true; break
-                            }
-                        } catch {}
-                    }
-                } elseif ($m -like "*\**" -or $m -like "*.*") {
-                    if (Get-ChildItem -Path $Target -Filter $m -Recurse -Depth 3 -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch "(\.git|\.agents|node_modules|DerivedData|\.build)" }) {
-                        $isMatched = $true; break
-                    }
-                } else {
-                    if (Test-Path (Join-Path $Target $m)) {
-                        $isMatched = $true; break
-                    }
-                }
-            }
-            if ($isMatched) {
-                $matchedItems += $item
-            }
-        }
-    }
-
-    if ($matchedItems.Count -gt 0) {
-        Write-Host "  🎯 Phát hiện các thành phần tech stack phù hợp trong catalog.json:" -ForegroundColor Green
-        foreach ($item in $matchedItems) {
-            Write-Host "     - $($item.name) ($($item.id))" -ForegroundColor Cyan
-        }
-        $doInject = $true
-        if (-not $Yes) {
-            $injectChoice = Read-Host "👉 Bạn có muốn tự động nạp các thành phần trên vào dự án? [Y/n]"
-            if ($injectChoice -match "^[nN]") { $doInject = $false }
-        }
-        if ($doInject) {
-            foreach ($item in $matchedItems) {
-                $srcPath = Join-Path $SourceDir $item.source_path
-                $tgtPath = Join-Path $Target $item.target_path
-                Copy-WorkflowItem $srcPath $tgtPath $item.name
-            }
-        }
-    } else {
-        Write-Host "  ℹ️  Không phát hiện tech stack đặc thù trong danh mục catalog.json." -ForegroundColor Cyan
-        Write-Host "  ✨ Giữ dự án 100% sạch sẽ: Không sao chép các kỹ năng thừa!" -ForegroundColor Green
-    }
+    if ($Yes) { $engineArgs += "--yes" }
+    & $pythonCmd.Source $enginePath @engineArgs
+    if ($LASTEXITCODE -ne 0) { throw "Installation partial or rejected (exit $LASTEXITCODE); inspect phase results and retry." }
+    if ($Update) { return }
 
     # ------------------------------------------------------------------------------
     # 5. Configure Git Tracking & Ignore Rules
@@ -486,7 +309,7 @@ See: https://github.com/ahauy/universal-agents-workflow/releases
         Write-Host "  📄 Đã tạo UPGRADE_NOTICE.md — hướng dẫn cách cập nhật framework sau này." -ForegroundColor Green
     }
 
-    Write-Host "`n🎉 Cài đặt hoàn tất thành công!" -ForegroundColor Green
+    Write-Host "`nInstallation results: see the source and phase summaries above."
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     Write-Host "👉 Bước tiếp theo:"
     Write-Host "  1. Mở dự án đích trong AI Editor (Antigravity IDE, Cursor, Windsurf, Claude Code)."

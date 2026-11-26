@@ -15,12 +15,13 @@
  *                                         [--check] [--dry-run]
  *
  * The generator is idempotent and never overwrites hooks the user added by
- * hand: entries are merged by (event, matcher) and only workflow-owned hooks
- * (those whose command references `.agents/scripts/hooks/`) are replaced.
+ * hand: only groups matching their recorded last-written hash are replaced.
+ * Command text alone never establishes ownership.
  */
 
 const fs = require("fs");
 const path = require("path");
+const ownership = require("./derived-state.cjs");
 
 const WORKFLOW_MARKER = ".agents/scripts/hooks/";
 
@@ -146,17 +147,39 @@ function defaultMatcher(target) {
 /**
  * Merge generated hooks into existing settings without clobbering user hooks.
  */
-function mergeHooks(existing, generated) {
-  const result = JSON.parse(JSON.stringify(existing || {}));
-  const isWorkflow = (h) => typeof h.command === "string" && h.command.includes(WORKFLOW_MARKER);
-
-  for (const [event, groups] of Object.entries(generated)) {
-    const cur = result[event] || [];
-    // Drop workflow-owned groups, keep everything the user authored.
-    const kept = cur.filter((g) => !g.hooks.every(isWorkflow));
-    result[event] = [...kept, ...groups];
+function validateHooks(hooks) {
+  if (!ownership.object(hooks)) throw new Error("Hooks must be an object");
+  for (const groups of Object.values(hooks)) {
+    if (!Array.isArray(groups)) throw new Error("Hook groups must be arrays");
+    for (const group of groups) {
+      if (!ownership.object(group) || !Array.isArray(group.hooks) || (group.matcher !== undefined && typeof group.matcher !== "string")) throw new Error("Invalid hook group");
+      if (group.hooks.some(hook => !ownership.object(hook))) throw new Error("Invalid hook definition");
+    }
   }
-  return result;
+}
+function mergeHooks(existing, generated, state) {
+  const result = structuredClone(existing);
+  let conflicts = 0;
+  let updated = 0;
+  for (const [event, groups] of Object.entries(generated)) {
+    const current = [...(result[event] || [])];
+    for (const group of groups) {
+      const matcher = group.matcher || "";
+      const key = JSON.stringify([event,matcher]);
+      const indices = current.flatMap((entry,index) => (entry.matcher || "") === matcher ? [index] : []);
+      const baseline = state.groups[key];
+      if (indices.length && (indices.length !== 1 || !baseline || ownership.hash(JSON.stringify(current[indices[0]])) !== baseline.hash)) {
+        conflicts++;
+        continue;
+      }
+      if (indices.length) current[indices[0]] = group;
+      else current.push(group);
+      state.groups = {...state.groups,[key]:{hash:ownership.hash(JSON.stringify(group))}};
+      updated++;
+    }
+    result[event] = current;
+  }
+  return {hooks:result,conflicts,updated};
 }
 
 function main() {
@@ -168,7 +191,23 @@ function main() {
     return 0;
   }
 
-  const sourcePath = path.join(opts.target, ".agents", "hooks.json");
+  opts.target = fs.realpathSync(opts.target);
+  const stateRel = ".agents/derived-state-hooks.json";
+  const state = ownership.load(opts.target,stateRel,() => false);
+  if (state.groups !== undefined && !ownership.object(state.groups)) throw new Error("Invalid hook ownership");
+  for (const [key, record] of Object.entries(state.groups || {})) {
+    const identity = JSON.parse(key);
+    if (!Array.isArray(identity) || identity.length !== 2 || identity.some(value => typeof value !== "string") || !ownership.object(record) || !/^[a-f0-9]{64}$/.test(record.hash)) throw new Error("Invalid hook ownership entry");
+  }
+  state.groups = {...(state.groups || {})};
+  const settingsFile = ownership.resolve(opts.target,".claude/settings.json");
+  if (fs.existsSync(settingsFile)) {
+    const settings = JSON.parse(fs.readFileSync(settingsFile,"utf8"));
+    if (!ownership.object(settings)) throw new Error("Invalid settings");
+    validateHooks(settings.hooks || {});
+  }
+  if (process.argv.includes("--validate-only")) return 0;
+  const sourcePath = ownership.resolve(opts.target,".agents/hooks.json");
   if (!fs.existsSync(sourcePath)) {
     process.stderr.write(`[install-hooks] missing ${sourcePath}\n`);
     return 1;
@@ -183,13 +222,19 @@ function main() {
     return 0;
   }
 
+  if (!ownership.object(source)) throw new Error("Invalid hooks source");
+  for (const events of Object.values(source)) {
+    if (!ownership.object(events) || Object.values(events).some(entries => !Array.isArray(entries))) throw new Error("Invalid source hook events");
+  }
   const generated = buildClaudeHooks(source);
-  const settingsPath = path.join(opts.target, ".claude", "settings.json");
+  const settingsPath = ownership.resolve(opts.target, ".claude/settings.json");
   const existing = fs.existsSync(settingsPath)
     ? JSON.parse(fs.readFileSync(settingsPath, "utf8"))
     : {};
-  const merged = mergeHooks(existing, generated);
-  const next = JSON.stringify(merged, null, 2) + "\n";
+  if (!ownership.object(existing)) throw new Error("Settings must be an object");
+  validateHooks(existing.hooks || {});
+  const merged = mergeHooks(existing.hooks || {}, generated, state);
+  const next = JSON.stringify({...existing,hooks:merged.hooks}, null, 2) + "\n";
   const prev = fs.existsSync(settingsPath) ? fs.readFileSync(settingsPath, "utf8") : "";
 
   const count = Object.values(generated).reduce((n, g) => n + g.reduce((m, x) => m + x.hooks.length, 0), 0);
@@ -213,15 +258,19 @@ function main() {
 
   if (next === prev) {
     process.stdout.write(`[install-hooks] unchanged: .claude/settings.json (${count} hooks).\n`);
+    ownership.summary("hooks",0,merged.conflicts);
     return 0;
   }
 
   fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
-  fs.writeFileSync(settingsPath, next);
+  ownership.atomic(settingsPath, next);
+  ownership.store(opts.target,stateRel,state);
+  ownership.summary("hooks",merged.updated,merged.conflicts);
   process.stdout.write(
     `[install-hooks] wrote .claude/settings.json with ${count} workflow hooks across ${Object.keys(generated).length} events.\n`,
   );
   return 0;
 }
 
-process.exit(main());
+try { process.exitCode = main(); }
+catch (error) { console.error(`install-hooks: ${error.message}`); ownership.summary("hooks",0,0,1); process.exitCode=1; }

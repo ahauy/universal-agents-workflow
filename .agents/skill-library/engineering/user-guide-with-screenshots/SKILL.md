@@ -31,7 +31,7 @@ triggers:
 - A feature / user story has just been completed and is ready to ship
 - A UI screen was edited (layout changed, flow updated, fields added/removed)
 - The user says "write user guide", "create docs for this feature", "done, document it", "instructions for X"
-- `implementation-orchestrator` or `speckit-implement` finishes a UI slice
+- UAW implementation finishes a UI slice (Fast in one context; Full via `implementation-orchestrator`)
 - **Definition of Done check**: any UI feature cannot be closed without this guide
 
 ## Core Principles
@@ -43,6 +43,7 @@ triggers:
 3.  **Visual Annotations & Red Highlights (MANDATORY ON ALL SCREENSHOTS)**:
     - Every captured step **MUST feature vibrant red highlights** (`outline: 3.5px solid #EF4444; box-shadow: 0 0 0 7px rgba(239, 68, 68, 0.3)`) bounding the target button, input, or container.
     - Attach a circular red numbered badge (**①, ②, ③**) with bold white text at the top-left corner of the highlighted element.
+    - The generic capture script does not inject annotations. Add highlights/badges in a browser automation step before capture or annotate the real captured image afterward; visually verify them. There are no annotation fields in the generic capture plan.
     - In the guide text, every instructional bullet point must explicitly reference the corresponding badge number (e.g. `① Click the button...`, `② Enter the term...`).
 4.  **One action = one annotated screenshot + 1–2 sentences.** Do not write a long paragraph and then drop a screenshot at the end.
 5.  **Always kept separate** from the technical README. Output file goes to
@@ -68,13 +69,16 @@ warning) only if the user needs to know about it.
 
 ### Step 3 — Run the app & capture real screenshots
 
-- Make sure the dev server is running (`pnpm dev`, `npm run dev`, etc.).
-- If Playwright is not yet installed: `pnpm add -D playwright --filter web && pnpm --filter web exec playwright install chromium`.
+- Read the actual project manifest, lockfile, workspace/app configuration and documented start command. Use its package manager and verify the listening URL from server output; do not assume a port or `web` package.
+- Make sure the app responds at that URL. Reuse its existing Playwright/browser setup or an available browser tool. If missing, report the blocker and follow the project’s dependency approval policy before installation.
 - Write a JSON capture plan (see `scripts/screenshot-plan.example.json` in this
   skill folder as a reference — each step from Step 2 becomes one entry in `steps`).
-- Run: `node .agents/skill-library/user-guide-with-screenshots/scripts/capture-screenshots.mjs <path-to-plan.json>`
+- Run: `node .agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs <path-to-plan.json>`
 - The script opens each screen, performs the actions (click / fill / hover),
-  and saves images to the `outDir` declared in the plan.
+  and saves images to the `outDir` declared in the plan. Supported action types are
+  `click`, `fill`, `hover`, `waitForSelector` and `wait`; it does not add annotations.
+- Any failed or unsupported action stops the run with a nonzero exit. Do not claim
+  completion or use a partial capture as proof; fix the plan and rerun.
 - Review the captured images — if a screenshot shows the wrong state (e.g. the
   form is empty instead of filled), fix the `actions` in the plan and re-run.
 
@@ -97,12 +101,11 @@ of the file:
 
 ## Reference Files
 
-Located at `.agents/skill-library/user-guide-with-screenshots/`:
+Located at `.agents/skill-library/engineering/user-guide-with-screenshots/`:
 
 - `scripts/capture-screenshots.mjs` — Playwright script; reads a JSON plan and captures screenshots.
-- `scripts/screenshot-plan.example.json` — example plan file based on the "Create flashcard" feature.
+- `scripts/screenshot-plan.example.json` — generic plan; replace the route/selectors with those of the running app.
 - `templates/user-guide-template.md` — blank guide template.
-- `templates/user-guide-example-card-creation.md` — filled example showing the expected tone and level of detail.
 
 ---
 
@@ -113,7 +116,5 @@ reliable ways to ensure this skill runs consistently:
 
 1. After finishing a feature, type: _"Done, now create/update the user guide
    using the user-guide-with-screenshots skill."_
-2. The `AGENTS.md` **User Guide Gate** rule already enforces this: every UI
-   feature is considered incomplete until this guide exists. Most agent tools
-   read that rule at the start of each task and will invoke this skill
-   automatically at the end of any UI implementation.
+2. Follow the target project’s documentation gates. Do not assume every harness
+   automatically invokes this skill; request it explicitly when needed.

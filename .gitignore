@@ -62,3 +62,6 @@ Cargo.lock.bak
 
 # Agent session cache (regenerated per workspace)
 .agents/.cache/
+
+# Task telemetry (append-only log is tracked, the active marker is not)
+.specify/metrics/active.json

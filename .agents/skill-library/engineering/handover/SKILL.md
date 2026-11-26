@@ -2,32 +2,38 @@
 invocation: user
 name: handover
 description: >
-  Use for Bounded Task or Full Feature work as the final step of the BA Pipeline,
+  Use for Full-lane work as the final step of the domain baseline,
   once spec-validator has returned a clean pass (or explicitly accepted gaps).
   Finalizes and version-locks the Domain Decision Baseline, produces a short
   handover brief for development, and formally hands off to technical planning
-  (speckit-specify). Do not let code or technical spec drafting begin before this
+  (technical-spec). Do not let code or technical spec drafting begin before this
   skill has signed off the baseline.
 metadata:
-  stage: "BA Pipeline — Stage 8 of 8"
+  stage: "Full lane — baseline stage 2f of 6"
   phase: "Phase 3: Handover"
   plane: "control"
   model_recommendation: "Standard thinking sufficient — gate verification and document finalization"
   prev_skill: "spec-validator"
-  next_skill: "speckit-specify"
+  next_skill: "technical-spec"
 ---
 
 # Handover — BA Domain Baseline Sign-Off
 
+Reuse confirmed answers, existing requirements and signed-off evidence within the
+current scope. Ask only material gaps; no fixed total interview count and no
+invented business defaults. Fast uses the checkpoint in AGENTS.md in one context;
+these Full-lane artifacts do not exempt any request from understanding behavior.
+
+
 > [!NOTE]
 > **NOT to be confused with `handoff`:**
 >
-> - `handover` (this skill) = **Control Plane** (Stage 8 of BA Pipeline) formal sign-off gate for the Domain Decision Baseline before coding begins.
+> - `handover` (this skill) = **Control Plane** (final gate of the Full-lane baseline) formal sign-off gate for the Domain Decision Baseline before coding begins.
 > - `handoff` (`.agents/skill-library/productivity/handoff`) = **Data Plane** session compactor for transferring active mental state and next steps to another agent context.
 
-Phase 3, Stage 8 — the final gate. Nothing in this pipeline authorizes
-writing implementation code; that authorization is what this skill grants,
-and only after every upstream checklist is green.
+Full lane, final baseline stage — the last gate. Nothing in this pipeline authorizes
+writing implementation code. This skill grants Gate 1 only after user sign-off;
+Gate 2 approval of plan/tasks is still required before implementation.
 
 ## 1. Confirm the exit gate
 
@@ -35,7 +41,7 @@ Before doing anything else, verify against `validation-report.md` and every
 upstream file:
 
 - [ ] Problem statement and success metrics clearly defined (Stage 2)
-- [ ] AS-IS, GAP, TO-BE documented — Full Feature only (Stage 3)
+- [ ] AS-IS, GAP, TO-BE documented — Full lane, when relevant (Stage 3)
 - [ ] All required pillars modeled without silent assumptions (Stage 4)
 - [ ] MoSCoW complete with explicit Won't-Have (Stage 5)
 - [ ] Contradiction scan passed with zero unresolved conflicts (Stage 5)
@@ -50,7 +56,9 @@ an explicit accepted gap with their reasoning, not a silent skip.
 
 ## 2. Sign off the baseline
 
-Update `baseline.md`:
+Present the completed baseline and obtain explicit user sign-off. Reuse an
+existing approval only when it covers this exact version and scope. Then update
+`baseline.md`:
 
 ```markdown
 **Status**: SIGNED-OFF
@@ -87,7 +95,7 @@ pointer, not a re-statement of the spec:
 <from validation-report.md and 04-risk-register.md, if any>
 
 ### Next step
-Invoke `speckit-specify` (or hand to the dev team) to generate the technical
+Invoke `technical-spec` (or hand to the dev team) to generate the technical
 plan artifacts.
 ```
 

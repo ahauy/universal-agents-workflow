@@ -2,17 +2,16 @@
 invocation: model
 name: gap-analysis
 description: >
-  Use for Full Feature work, after elicitation-interview has
+  Use for Full-lane work, after elicitation-interview has
   captured business value and the 6 pillars. Documents AS-IS (current system
   or manual workaround), TO-BE (target end-to-end experience), and the
   functional/data/user-impact/transition gaps between them. Trigger this
-  whenever a Full Feature baseline is being built, whenever the user
+  whenever a Full-lane baseline is being built, whenever the user
   describes how something works "today" vs how they want it to work, or
   whenever a change could break or migrate existing user data or workflows.
-  Not used for Bounded Tasks — intake-classifier's protocol selection skips
-  this stage for small, well-scoped changes.
+  Skipped when the intake records no meaningful AS-IS delta.
 metadata:
-  stage: "BA Pipeline — Stage 3 of 8 (Full Feature only)"
+  stage: "Full lane — baseline stage 2b-pre (when a delta exists)"
   phase: "Phase 1: Business Analysis"
   model_recommendation: "Extended thinking preferred — requires self-directed code/schema inspection and gap reasoning"
   prev_skill: "elicitation-interview"
@@ -21,8 +20,14 @@ metadata:
 
 # Gap Analysis
 
-Phase 1, Stage 3. Only runs for **Full Feature** protocol — check
-`00-intake.md` before starting; if the protocol is Bounded Task, skip
+Reuse confirmed answers, existing requirements and signed-off evidence within the
+current scope. Ask only material gaps; no fixed total interview count and no
+invented business defaults. Fast uses the checkpoint in AGENTS.md in one context;
+these Full-lane artifacts do not exempt any request from understanding behavior.
+
+
+Full lane, when a real AS-IS/TO-BE delta exists — check
+`00-intake.md` before starting; if it records no meaningful delta, skip
 straight to `domain-modeling` and don't invoke this skill at all.
 
 The purpose here is narrow but easy to skip past: don't just describe the

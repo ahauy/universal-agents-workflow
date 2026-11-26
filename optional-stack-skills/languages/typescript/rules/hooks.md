@@ -7,7 +7,7 @@ paths:
 ---
 # TypeScript/JavaScript Hooks
 
-> This file extends [common/hooks.md](../common/hooks.md) with TypeScript/JavaScript specific content.
+> These TypeScript/JavaScript rules are self-contained; no unshipped common rule pack is required.
 
 ## PostToolUse Hooks
 

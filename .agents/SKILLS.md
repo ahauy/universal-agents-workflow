@@ -7,7 +7,7 @@
 | Tier | Location | Cost | Contents |
 | --- | --- | --- | --- |
 | Hot | `.agents/skills/` | name + description on every request | 9 entry points and slash commands |
-| Cold | `.agents/skill-library/` | zero until read | 57 on-demand skills |
+| Cold | `.agents/skill-library/` | zero until read | 60 on-demand skills |
 
 Regenerate with `node .agents/scripts/build-skill-index.mjs`; verify with `--check`.
 
@@ -20,12 +20,14 @@ Regenerate with `node .agents/scripts/build-skill-index.mjs`; verify with `--che
 | Need AS-IS / TO-BE, RBAC, state machine, ERD | `domain-modeling` |
 | Turn analysis into requirements.md | `spec-writer` |
 | Requirements need an IEEE 29148 check | `spec-validator` |
-| Turn a spec into plan + tasks | `speckit-plan` |
-| Break a plan into ordered tasks | `speckit-tasks` |
-| Implement a signed-off feature | `implementation-orchestrator` |
+| Design a signed-off Full feature | `technical-spec` |
+| Turn a technical spec into an implementation plan | `implementation-plan` |
+| Break a plan into ordered tasks | `task-breakdown` |
+| Check existing requirements + spec + plan + tasks | `technical-consistency-review` |
+| Implement an approved Full feature | `implementation-orchestrator` |
 | Bug reproduced, root cause unknown | `diagnosing-bugs` |
 | Over-engineered diff / bloated repo | `ponytail-review` |
-| Need an architecture or sequence diagram | `archify` |
+| Need an architecture or sequence diagram | `technical-documentation` |
 | Feature ships, needs docs + screenshots | `technical-documentation` |
 | Unsure which skill or phase applies | `route` |
 
@@ -33,13 +35,13 @@ Regenerate with `node .agents/scripts/build-skill-index.mjs`; verify with `--che
 
 | Skill | When | Path |
 | --- | --- | --- |
-| `command-continue-project` | Continue the roadmap: read PRODUCT_BACKLOG_ROADMAP.md, resolve [!] blockers via grilling, then run BA -> Speckit -> TDD… | `.agents/skills/engineering/command-continue-project/SKILL.md` |
+| `command-continue-project` | Continue the roadmap in the Fast lane by default; escalate to the Full lane only on a hard trigger. | `.agents/skills/engineering/command-continue-project/SKILL.md` |
 | `command-generate-backlog` | Interview the user and render docs/PRODUCT_BACKLOG_ROADMAP.md: MoSCoW, RICE, dependency chain, effort, context budget,… | `.agents/skills/engineering/command-generate-backlog/SKILL.md` |
 | `command-git-push` | Inspect changes, write Conventional Commits by layer, push the branch, and emit an English PR brief. | `.agents/skills/engineering/command-git-push/SKILL.md` |
 | `command-skill-setup` | Scan project manifests, match compatible skills and rules from the catalog, confirm with the user, then activate… | `.agents/skills/engineering/command-skill-setup/SKILL.md` |
 | `command-update` | Update the framework through the 3-Way Hash engine; protects project data and user-added skills (Zero Deletion Policy). | `.agents/skills/engineering/command-update/SKILL.md` |
 | `command-user-guide` | Verify the dev server, capture real Playwright screenshots, and write docs/user-guides/<slug>.md in non-technical… | `.agents/skills/engineering/command-user-guide/SKILL.md` |
-| `intake-classifier` | MANDATORY first step for any new request: classify Micro-Task/Spike/Bounded/Full Feature, pick pipeline depth, create… | `.agents/skills/engineering/intake-classifier/SKILL.md` |
+| `intake-classifier` | BA checkpoint and lane selector: reuse confirmed evidence; Fast for bounded existing behavior, Full on risk or… | `.agents/skills/engineering/intake-classifier/SKILL.md` |
 | `ponytail` | Laziest solution that works: YAGNI, stdlib before custom, native before deps, one line before fifty. | `.agents/skills/engineering/ponytail/SKILL.md` |
 | `skills-index` | Skill catalog router. | `.agents/skills/engineering/skills-index/SKILL.md` |
 
@@ -47,35 +49,44 @@ Regenerate with `node .agents/scripts/build-skill-index.mjs`; verify with `--che
 
 | Skill | When | Path |
 | --- | --- | --- |
-| `elicitation-interview` | Use after intake-classifier has classified a request as a Bounded Task or Full Feature. | `.agents/skill-library/engineering/elicitation-interview/SKILL.md` |
+| `elicitation-interview` | Use after a request escalates to the Full lane (see AGENTS.md §2). | `.agents/skill-library/engineering/elicitation-interview/SKILL.md` |
 | `grilling` | The reusable interview primitive. | `.agents/skill-library/productivity/grilling/SKILL.md` |
 | `to-questionnaire` | Turn a decision you cannot answer alone into a Markdown questionnaire for the one person who CAN answer it. | `.agents/skill-library/productivity/to-questionnaire/SKILL.md` |
-| `domain-modeling` | Use for Bounded Task or Full Feature work, after elicitation (and gap-analysis, if run) to turn interview answers into… | `.agents/skill-library/engineering/domain-modeling/SKILL.md` |
-| `gap-analysis` | Use for Full Feature work, after elicitation-interview has captured business value and the 6 pillars. | `.agents/skill-library/engineering/gap-analysis/SKILL.md` |
-| `risk-contradiction-scanner` | Use for Lean Task or Full Feature work, after domain-modeling, to scan the accumulated business rules and state… | `.agents/skill-library/engineering/risk-contradiction-scanner/SKILL.md` |
-| `spec-writer` | Use for Lean Task or Full Feature work once elicitation, domain modeling, and the consistency scan are complete. | `.agents/skill-library/engineering/spec-writer/SKILL.md` |
-| `spec-validator` | Use for Lean Task or Full Feature work immediately after spec-writer produces its documents. | `.agents/skill-library/engineering/spec-validator/SKILL.md` |
-| `handover` | Use for Bounded Task or Full Feature work as the final step of the BA Pipeline, once spec-validator has returned a… | `.agents/skill-library/engineering/handover/SKILL.md` |
+| `domain-modeling` | Use for Full-lane work, after elicitation (and gap-analysis, if run) to turn interview answers into concrete domain… | `.agents/skill-library/engineering/domain-modeling/SKILL.md` |
+| `gap-analysis` | Use for Full-lane work, after elicitation-interview has captured business value and the 6 pillars. | `.agents/skill-library/engineering/gap-analysis/SKILL.md` |
+| `risk-contradiction-scanner` | Use for Full-lane work, after domain-modeling, to scan the accumulated business rules and state machines for logic… | `.agents/skill-library/engineering/risk-contradiction-scanner/SKILL.md` |
+| `spec-writer` | Use for Full-lane work once elicitation, domain modeling, and the consistency scan are complete. | `.agents/skill-library/engineering/spec-writer/SKILL.md` |
+| `spec-validator` | Use for Full-lane work immediately after spec-writer produces its documents. | `.agents/skill-library/engineering/spec-validator/SKILL.md` |
+| `handover` | Use for Full-lane work as the final step of the domain baseline, once spec-validator has returned a clean pass (or… | `.agents/skill-library/engineering/handover/SKILL.md` |
 | `wayfinder` | Plan large, ambiguous efforts (exceeding a single session) as a shared map of decision tickets on an issue tracker… | `.agents/skill-library/engineering/wayfinder/SKILL.md` |
 
-## Spec, Plan & Tasks (14)
+## Spec, Plan & Tasks (8)
 
 | Skill | When | Path |
 | --- | --- | --- |
-| `speckit-specify` | Use to create or update a formal feature specification from approved domain baseline requirements (Phase 2 of Unified… | `.agents/skill-library/engineering/speckit-specify/SKILL.md` |
-| `speckit-plan` | Use to generate the implementation plan from a feature spec. | `.agents/skill-library/engineering/speckit-plan/SKILL.md` |
-| `speckit-tasks` | Use to generate dependency-ordered tasks.md from plan.md and other design artifacts. | `.agents/skill-library/engineering/speckit-tasks/SKILL.md` |
-| `speckit-analyze` | Use after speckit-tasks to verify consistency across spec.md, plan.md, and tasks.md. | `.agents/skill-library/engineering/speckit-analyze/SKILL.md` |
-| `speckit-clarify` | Use when the feature spec has ambiguous or underspecified areas. | `.agents/skill-library/engineering/speckit-clarify/SKILL.md` |
-| `speckit-checklist` | Use to generate a quality checklist (UX, security, testing, etc.) for the current feature. | `.agents/skill-library/engineering/speckit-checklist/SKILL.md` |
-| `speckit-constitution` | Use to create or update the project constitution — governance rules, coding standards, and architectural principles… | `.agents/skill-library/engineering/speckit-constitution/SKILL.md` |
-| `speckit-converge` | Use to check implementation progress against spec/plan/tasks and find remaining unbuilt work. | `.agents/skill-library/engineering/speckit-converge/SKILL.md` |
-| `speckit-implement` | Use to execute the implementation plan by processing all tasks in tasks.md. | `.agents/skill-library/engineering/speckit-implement/SKILL.md` |
-| `speckit-taskstoissues` | Use to convert tasks.md entries into GitHub Issues with proper labels, dependencies, and descriptions. | `.agents/skill-library/engineering/speckit-taskstoissues/SKILL.md` |
+| `technical-spec` | Design UAW technical spec.md from a signed-off Full-lane baseline; return unresolved business decisions to BA. | `.agents/skill-library/engineering/technical-spec/SKILL.md` |
+| `implementation-plan` | Plan scoped UAW implementation from signed-off baseline and technical spec; define files, dependencies, risks and… | `.agents/skill-library/engineering/implementation-plan/SKILL.md` |
+| `task-breakdown` | Create dependency-ordered UAW tasks.md from technical spec and implementation plan, with verification and scoped… | `.agents/skill-library/engineering/task-breakdown/SKILL.md` |
+| `technical-consistency-review` | Review existing UAW requirements, spec, plan and tasks for traceability and contradictions before Gate 2; read-only. | `.agents/skill-library/engineering/technical-consistency-review/SKILL.md` |
 | `scaffold-architecture` | Generates the initial project/feature folder structure, seeds base files (shared types, error constants, DTO… | `.agents/skill-library/engineering/scaffold-architecture/SKILL.md` |
 | `codebase-design` | MANDATORY when designing or refactoring module boundaries, service interfaces, domain logic, custom React hooks, or… | `.agents/skill-library/engineering/codebase-design/SKILL.md` |
 | `setup-deep-modules` | Wire automated architectural seam and deep module enforcement for the active codebase (TypeScript, Python, Go, Rust,… | `.agents/skill-library/engineering/setup-deep-modules/SKILL.md` |
 | `improve-codebase-architecture` | Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever… | `.agents/skill-library/engineering/improve-codebase-architecture/SKILL.md` |
+
+## Legacy migration aliases (10)
+
+| Skill | When | Path |
+| --- | --- | --- |
+| `speckit-specify` | Legacy compatibility alias; use technical-spec under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-specify/SKILL.md` |
+| `speckit-plan` | Legacy compatibility alias; use implementation-plan under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-plan/SKILL.md` |
+| `speckit-tasks` | Legacy compatibility alias; use task-breakdown under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-tasks/SKILL.md` |
+| `speckit-analyze` | Legacy compatibility alias; use technical-consistency-review under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-analyze/SKILL.md` |
+| `speckit-clarify` | Legacy compatibility alias; use elicitation-interview under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-clarify/SKILL.md` |
+| `speckit-checklist` | Legacy compatibility alias; use spec-validator under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-checklist/SKILL.md` |
+| `speckit-constitution` | Retired legacy entry point; explains the supported UAW replacement. | `.agents/skill-library/engineering/speckit-constitution/SKILL.md` |
+| `speckit-converge` | Legacy compatibility alias; use verification-before-completion under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-converge/SKILL.md` |
+| `speckit-implement` | Legacy compatibility alias; use implementation-orchestrator under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-implement/SKILL.md` |
+| `speckit-taskstoissues` | Retired legacy entry point; explains the supported UAW replacement. | `.agents/skill-library/engineering/speckit-taskstoissues/SKILL.md` |
 
 ## Implementation (10)
 
@@ -99,9 +110,9 @@ Regenerate with `node .agents/scripts/build-skill-index.mjs`; verify with `--che
 | `ui-design-review` | Use as the independent visual and design review step whenever a UI slice has been implemented — whether inside… | `.agents/skill-library/engineering/ui-design-review/SKILL.md` |
 | `technical-documentation` | MANDATORY when writing, updating, or reviewing technical documentation, architecture docs, feature docs, API… | `.agents/skill-library/engineering/technical-documentation/SKILL.md` |
 | `user-guide-with-screenshots` | Creates or updates a user-facing guide (non-technical language, real screenshots) for a feature that was just built or… | `.agents/skill-library/engineering/user-guide-with-screenshots/SKILL.md` |
-| `verification-before-completion` | Use at the end of Phase 5 (Implementation) and Phase 6 (Quality Review) to verify that a feature is fully complete and… | `.agents/skill-library/engineering/verification-before-completion/SKILL.md` |
+| `verification-before-completion` | Verify completion against the selected Fast or Full lane, acceptance criteria, relevant automated checks and zero… | `.agents/skill-library/engineering/verification-before-completion/SKILL.md` |
 
-## UI & Design (7)
+## UI & Design (6)
 
 | Skill | When | Path |
 | --- | --- | --- |
@@ -111,7 +122,6 @@ Regenerate with `node .agents/scripts/build-skill-index.mjs`; verify with `--che
 | `ui-taste-pro` | Use this skill whenever building, redesigning, styling, or reviewing any UI or frontend work — pages, screens,… | `.agents/skill-library/engineering/ui-taste-pro/SKILL.md` |
 | `motion-design` | Use this skill whenever building, reviewing, or refining UI/web animation — hover effects, scroll reveals, page… | `.agents/skill-library/engineering/motion-design/SKILL.md` |
 | `frontend-a11y` | MANDATORY when building any interactive React UI component, form, modal, dropdown, or navigation element. | `.agents/skill-library/engineering/frontend-a11y/SKILL.md` |
-| `archify` | Create polished, validated architecture, workflow, sequence, data-flow, and lifecycle/state diagrams as explorable… | `.agents/skill-library/engineering/archify/SKILL.md` |
 
 ## Minimal code (ponytail) (5)
 

@@ -9,7 +9,7 @@ paths:
 ---
 # React Coding Style
 
-> This file extends [typescript/coding-style.md](../typescript/coding-style.md) and [common/coding-style.md](../common/coding-style.md) with React specific content.
+> These React rules are self-contained. If TypeScript rules are also selected, resolve their catalog target through `.agents/catalog.json`; no common rule pack is required.
 
 ## File Extensions
 

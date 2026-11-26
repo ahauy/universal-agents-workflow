@@ -19,9 +19,11 @@ node .agents/scripts/measure-skill-index.mjs
 auto-discovery for the cold tier. A cold skill has no `skill` tool entry —
 reading its `SKILL.md` **is** the load.
 
-**Why:** 65 auto-discovered skills cost ~7,000 tokens per request. With 9 hot
-skills the same tree costs ~360. That is paid again for every subagent, so a
-20-agent pipeline saved ~130k tokens.
+**Interpretation:** the measurement script estimates text size as characters ÷ 4,
+not actual model tokens, cache behavior, billed usage or money saved. Keep the
+hot entry-point set small; native planning skills and compatibility aliases stay
+cold. Available provider telemetry is required to establish real cost changes;
+this workflow makes no guaranteed monetary savings claim.
 
 ## Fixed cost per request (OpenCode, this repo)
 
@@ -29,16 +31,16 @@ skills the same tree costs ~360. That is paid again for every subagent, so a
 | --- | --- | --- |
 | Skill index | ~360 | keep the hot set ≤ 12 skills; `--check` fails above that |
 | `AGENTS.md` | ~2,000 | already a summary; detail lives in `.agents/docs/` |
-| `~/AGENTS.md` (global) | ~500 | keep it a pointer, not a second contract |
+| User/harness context outside this project | varies | measure separately; project setup does not manage it |
 | MCP tool schemas | 3,000–12,000 | enable MCP per project, not globally |
 
 ## MCP servers are the other big lever
 
 Tool schemas are injected like skills, and subagents inherit them. Rules:
 
-- **Do not enable a server globally** unless every project uses it.
-  `StitchMCP` (18 tools) is disabled in `~/.config/opencode/opencode.jsonc`;
-  set `"enabled": true` only in a project that actually calls it.
+- Enable only explicitly selected servers in the project's supported configuration.
+  Project setup does not modify global MCP settings; inspect actual enabled schemas
+  rather than assuming another user's server inventory or tool count.
 - `inheritMcp: false` on read-only subagents (`code-reviewer`, `ui-ux-reviewer`,
   `code-explorer`, `agent-evaluator`, `business-analyst`, `system-architect`,
   `tech-doc-architect`, `user-guide-creator`, `build-resolver`). Only agents
@@ -52,6 +54,15 @@ Hooks spawn a process per matching tool call. On `run_command`, six separate
 as narrow as the harness allows, and never let a hook reach the network —
 `auto-format-on-edit.js` uses the local `prettier` binary or `npx --no-install`,
 never a registry fetch.
+
+## Adding optional packs
+
+Use the project catalog's exact `source_path=target_path` mappings with the verified
+source `update-engine.py --sync --extra-ship`. This registers selected packs and
+last-written hashes before regenerating the index and adapters. Optional skills
+stay cold in `.agents/skill-library/`; manually copying them into `.agents/skills/`
+adds discovery cost and bypasses update ownership. Read a cold skill by its catalog
+path only when needed.
 
 ## Keeping it honest
 

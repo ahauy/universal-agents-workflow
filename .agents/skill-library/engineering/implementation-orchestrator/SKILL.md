@@ -18,6 +18,12 @@ description: >
 
 # Implementation Orchestrator
 
+Reuse confirmed answers, existing requirements and signed-off evidence within the
+current scope. Ask only material gaps; no fixed total interview count and no
+invented business defaults. Fast uses the checkpoint in AGENTS.md in one context;
+these Full-lane artifacts do not exempt any request from understanding behavior.
+
+
 Phase 4, Stage 9 — bridges the signed-off Domain Decision Baseline to actual
 code, without dragging the full BA history or the full spec into one coding
 context. The orchestrator's own context should stay thin throughout: it
@@ -28,22 +34,29 @@ than one slice itself in the same context.
 See `/README.md` for the pipeline this stage extends and the shared file
 conventions it reuses.
 
-## 1. Confirm the requirements baseline (Tier-Aware Gate)
+## 1. Confirm the requirements baseline (Lane-Aware Gate)
 
-- **Tier 3 (Full Feature / Epic)**: Read `baseline.md`. If `Status` is not `SIGNED-OFF`, stop and send the user back to `handover`.
-- **Tier 1 (Fast-Track) & Tier 2 (Roadmap US)**: Verify that the task's Acceptance Criteria (AC) are defined in `PRODUCT_BACKLOG_ROADMAP.md` or `test-plan.md`. Bypasses `baseline.md` requirement entirely to prevent ceremony overhead.
+- **Full lane (this skill's only entry)**: Read `baseline.md`. If `Status` is not `SIGNED-OFF`, stop and send the user back to `handover`.
+- Verify `plan.md` and `tasks.md` have explicit user approval (Gate 2), with technical consistency reviewed after all artifacts exist.
+- **Fast lane**: this skill does not run. Return control — the current context establishes the BA checkpoint, then implements confirmed AC and `test-plan.md` (if any). Slicing a Fast-lane task is a process bug.
 
-## 2. Decompose into slices (Calibrated by Task Tier)
+## 2. Decompose into slices (Full lane only)
 
-- **Tier 1 (< 80 lines)**: **Zero Slicing**. Implement directly via single developer turn using TDD.
-- **Tier 2 (80–250 lines)**: **Cohesive Slicing**. Merge adjacent layers into a single end-to-end slice (Data + Logic + API handled by one developer subagent, UI by frontend subagent). **Do NOT split into 4 micro-subagents.**
-- **Tier 3 (> 250 lines)**: Read `requirements.md` §3 and §4. Group `REQ-`/`US-` items into slices by **dependency layer**, not by file or by feature area:
+Slicing exists to keep each context thin. Never slice a task that one context can
+finish.
+
+- Read `requirements.md` §3 and §4. Group `REQ-`/`US-` items into slices by
+  **dependency layer**, not by file or by feature area:
   - **Data layer** — schema/migration, `BR-` validations
   - **Domain/business logic** — algorithms, state machine transitions
   - **API/interface layer** — endpoints, contracts
-  - **UI layer** — screens and states from `03-domain-model.md`
+  - **UI layer** — screens and states from the domain model
 
-Record in `implementation/slice-plan.md` (Tier 3 only):
+Merge adjacent layers into one slice when they are small: a single developer can
+own Data + Logic + API, with UI separate. **Never split one slice into four
+micro-subagents.** Slices marked parallel-safe are dispatched together.
+
+Record in `implementation/slice-plan.md`:
 
 ```markdown
 # Slice Plan: <Feature Title>

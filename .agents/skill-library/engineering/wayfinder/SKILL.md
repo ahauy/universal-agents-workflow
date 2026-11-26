@@ -107,4 +107,4 @@ Every decision ticket falls into one of two operational modes:
    - Close the ticket.
    - Move it to "Decisions Made So Far" on the Map.
    - Check if downstream tickets in "Fog of War" are now unblocked; promote them to the Frontier.
-5. **Handoff**: When the Frontier is empty and the path to Destination is 100% clear, close the map and hand off to `intake-classifier` or `speckit-specify`.
+5. **Handoff**: When the Frontier is empty and the path to Destination is 100% clear, close the map and hand off to `intake-classifier` for the BA checkpoint and lane decision. Only Full with a signed-off baseline proceeds to `technical-spec`; a clear map alone grants no gate approval.
