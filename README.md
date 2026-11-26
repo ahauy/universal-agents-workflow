@@ -223,14 +223,36 @@ flowchart TD
 | **3** | **Đặc Tả & Thiết Kế (Full lane)**| `technical-spec`, `implementation-plan`, `task-breakdown`         | `spec.md`, `plan.md`, `data-model.md`, `tasks.md`.                                         |
 | **4** | **Lập Trình TDD**                | `code-explorer`, `backend-developer`, `frontend-developer` | Fast: không file thủ tục. Full: `test-plan.md` + Unit Tests đỏ → xanh.                     |
 | **5** | **Phản Biện (Full lane)**        | `code-reviewer`, `ui-design-review`, `ponytail-review`     | Báo cáo 3 tầng: Bảo mật, Spec fidelity & Tối giản hoá mã nguồn.                            |
-| **6** | **Tài Liệu Hóa (Full lane)**     | `tech-doc-architect`, `command-user-guide`      | `docs/features/<slug>/README.md`, `docs/user-guides/<slug>.md`, sơ đồ Mermaid.               |
+| **6** | **Tài Liệu Hóa (Full lane)**     | `tech-doc-architect`; `command-user-guide` khi cần | `docs/features/<slug>/README.md` + index; user guide chỉ khi được yêu cầu hoặc cần cho release. |
 | **7** | **Đóng Gói & Đẩy Mã**            | `/command-git-push`                                        | Tự động chia Modular Commits theo tầng và push an toàn.                                    |
 
 ### Từ dev tới production
 
+Trong dự án **đã cài UAW**, bắt đầu từ Product Backlog như sau. Các lệnh dưới đây
+là yêu cầu gửi trong chat AI; khả năng hiển thị slash command tùy harness.
+
+| Bước | Lệnh hoặc yêu cầu bạn gửi | Điểm cần bạn duyệt |
+| --- | --- | --- |
+| 1. Thiết lập | `/skill-setup` | Skill/rules, chế độ Git và lựa chọn còn thiếu; tái sử dụng lựa chọn đã xác nhận. |
+| 2. Rà backlog | “Rà Product Backlog, chỉ hỏi phần còn thiếu.” Dùng `/generate-backlog` nếu cần tạo/cập nhật. | Mục tiêu, phạm vi, rule và AC mới/thay đổi trước khi ghi backlog. Không viết lại backlog đã rõ. |
+| 3. Làm từng story | `/continue` | Fast không có bộ tài liệu duyệt riêng. Full cần **Gate 1: baseline**, rồi **Gate 2: plan + tasks** trước khi code. |
+| 4. Kiểm tra và đẩy mã | Sau khi AI kiểm thử/review đạt, gọi `/command-git-push`. | Lệnh cho phép commit/push, không cho phép deploy hoặc tự merge PR. |
+| 5. Chuẩn bị release | “Chuẩn bị release v1.0.0, lập OPERATIONS và hồ sơ release; chưa deploy.” | Xác nhận hosting, môi trường, thủ tục, người phụ trách và quyết định còn thiếu. Nghiệm thu nghiệp vụ theo AC đã thống nhất. |
+| 6. Deploy và kiểm tra | “Triển khai release v1.0.0, candidate `<commit/artifact>`, lên `<môi trường production>` theo hồ sơ đã duyệt.” | Chỉ thực hiện khi RELEASE_READY; yêu cầu này cấp quyền deploy đúng candidate/môi trường/thao tác, hoặc tái sử dụng quyền tương ứng đã có. |
+
+Gate 3 (review) và Gate 4 (tài liệu Full) là kiểm tra do AI thực hiện, không phải
+hai lần xin bạn duyệt thêm. Điểm chưa rõ trọng yếu vẫn cần bạn xác nhận; không
+được bỏ qua kiểm tra bắt buộc hoặc chấp nhận lỗi Critical để phát hành.
+
 Task hoàn thành là **DEV_COMPLETE**. Release đạt các kiểm tra áp dụng là
 **RELEASE_READY**; chỉ sau deploy được ủy quyền và kiểm tra thật mới là
 **PRODUCTION_VERIFIED**. Push code không đồng nghĩa đã deploy.
+
+Hiện chưa có lệnh `/release` hoặc `/deploy`; dùng yêu cầu bằng lời ở bảng trên.
+AI kiểm tra CI/build/test, staging hoặc phương án đã thống nhất, UAT và
+migration/backup/phục hồi khi áp dụng. Thiếu hoặc bỏ qua kiểm tra bắt buộc là
+BLOCKED; deploy/kiểm tra sau deploy thất bại là FAILED. Chỉ ghi ROLLED_BACK sau
+phục hồi và xác minh; nếu thao tác vượt quyền đã cấp, cần bạn duyệt thêm.
 
 Luồng release dùng skill hiện có, đọc theo nhu cầu trong
 [production lifecycle](.agents/docs/production-lifecycle.md). Chỉ cần hai loại hồ sơ:

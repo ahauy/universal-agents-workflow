@@ -9,6 +9,22 @@ Chỉ hỏi khoảng trống trọng yếu; khi chạm trigger thì escalate m�
 
 ---
 
+## Bước 0 — Từ dự án chỉ có Product Backlog
+
+Trong dự án đã cài UAW, nhập `/skill-setup` để AI đọc stack thực tế và đề xuất
+thiết lập. **Bạn duyệt** skill/rules, chế độ Git và lựa chọn còn thiếu; lựa chọn
+đã xác nhận được dùng lại. Không tự suy đoán stack nếu dự án chưa có code.
+
+Tiếp theo gửi: **“Rà Product Backlog hiện có, chỉ hỏi yêu cầu còn thiếu.”**
+Nếu cần tạo/cập nhật, dùng `/generate-backlog`. **Bạn xác nhận** mục tiêu, người
+dùng, phạm vi, rule và AC mới/thay đổi trước khi AI ghi backlog. Backlog đã đủ
+thì tái sử dụng; không bắt buộc viết thêm BRD/PRD/SRS.
+
+Khi có code, README ghi cách chạy/kiểm tra; CONTEXT bổ sung thuật ngữ cần thiết.
+Requirements/spec/plan/tasks chỉ theo Full lane; ADR chỉ khi có quyết định quan trọng.
+Các slash command trong tài liệu là yêu cầu gửi trong chat AI, không phải lệnh
+shell; nếu harness không hiển thị, yêu cầu AI áp dụng skill tương ứng.
+
 ## Bước 1 — Chọn làn
 
 - **Bạn làm**: đưa yêu cầu (ticket, mô tả, hoặc `/continue`).
@@ -71,7 +87,9 @@ Sáu stage; chỉ hỏi phần nghiệp vụ còn thiếu, không hỏi lại b�
 6. **`handover`** — duyệt cổng, đánh dấu `baseline.md` = `SIGNED-OFF v1.0`, thêm
    section Dev Handover Brief ngay trong file đó.
 
-- 🛑 **Gate 1**: chưa SIGNED-OFF thì không có spec kỹ thuật, không có code.
+- 🛑 **Gate 1 — bạn duyệt baseline nghiệp vụ**: sau khi xem phạm vi, rule, AC và
+  rủi ro, có thể trả lời “Mình duyệt baseline.” AI chỉ ghi SIGNED-OFF sau xác nhận
+  này; chưa duyệt thì không có spec kỹ thuật, không có code.
 
 ## Bước 3 — Spec kỹ thuật & Kế hoạch (Full lane)
 
@@ -79,6 +97,8 @@ Sáu stage; chỉ hỏi phần nghiệp vụ còn thiếu, không hỏi lại b�
   `task-breakdown` → `technical-consistency-review` sau khi có đủ spec/plan/tasks.
 - **Kết quả**: `spec.md`, `plan.md`, `tasks.md`; data-model/contracts chỉ khi cần.
 - 🛑 **Gate 2**: bạn duyệt `plan.md` + `tasks.md`.
+  Ví dụ: “Mình duyệt plan và tasks ở Gate 2, bạn triển khai.” Gate 1 không thay
+  thế Gate 2; dùng lại xác nhận phù hợp đã có, không hỏi lại cùng quyết định.
 
 ## Bước 3.5 — Scaffold (Full lane, chỉ greenfield)
 
@@ -126,6 +146,11 @@ Sáu stage; chỉ hỏi phần nghiệp vụ còn thiếu, không hỏi lại b�
 - Đóng task bằng `node .agents/scripts/metrics.mjs end`; xem lại bằng
   `node .agents/scripts/metrics.mjs report` sau mỗi 10 task.
 
+Bạn gọi `/command-git-push` là cho phép commit/push; không đồng nghĩa cho phép
+merge PR hay deploy. Trước đó, Gate 3 (review) và Gate 4 (tài liệu Full) do AI
+kiểm tra, không thêm hai lượt duyệt thủ công. Fast không có Gate 1/2 hay bộ hồ
+sơ Full; câu hỏi trọng yếu vẫn phải được làm rõ trước khi triển khai.
+
 ---
 
 ## Hộp cứu hộ
@@ -141,12 +166,53 @@ Sáu stage; chỉ hỏi phần nghiệp vụ còn thiếu, không hỏi lại b�
 
 ## Phát hành và xác nhận production — khi có release
 
-Task/story xong là DEV_COMPLETE; không đồng nghĩa đã deploy. Khi chuẩn bị release,
-đọc phần liên quan trong [production lifecycle](production-lifecycle.md).
-RELEASE_READY cần bằng chứng đúng phiên bản/môi trường; PRODUCTION_VERIFIED cần
-triển khai được ủy quyền và kiểm tra thật sau deploy. Lỗi kiểm tra bắt buộc phải
-được xử lý hoặc phục hồi có xác minh; không báo thành công khi chưa chạy.
+Task/story xong là **DEV_COMPLETE**, không đồng nghĩa đã deploy. Các bước sau
+chạy theo release, không lặp cho từng `/continue`. Luật chi tiết nằm trong
+[production lifecycle](production-lifecycle.md); chỉ đọc phần đang cần.
 
-Chỉ thêm docs/OPERATIONS.md cho hướng dẫn vận hành ổn định và một
-docs/releases/<version>.md cho mỗi release. Không tạo bộ release cho từng task;
-không tự chạy deploy từ /continue hoặc git push. Giữ nguyên nội dung tùy chỉnh.
+### 1. Chuẩn bị — chưa deploy
+
+Gửi: **“Chuẩn bị release v1.0.0: kiểm tra readiness, lập OPERATIONS và hồ sơ
+release; chưa deploy.”** Hiện không có lệnh `/release` hay `/deploy`.
+
+AI tái sử dụng bằng chứng đúng candidate/môi trường/cấu hình, kiểm tra CI/build/
+test, staging hoặc phương án đã thống nhất, UAT theo AC, cấu hình/secret reference
+và migration/backup/phục hồi khi áp dụng. **Bạn xác nhận** hosting, môi trường,
+thủ tục, người phụ trách và quyết định còn thiếu; không phải duyệt lại điều đã rõ.
+Nghiệm thu nghiệp vụ theo cách đã thống nhất. Không lưu giá trị secrets vào tài liệu.
+
+Hai hồ sơ dùng lại: `docs/OPERATIONS.md` ghi quy trình vận hành ổn định, còn
+`docs/releases/<version>.md` ghi bằng chứng của từng release. Tạo từ
+[operations template](../../.specify/templates/operations-template.md) và
+[release template](../../.specify/templates/release-template.md) chỉ khi thiếu;
+nếu đã có thì sửa đúng phần liên quan, giữ nội dung tùy chỉnh và các lần thử trước.
+
+Chỉ ghi **RELEASE_READY** khi kiểm tra bắt buộc đã đạt. Thiếu/fail/skipped thì
+BLOCKED; N/A cần lý do áp dụng thật. Không được chấp nhận lỗi Critical; High phải
+được sửa hoặc bạn chấp nhận rủi ro cụ thể, không thay thế một kiểm tra bắt buộc.
+
+### 2. Bạn cho phép triển khai đúng phiên bản và môi trường
+
+Khi RELEASE_READY còn hiệu lực, gửi: **“Triển khai release v1.0.0, candidate
+`<commit/artifact>`, lên `<môi trường production>` theo hồ sơ đã duyệt.”**
+Thay các phần trong ngoặc bằng thông tin thật. AI kiểm tra quyền khớp candidate,
+môi trường và thao tác; dùng lại ủy quyền tương ứng đã có. Nếu phạm vi thay đổi
+hoặc chưa đủ quyền thì hỏi đúng phần thiếu. Duyệt backlog, plan, push hoặc bản
+cập nhật framework không phải quyền deploy; thay đổi làm mất hiệu lực bằng chứng
+readiness phải được kiểm tra lại trước khi triển khai.
+
+### 3. Xác nhận hoặc phục hồi
+
+Sau deploy, AI chạy smoke/health, xem log/cảnh báo và kiểm tra dữ liệu/cấu hình
+bắt buộc của candidate thật. Đạt đủ mới ghi **PRODUCTION_VERIFIED**; lệnh deploy
+thành công một mình chưa đủ. Thiếu/skipped bằng chứng là BLOCKED; deploy hoặc
+kiểm tra thất bại là FAILED, phải ghi trạng thái hệ thống thực tế.
+
+Phục hồi theo thủ tục phù hợp đã xác nhận; không giả định migration đảo ngược
+được hoặc revert code sẽ khôi phục dữ liệu. **Bạn duyệt thêm nếu thao tác phục hồi
+vượt quyền đã cấp**. Chỉ ghi ROLLED_BACK khi trạng thái trước đã được khôi phục
+và kiểm tra đạt; candidate thất bại không trở thành PRODUCTION_VERIFIED.
+
+Nếu cần hướng dẫn người dùng, gọi `/command-user-guide <slug>` để viết văn bản;
+không bắt buộc sau mỗi story và không có quy trình screenshot. Không tự deploy
+từ `/continue` hoặc git push.
