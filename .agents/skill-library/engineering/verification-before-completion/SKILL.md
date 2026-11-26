@@ -79,15 +79,52 @@ justify them.
 - Update affected architecture/algorithm documents only when those behaviors
   changed; preserve accepted ADRs and signed requirements.
 - For UI, reuse existing authorization and confirmed screen evidence. If a guide
-  is required by the approved scope, invoke `user-guide-with-screenshots` through
-  `.agents/SKILLS.md` with real screenshots. Ask only for a still-missing material
+  is required by the approved scope, invoke the text-only `user-guide` through
+  `.agents/SKILLS.md`; guide production requires no browser capture or app startup. Ask only for a still-missing material
   decision or required authorization; do not repeat an answered confirmation.
 - Append completion evidence to the feature `CHANGELOG.md`; update the requested
   roadmap story only after all applicable gates pass.
+
+## Release verification (selected releases only)
+
+Feature checks above establish **DEV_COMPLETE** for the selected scope, not a
+production claim. A commit or successful push does not establish release readiness
+or deployment. Ordinary Fast/Full task completion needs no release record.
+
+When a release is explicitly selected, read only the needed section of the
+[production lifecycle](../../../docs/production-lifecycle.md#readiness):
+
+- **RELEASE_READY**: verify the candidate revision/artifact, target environment
+  and configuration against applicable build/test/CI, staging or evidenced
+  alternative, UAT/AC, config/secrets references, owner and operational checks.
+  Required failed, missing or skipped evidence blocks readiness. N/A needs a
+  concrete applicability reason. Zero unresolved Critical; fix High findings or
+  obtain explicit owner acceptance. Reuse evidence only for the same candidate,
+  environment and config with no invalidating changes.
+- Before any real deployment, follow [deployment](../../../docs/production-lifecycle.md#deployment).
+  Check matching explicit operational authorization; reuse it when already given.
+  Approval of this framework or a plan does not authorize production writes.
+  Unknown commands, hosting or material choices remain ASM-/BLOCKED.
+- **PRODUCTION_VERIFIED** requires an actual authorized deployment and passing
+  [post-deploy verification](../../../docs/production-lifecycle.md#verification)
+  for that candidate/target: applicable smoke, health, logs and alert checks.
+  Record real evidence; an unexecuted check is not a pass. Failed required
+  post-deploy checks mean FAILED, never a verified candidate.
+- Use [recovery](../../../docs/production-lifecycle.md#recovery) when needed.
+  Account for actual schema/data compatibility and backup/restore evidence;
+  never assume code rollback reverses data changes. Only verified recovery earns
+  ROLLED_BACK; it does not verify the failed candidate.
+
+Record selected release evidence in `docs/releases/<version>.md`, based on the
+[release template](../../../../.specify/templates/release-template.md). Reuse
+`docs/OPERATIONS.md` for stable procedures. Preserve existing custom content and
+assets; store secret names/references only, never values. Report BLOCKED rather
+than inventing commands or evidence. Keep release checks outside ordinary tasks.
 
 ## Completion report (both lanes)
 
 Report the selected lane, acceptance outcome, executed checks/results, review
 findings and material limitations. Full also reports approval, traceability and
-documentation gates. Verdict: COMPLETE or INCOMPLETE with the concrete reason.
+documentation gates. Feature verdict: COMPLETE or INCOMPLETE with the concrete reason; when a release
+was selected, also state its separate lifecycle status and candidate/target evidence.
 Do not commit, push or merge without explicit user authorization.

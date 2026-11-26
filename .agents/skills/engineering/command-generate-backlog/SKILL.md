@@ -62,6 +62,9 @@ Use the template and confirmed decisions only:
 6. Keep deferred ideas `[~]`, blocked decisions `[!]`, and never mark new work
    `[x]`. Scope sprints and release checks to confirmed priorities and risk;
    include only applicable security, migration, routing and smoke checks.
+   Roadmap `[x]` means DEV_COMPLETE against story AC, not deployment. Track selected
+   release readiness/production evidence by linking docs/releases/<version>.md;
+   keep the existing roadmap schema and do not create release records per story.
 7. Record Won't-Have as confirmed boundaries or explicitly unresolved. Do not
    derive exclusions from a vague idea. Preserve existing completed stories.
 

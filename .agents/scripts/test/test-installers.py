@@ -158,6 +158,19 @@ class FullSourceInstaller(unittest.TestCase):
                     self.assertTrue((target / '.claude/skills').is_dir())
                     self.assertTrue((target / '.claude/agents/go-reviewer.md').is_file())
                     self.assertTrue((target / '.claude/agents/code-reviewer.md').is_file())
+                    skills = {p.parent.name for base in ('.agents/skills', '.agents/skill-library')
+                              for p in (target / base).glob('*/*/SKILL.md')}
+                    self.assertIn('wait-what', skills)
+                    self.assertFalse(any(name.startswith('speckit-') for name in skills))
+                    self.assertFalse(skills.intersection({'route', 'frontend-design', 'ui-taste-pro',
+                                                         'ponytail-audit', 'ponytail-help', 'ponytail-gain',
+                                                         'setup-workspace', 'writing-for-agents', 'ponytail-debt',
+                                                         'user-guide-with-screenshots'}))
+                    self.assertIn('user-guide', skills)
+                    for template in ('operations-template.md', 'release-template.md'):
+                        self.assertTrue((target / '.specify/templates' / template).is_file())
+                    self.assertFalse((target / 'docs/OPERATIONS.md').exists())
+                    self.assertFalse((target / 'docs/releases').exists())
 
 
 if __name__ == "__main__":

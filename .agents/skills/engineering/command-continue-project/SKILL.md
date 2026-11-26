@@ -14,7 +14,8 @@ triggers:
 
 # Command: Continue Project Workflow (/command-continue-project)
 
-Picks the next story from [PRODUCT_BACKLOG_ROADMAP.md](../../../../docs/PRODUCT_BACKLOG_ROADMAP.md)
+Picks the next story from `docs/PRODUCT_BACKLOG_ROADMAP.md`
+(created using the [roadmap template](../../../../.specify/templates/PRODUCT_BACKLOG_ROADMAP-template.md))
 and runs it through the **Fast lane** unless a hard trigger says otherwise.
 Lane rules are owned by [AGENTS.md](../../../../AGENTS.md) §2 — this file only executes them.
 
@@ -163,7 +164,7 @@ Only after Step 2 escalated, or the user typed `/full`. Create
 
 - `tech-doc-architect`: `docs/features/<slug>/README.md` + index. ADR only when
   architecture actually changed.
-- `user-guide-creator` per release, not per story — skip for backend-only work.
+- Text-only user-guide runs only when requested or selected for release documentation, not on each story.
 
 ### 4f. Close
 
@@ -173,6 +174,15 @@ Only after Step 2 escalated, or the user typed `/full`. Create
 - Commit only on `/command-git-push` or explicit approval.
 
 ---
+
+## Delivery boundary
+
+Roadmap `[x]` and this command completion mean `DEV_COMPLETE` for the story only.
+Do not create release records or deploy from /continue. When the user selects
+release work, read the relevant section of
+[production lifecycle](../../../docs/production-lifecycle.md); establish release
+evidence and reuse matching deployment authorization separately. Push does not
+prove production verification.
 
 ## Output format
 

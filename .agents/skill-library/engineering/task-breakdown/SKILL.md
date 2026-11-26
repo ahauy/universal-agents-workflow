@@ -12,6 +12,8 @@ Full-lane Step 3 only. Require a SIGNED-OFF baseline.md plus spec.md and plan.md
 
 Write tasks.md using .specify/templates/tasks-template.md. Give each task a stable T id, relevant REQ-/US- ids, exact files or bounded file families, dependencies, deliverable, and observable verification. Include meaningful failing-test-first implementation tasks followed by verification, review and documentation. For prose-only changes use structural and decision-path checks appropriate to their behavior; do not create tests that merely repeat wording.
 
+For a selected release, use the [release lifecycle](../../../docs/production-lifecycle.md#readiness) to order readiness evidence, separately authorized deployment, post-deploy checks and applicable recovery tasks. Name the candidate/environment/config and verification owner. Production tasks remain blocked by missing required evidence or operational authorization; task/Gate 2 approval alone cannot release them. Reuse existing results only where still valid; keep this out of ordinary feature task lists.
+
 Mark [P] only for slices with disjoint file ownership and no unresolved output dependency. Shared-file edits serialize. Define each Full-lane slice's context-pack.md scope (at most 150 lines), output path and integration owner. Fast work remains one context and never delegates.
 
 Check coverage from every applicable REQ-/acceptance criterion to a task and verification. Do not create speculative foundation work or automatic commits. Route to technical-consistency-review only after spec.md, plan.md and tasks.md all exist. Present plan + tasks for Gate 2 approval; no scaffold or implementation before approval, and material business gaps return to BA.

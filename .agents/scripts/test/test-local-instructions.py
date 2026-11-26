@@ -8,13 +8,13 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[3]
 SETUP = ROOT / '.agents/skills/engineering/command-skill-setup/SKILL.md'
-WORKSPACE = ROOT / '.agents/skill-library/productivity/setup-workspace/SKILL.md'
+WORKSPACE = ROOT / '.agents/skills/engineering/command-skill-setup/references/onboarding.md'
 VERIFY = ROOT / '.agents/skill-library/engineering/verification-before-completion/SKILL.md'
 
 
 class LocalInstructionsTests(unittest.TestCase):
     def test_activation_uses_registered_explicit_catalog_mappings(self):
-        text = SETUP.read_text()
+        text = WORKSPACE.read_text()
         for required in ('--sync', '--extra-ship', 'source_path', 'target_path',
                          'selectedPacks', 'last-written', 'cold', '--yes'):
             self.assertIn(required, text)
@@ -22,7 +22,9 @@ class LocalInstructionsTests(unittest.TestCase):
         self.assertNotIn('~/.agents/', text)
         self.assertNotIn('Archify', text)
         self.assertIn('Do not use `--detect-packs`', text)
-        self.assertIn('command-skill-setup', WORKSPACE.read_text())
+        self.assertIn('CONTEXT.md', WORKSPACE.read_text())
+        self.assertIn('adr/', WORKSPACE.read_text())
+        self.assertIn('references/onboarding.md', SETUP.read_text())
 
     def test_fast_verification_does_not_require_full_artifacts(self):
         text = VERIFY.read_text()

@@ -36,9 +36,7 @@ diluted copy of the marketing one.
 
 **Where this skill borrows instead of repeating:** performance/accessibility
 guardrails, dark-mode protocol, and the em-dash ban are universal hygiene, not
-marketing-specific. Read them fresh from `design-taste-frontend` Sections 6,
-8, and 9.G rather than treating this file as a substitute — they apply here
-exactly as written there.
+marketing-specific. Read the applicable section in [performance and dark mode](../design-taste-frontend/references/perf-and-dark-mode.md) or [AI tells](../design-taste-frontend/references/ai-tells.md), one file at a time, rather than loading the whole marketing rubric.
 
 ---
 
@@ -66,6 +64,8 @@ Activate `design-taste-product` whenever **any** of the following apply:
 - Mixed surfaces (marketing page + in-app screen in one feature) → split the work: `design-taste-frontend` for the marketing surface, this skill for the in-app surface
 
 ---
+Before selecting technology or tokens, use [shared stack and surface detection](../design-taste-frontend/references/shared-design-foundations.md#detect-stack-and-surface). Reuse the detected stack and existing design anchor; ask if neither the repository nor the owner establishes the stack. Shared examples never authorize a framework change or invented business behavior.
+
 ## 0. Scope
 
 ### 0.A This skill covers
@@ -164,7 +164,7 @@ sees this screen every day is not impressed by variance — they're slowed
 down by it.
 
 - **`VISUAL_DENSITY`** — reuse the same 1-10 scale and definitions from
-  `design-taste-frontend` Section 7. Product UI typically lands 4-8
+  [the shared dial definitions](../design-taste-frontend/references/perf-and-dark-mode.md#7-dial-definitions-technical-reference). Product UI typically lands 4-8
   (Daily App to Cockpit) rather than the 2-4 (Art Gallery) range common on
   marketing pages. A dashboard with 15 metrics genuinely needs density; don't
   pad it with landing-page whitespace just to look "clean."
@@ -198,6 +198,8 @@ Different product-UI tasks need different hierarchy strategies:
 
 ---
 ## 11. Pre-flight check
+
+Before calling product UI done, apply the [shared final check](../design-taste-frontend/references/shared-design-foundations.md#shared-final-check) alongside the product checks below. This includes consistent action labels and feedback, real social proof, coherent icons, keyboard focus and source-preserving design-anchor updates.
 
 Before calling product UI done:
 
@@ -238,6 +240,7 @@ This skill is split so a load costs ~3.4k tokens instead of ~4.7k. The core abov
 
 | Open | Contains |
 | --- | --- |
+| `../design-taste-frontend/references/shared-design-foundations.md` | Stack/surface detection, subject-specific direction and copy, shared final check (read the matching section only) |
 | `references/design-anchor.md` | 5. Design anchor (DESIGN.md), Palette, Type, Spacing, Radius / Shadow / Motion, Notes |
 | `references/ux-states-a11y-i18n.md` | 6. UX states, grounded in the spec, 7. Accessibility, in context, 8. i18n resilience |
 | `references/engagement-and-ai-tells.md` | 9. Engagement mechanics (streaks, XP, rewards, urgency), 10. AI tells specific to product UI |

@@ -7,7 +7,7 @@
 | Tier | Location | Cost | Contents |
 | --- | --- | --- | --- |
 | Hot | `.agents/skills/` | name + description on every request | 9 entry points and slash commands |
-| Cold | `.agents/skill-library/` | zero until read | 60 on-demand skills |
+| Cold | `.agents/skill-library/` | zero until read | 41 on-demand skills |
 
 Regenerate with `node .agents/scripts/build-skill-index.mjs`; verify with `--check`.
 
@@ -28,8 +28,8 @@ Regenerate with `node .agents/scripts/build-skill-index.mjs`; verify with `--che
 | Bug reproduced, root cause unknown | `diagnosing-bugs` |
 | Over-engineered diff / bloated repo | `ponytail-review` |
 | Need an architecture or sequence diagram | `technical-documentation` |
-| Feature ships, needs docs + screenshots | `technical-documentation` |
-| Unsure which skill or phase applies | `route` |
+| Need a plain-language user guide | `user-guide` |
+| Unsure which skill or phase applies | `skills-index` |
 
 ## Hot set — already in the system prompt (9)
 
@@ -38,9 +38,9 @@ Regenerate with `node .agents/scripts/build-skill-index.mjs`; verify with `--che
 | `command-continue-project` | Continue the roadmap in the Fast lane by default; escalate to the Full lane only on a hard trigger. | `.agents/skills/engineering/command-continue-project/SKILL.md` |
 | `command-generate-backlog` | Interview the user and render docs/PRODUCT_BACKLOG_ROADMAP.md: MoSCoW, RICE, dependency chain, effort, context budget,… | `.agents/skills/engineering/command-generate-backlog/SKILL.md` |
 | `command-git-push` | Inspect changes, write Conventional Commits by layer, push the branch, and emit an English PR brief. | `.agents/skills/engineering/command-git-push/SKILL.md` |
-| `command-skill-setup` | Scan project manifests, match compatible skills and rules from the catalog, confirm with the user, then activate… | `.agents/skills/engineering/command-skill-setup/SKILL.md` |
+| `command-skill-setup` | Inspect and onboard a project, then activate confirmed catalog skills and rules safely through registered mappings. | `.agents/skills/engineering/command-skill-setup/SKILL.md` |
 | `command-update` | Update the framework through the 3-Way Hash engine; protects project data and user-added skills (Zero Deletion Policy). | `.agents/skills/engineering/command-update/SKILL.md` |
-| `command-user-guide` | Verify the dev server, capture real Playwright screenshots, and write docs/user-guides/<slug>.md in non-technical… | `.agents/skills/engineering/command-user-guide/SKILL.md` |
+| `command-user-guide` | Write or update a concise text guide in docs/user-guides/<slug>.md using confirmed feature behavior. | `.agents/skills/engineering/command-user-guide/SKILL.md` |
 | `intake-classifier` | BA checkpoint and lane selector: reuse confirmed evidence; Fast for bounded existing behavior, Full on risk or… | `.agents/skills/engineering/intake-classifier/SKILL.md` |
 | `ponytail` | Laziest solution that works: YAGNI, stdlib before custom, native before deps, one line before fifty. | `.agents/skills/engineering/ponytail/SKILL.md` |
 | `skills-index` | Skill catalog router. | `.agents/skills/engineering/skills-index/SKILL.md` |
@@ -73,21 +73,6 @@ Regenerate with `node .agents/scripts/build-skill-index.mjs`; verify with `--che
 | `setup-deep-modules` | Wire automated architectural seam and deep module enforcement for the active codebase (TypeScript, Python, Go, Rust,… | `.agents/skill-library/engineering/setup-deep-modules/SKILL.md` |
 | `improve-codebase-architecture` | Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever… | `.agents/skill-library/engineering/improve-codebase-architecture/SKILL.md` |
 
-## Legacy migration aliases (10)
-
-| Skill | When | Path |
-| --- | --- | --- |
-| `speckit-specify` | Legacy compatibility alias; use technical-spec under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-specify/SKILL.md` |
-| `speckit-plan` | Legacy compatibility alias; use implementation-plan under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-plan/SKILL.md` |
-| `speckit-tasks` | Legacy compatibility alias; use task-breakdown under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-tasks/SKILL.md` |
-| `speckit-analyze` | Legacy compatibility alias; use technical-consistency-review under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-analyze/SKILL.md` |
-| `speckit-clarify` | Legacy compatibility alias; use elicitation-interview under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-clarify/SKILL.md` |
-| `speckit-checklist` | Legacy compatibility alias; use spec-validator under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-checklist/SKILL.md` |
-| `speckit-constitution` | Retired legacy entry point; explains the supported UAW replacement. | `.agents/skill-library/engineering/speckit-constitution/SKILL.md` |
-| `speckit-converge` | Legacy compatibility alias; use verification-before-completion under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-converge/SKILL.md` |
-| `speckit-implement` | Legacy compatibility alias; use implementation-orchestrator under UAW lane and gate rules. | `.agents/skill-library/engineering/speckit-implement/SKILL.md` |
-| `speckit-taskstoissues` | Retired legacy entry point; explains the supported UAW replacement. | `.agents/skill-library/engineering/speckit-taskstoissues/SKILL.md` |
-
 ## Implementation (10)
 
 | Skill | When | Path |
@@ -109,41 +94,32 @@ Regenerate with `node .agents/scripts/build-skill-index.mjs`; verify with `--che
 | --- | --- | --- |
 | `ui-design-review` | Use as the independent visual and design review step whenever a UI slice has been implemented — whether inside… | `.agents/skill-library/engineering/ui-design-review/SKILL.md` |
 | `technical-documentation` | MANDATORY when writing, updating, or reviewing technical documentation, architecture docs, feature docs, API… | `.agents/skill-library/engineering/technical-documentation/SKILL.md` |
-| `user-guide-with-screenshots` | Creates or updates a user-facing guide (non-technical language, real screenshots) for a feature that was just built or… | `.agents/skill-library/engineering/user-guide-with-screenshots/SKILL.md` |
+| `user-guide` | Create or update concise text instructions for end users from confirmed behavior. | `.agents/skill-library/engineering/user-guide/SKILL.md` |
 | `verification-before-completion` | Verify completion against the selected Fast or Full lane, acceptance criteria, relevant automated checks and zero… | `.agents/skill-library/engineering/verification-before-completion/SKILL.md` |
 
-## UI & Design (6)
+## UI & Design (4)
 
 | Skill | When | Path |
 | --- | --- | --- |
-| `frontend-design` | Guidance for distinctive, intentional visual design when building new UI or reshaping an existing one. | `.agents/skill-library/engineering/frontend-design/SKILL.md` |
 | `design-taste-frontend` | Anti-slop frontend skill for landing pages, portfolios, and redesigns. | `.agents/skill-library/engineering/design-taste-frontend/SKILL.md` |
 | `design-taste-product` | Anti-slop design skill for product UI — dashboards, in-app screens, data tables, multi-step forms and wizards,… | `.agents/skill-library/engineering/design-taste-product/SKILL.md` |
-| `ui-taste-pro` | Use this skill whenever building, redesigning, styling, or reviewing any UI or frontend work — pages, screens,… | `.agents/skill-library/engineering/ui-taste-pro/SKILL.md` |
 | `motion-design` | Use this skill whenever building, reviewing, or refining UI/web animation — hover effects, scroll reveals, page… | `.agents/skill-library/engineering/motion-design/SKILL.md` |
 | `frontend-a11y` | MANDATORY when building any interactive React UI component, form, modal, dropdown, or navigation element. | `.agents/skill-library/engineering/frontend-a11y/SKILL.md` |
 
-## Minimal code (ponytail) (5)
+## Minimal code (ponytail) (1)
 
 | Skill | When | Path |
 | --- | --- | --- |
-| `ponytail-review` | Code review focused exclusively on over-engineering. | `.agents/skill-library/engineering/ponytail-review/SKILL.md` |
-| `ponytail-audit` | Whole-repo audit for over-engineering. | `.agents/skill-library/engineering/ponytail-audit/SKILL.md` |
-| `ponytail-debt` | Harvest every `ponytail:` comment in the codebase into a debt ledger, so the deliberate shortcuts and deferrals… | `.agents/skill-library/engineering/ponytail-debt/SKILL.md` |
-| `ponytail-gain` | Show ponytail's measured impact as a compact scoreboard: less code, less cost, more speed, from the benchmark medians. | `.agents/skill-library/engineering/ponytail-gain/SKILL.md` |
-| `ponytail-help` | Quick-reference card for all ponytail modes, skills, and commands. | `.agents/skill-library/engineering/ponytail-help/SKILL.md` |
+| `ponytail-review` | Diff/repository complexity review or a debt ledger of deliberate ponytail shortcuts. | `.agents/skill-library/engineering/ponytail-review/SKILL.md` |
 
-## Productivity & meta (7)
+## Productivity & meta (4)
 
 | Skill | When | Path |
 | --- | --- | --- |
-| `route` | Intelligent workflow router (replacing `ask-matt`). | `.agents/skill-library/productivity/route/SKILL.md` |
 | `wait-what` | Use immediately when an explanation, architectural rationale, or decision does not land or feels confusing. | `.agents/skill-library/productivity/wait-what/SKILL.md` |
 | `handoff` | Compact the current session context, in-flight work, decisions made, and immediate next actions into a structured… | `.agents/skill-library/productivity/handoff/SKILL.md` |
 | `retro` | Conduct a retrospective on a coding session or project milestone to continuously improve the agent's operating… | `.agents/skill-library/productivity/retro/SKILL.md` |
-| `setup-workspace` | One-time repository onboarding and self-configuration skill (replacing `setup-matt-pocock-skills`). | `.agents/skill-library/productivity/setup-workspace/SKILL.md` |
 | `setup-subagents` | Detect which models each installed harness actually exposes, decide which of them the user is permitted to use, and… | `.agents/skill-library/engineering/setup-subagents/SKILL.md` |
-| `writing-for-agents` | Guidelines and standards for authoring documentation, skill descriptions, agent prompts, and architecture guides… | `.agents/skill-library/engineering/writing-for-agents/SKILL.md` |
 
 ## How to use a cold skill
 

@@ -179,15 +179,28 @@ Stopping rules are non-negotiable:
 feature index. Update `docs/architecture/` + an ADR only when the feature changes
 architecture (new entity, service, or contract).
 
-`user-guide-with-screenshots` runs **per release, not per feature**.
+`user-guide` runs only when requested or selected for release documentation. Write text instructions from confirmed behavior; no browser capture, annotations or server startup is required.
 
 `agent-evaluator` is **not** part of the default delivery path. Run it via
 `/retro` when you want a meta-review of the workflow itself.
 
-## Step 7 — Ship (both lanes, user-triggered only)
+## Step 7 — Code delivery (both lanes, user-triggered only)
 
 `/command-git-push`. Modular commits by layer: `docs(spec)` → `feat(shared-types)`
 → `feat(api)` → `feat(ui)` → `docs`.
 
 **No autonomous rebase.** If the branch diverged, stop and report the conflict
 instead of auto-resolving it. Single-line English Conventional Commits.
+
+## Release and production — selected release only
+
+Feature gates close as DEV_COMPLETE; code push is neither RELEASE_READY nor
+PRODUCTION_VERIFIED. For release work read only the matching section of
+[production lifecycle](production-lifecycle.md): preparation → readiness → authorized
+deployment → post-deploy verification or recovery. Reuse candidate/target/config-bound
+evidence; required missing/failed/skipped checks block. Do not add production
+ceremony to each Fast task or execute deployment from /continue or push.
+
+Maintain docs/OPERATIONS.md once and docs/releases/<version>.md per selected release
+from the two templates; update existing custom documents surgically. Real CI/CD
+commands and platforms come from the target product, not this framework.

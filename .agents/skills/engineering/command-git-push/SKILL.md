@@ -88,13 +88,28 @@ git push origin <CURRENT_BRANCH>
 
 ---
 
+### Source delivery and production status
+
+A successful commit/push is source delivery only. It does not mean a deployment
+ran or production is healthy. Report the actual branch/commit result; use
+DEV_COMPLETE only when feature verification supports it. Do not create release
+records or run deployments automatically from this command.
+
+When the user also selected a release, hand off on demand to
+[release readiness](../../../docs/production-lifecycle.md#readiness) and the
+existing `verification-before-completion` skill. Read deployment/verification/
+recovery sections only when that operational stage is in scope. Reuse matching
+prior production authorization; framework/plan/Git approval alone is not such
+authorization. RELEASE_READY and PRODUCTION_VERIFIED need their own candidate/
+target evidence in `docs/releases/<version>.md`; a push cannot substitute for it.
+
 ### Step 4: Non-Blocking Advisory & Compact PR Brief
 
 After successful push, output a concise status and ready-to-copy PR Brief in GitHub markdown:
 
 1. **Non-Blocking UI User Guide Advisory**:
-   - If changes modified frontend UI files (`web/`, `frontend/`, `components/`) and `docs/user-guides/<slug>.md` has not been updated with screenshots:
-     > 💡 **Advisory Notice:** UI changes committed. If this completes a customer-facing flow, remember to run `/command-user-guide <slug>` to capture Playwright screenshots before merging. _(Push completed successfully — this does not block your work)._
+   - If changes modified frontend UI files (`web/`, `frontend/`, `components/`) and the target release requires an end-user guide that has not been updated:
+     > 💡 **Advisory Notice:** UI changes committed. If this completes a customer-facing flow, run `/command-user-guide <slug>` when needed to update the concise text instructions. _(Push completed successfully — this does not block your work)._
 
 2. **Generated PR Brief (English)**:
 
@@ -123,7 +138,7 @@ After successful push, output a concise status and ready-to-copy PR Brief in Git
 
 - [x] Automated test suite passed
 - [x] Conventional commits verified
-- [ ] User guide updated (if user-facing UI change)
+- [ ] Text user guide updated (only when requested or required for release)
 ```
 ````
 

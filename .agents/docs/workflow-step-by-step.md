@@ -114,10 +114,10 @@ Sáu stage; chỉ hỏi phần nghiệp vụ còn thiếu, không hỏi lại b�
 
 - `tech-doc-architect`: `docs/features/<slug>/README.md` + cập nhật index. Chỉ tạo
   ADR khi kiến trúc thay đổi thật.
-- `user-guide-with-screenshots`: **theo release, không theo feature**.
+- `user-guide`: **khi được yêu cầu hoặc được chọn cho tài liệu release**; viết hướng dẫn văn bản, không có bước chụp ảnh hay chạy ứng dụng bắt buộc.
 - `agent-evaluator`: chạy qua `/retro`, không nằm trong đường giao mặc định.
 
-## Bước 7 — Ship (cả 2 làn, chỉ khi bạn gõ lệnh)
+## Bước 7 — Đẩy mã (cả 2 làn, chỉ khi bạn gõ lệnh)
 
 - `/command-git-push` → chia modular commit theo tầng: `docs(spec)` →
   `feat(shared-types)` → `feat(api)` → `feat(ui)` → `docs`, xuất PR brief tiếng Anh.
@@ -132,9 +132,21 @@ Sáu stage; chỉ hỏi phần nghiệp vụ còn thiếu, không hỏi lại b�
 
 | Tình huống | Gõ gì | Skill |
 | --- | --- | --- |
-| Không biết bước tiếp theo | `/route` | `route` |
+| Không biết bước tiếp theo | `bước tiếp theo?` | `skills-index` |
 | AI nói khó hiểu | `/wait-what` | `wait-what` |
 | Cần hỏi stakeholder | `tạo khảo sát` | `to-questionnaire` |
 | Bài toán quá lớn, mờ mịt | `lập bản đồ quyết định` | `wayfinder` |
 | Sắp đầy context window | `/handoff` | `handoff` |
 | Muốn tinh chỉnh chính workflow | `/retro` | `retro` |
+
+## Phát hành và xác nhận production — khi có release
+
+Task/story xong là DEV_COMPLETE; không đồng nghĩa đã deploy. Khi chuẩn bị release,
+đọc phần liên quan trong [production lifecycle](production-lifecycle.md).
+RELEASE_READY cần bằng chứng đúng phiên bản/môi trường; PRODUCTION_VERIFIED cần
+triển khai được ủy quyền và kiểm tra thật sau deploy. Lỗi kiểm tra bắt buộc phải
+được xử lý hoặc phục hồi có xác minh; không báo thành công khi chưa chạy.
+
+Chỉ thêm docs/OPERATIONS.md cho hướng dẫn vận hành ổn định và một
+docs/releases/<version>.md cho mỗi release. Không tạo bộ release cho từng task;
+không tự chạy deploy từ /continue hoặc git push. Giữ nguyên nội dung tùy chỉnh.

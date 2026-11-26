@@ -72,18 +72,6 @@ const GROUPS = {
     "setup-deep-modules",
     "improve-codebase-architecture",
   ],
-  "Legacy migration aliases": [
-    "speckit-specify",
-    "speckit-plan",
-    "speckit-tasks",
-    "speckit-analyze",
-    "speckit-clarify",
-    "speckit-checklist",
-    "speckit-constitution",
-    "speckit-converge",
-    "speckit-implement",
-    "speckit-taskstoissues",
-  ],
   Implementation: [
     "implementation-orchestrator",
     "api-design",
@@ -99,32 +87,23 @@ const GROUPS = {
   "Review, Docs & Delivery": [
     "ui-design-review",
     "technical-documentation",
-    "user-guide-with-screenshots",
+    "user-guide",
     "verification-before-completion",
   ],
   "UI & Design": [
-    "frontend-design",
     "design-taste-frontend",
     "design-taste-product",
-    "ui-taste-pro",
     "motion-design",
     "frontend-a11y",
   ],
   "Minimal code (ponytail)": [
     "ponytail-review",
-    "ponytail-audit",
-    "ponytail-debt",
-    "ponytail-gain",
-    "ponytail-help",
   ],
   "Productivity & meta": [
-    "route",
     "wait-what",
     "handoff",
     "retro",
-    "setup-workspace",
     "setup-subagents",
-    "writing-for-agents",
   ],
 };
 
@@ -143,8 +122,8 @@ const PICK_FAST = [
   ["Bug reproduced, root cause unknown", "diagnosing-bugs"],
   ["Over-engineered diff / bloated repo", "ponytail-review"],
   ["Need an architecture or sequence diagram", "technical-documentation"],
-  ["Feature ships, needs docs + screenshots", "technical-documentation"],
-  ["Unsure which skill or phase applies", "route"],
+  ["Need a plain-language user guide", "user-guide"],
+  ["Unsure which skill or phase applies", "skills-index"],
 ];
 
 function parseFrontmatter(text) {

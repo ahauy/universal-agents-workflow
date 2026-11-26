@@ -20,7 +20,7 @@ triggers:
 
 Motion is a design decision, not a default. Every animation should answer "what does this communicate?" — feedback, hierarchy, continuity, or delight. If the answer is "nothing, it just looks nice," that's the seed of AI slop: fade-ins on every element, the same 300ms ease on everything, cards that all scale 1.05 on hover.
 
-This skill pairs with `frontend-design` (visual identity, layout, typography) and `design-taste-frontend` / `design-taste-product` — use them together when building UI.
+Pair this skill with the surface owner: `design-taste-frontend` for marketing/public pages or `design-taste-product` for application screens. Read only the motion reference needed for the current interaction.
 
 ## When to Use This Skill (Trigger Conditions)
 
