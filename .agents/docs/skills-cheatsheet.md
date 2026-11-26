@@ -18,7 +18,7 @@
 | **`/command-generate-backlog`** | `/generate-backlog`, `/create-roadmap` | Checkpoint nghiệp vụ theo scope và tự sinh roadmap chuẩn schema v1.2 chống hallucination.                                      | Bắt đầu dự án mới hoặc khi có ý tưởng sản phẩm từ đầu.   |
 | **`/command-continue-project`** | `/continue`, `/next`                   | Quét `PRODUCT_BACKLOG_ROADMAP.md`, phỏng vấn `grilling` gỡ blocker `[!]` và kích hoạt chu trình làm tính năng tiếp theo. | Trong dự án cá nhân/greenfield phát triển theo roadmap.  |
 | **`/command-git-push`**         | `/push`, `/ship`                       | Kiểm tra cổng tài liệu, phân tách commit theo tầng (Modular Commit) và push an toàn.                                     | Khi hoàn thành tính năng hoặc sửa lỗi cần đẩy lên Git.   |
-| **`/command-user-guide`**       | `/user-guide`, `/guide`                | Khởi chạy Playwright chụp ảnh giao diện thực tế và viết tài liệu hướng dẫn.                                              | Sau khi hoàn thiện giao diện người dùng.                 |
+| **`/command-user-guide`**       | `/user-guide`, `/guide`                | Viết hướng dẫn sử dụng bằng văn bản từ hành vi đã xác nhận; không cần chụp ảnh.                                              | Khi được yêu cầu hoặc cần tài liệu cho release.                 |
 | **`/command-update`**           | `/update`, `/upgrade`                  | Cập nhật framework an toàn với động cơ 3-Way Hash; bảo vệ 100% dữ liệu dự án và giữ nguyên custom skill.                 | Khi có bản phát hành mới hoặc muốn đồng bộ framework.    |
 
 ---
@@ -71,9 +71,8 @@
 
 | Kỹ Năng                     | Ý Nghĩa Ngắn Gọn & Giá Trị Thực Tế                                                                         | Khi Nào Sử Dụng?                                            |
 | :-------------------------- | :--------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------- |
-| **`ui-taste-pro`**          | Bộ quy chuẩn Anti-AI-Slop: cấm gradient neon tùy tiện, chỉ dùng viền hairline 1px, typography có phân cấp. | Bộ lọc bắt buộc cho mọi mã nguồn giao diện.                 |
-| **`design-taste-frontend`** | Tiêu chuẩn thẩm mỹ thị giác hiện đại dành cho Landing Page, Marketing Page và Public Surfaces.             | Khi thiết kế trang công cộng cần gây ấn tượng mạnh.         |
-| **`design-taste-product`**  | Tiêu chuẩn thiết kế giao diện ứng dụng chuyên sâu: Dashboard, Bảng dữ liệu, Form nhập liệu phức tạp.       | Khi xây dựng in-app UI, admin portal, ứng dụng web/desktop. |
+| **`design-taste-frontend`** | Tiêu chuẩn thẩm mỹ thị giác hiện đại dành cho Landing Page, Marketing Page và Public Surfaces.             | Khi thiết kế trang công cộng; dùng reference chung cho stack, design anchor và tự kiểm tra.         |
+| **`design-taste-product`**  | Tiêu chuẩn thiết kế giao diện ứng dụng chuyên sâu: Dashboard, Bảng dữ liệu, Form nhập liệu phức tạp.       | Khi xây dựng in-app UI; dùng chung hướng dẫn nền tảng, không tải lại rubric marketing. |
 | **`motion-design`**         | Tiêu chuẩn hiệu ứng chuyển động, easing curves, tương tác vi mô và hỗ trợ `prefers-reduced-motion`.        | Khi tạo animations, transitions mượt mà không gây giật lag. |
 | **`frontend-a11y`**         | Tiêu chuẩn tiếp cận người dùng khuyết tật đạt chuẩn quốc tế WCAG 2.1 AA (ARIA, phím tắt, tương phản màu).  | Kiểm tra tính tiếp cận cho ứng dụng web/mobile.             |
 | **`ui-design-review`**      | Quy trình phản biện giao diện kép (Pass A: Anti-Slop & Design System; Pass B: Spec & UX Fidelity).         | Phase 6A: Audit visual giao diện trước khi bàn giao.        |
@@ -86,8 +85,8 @@
 | :----------------------------------- | :---------------------------------------------------------------------------------------------------------- | :------------------------------------------------------ |
 | **`verification-before-completion`** | Thu thập bằng chứng kiểm thử thực tế (test output, log) chứng minh code hoạt động trước khi chốt task.      | Bước cuối cùng của Phase 6 trước khi tạo commit.        |
 | **`technical-documentation`**        | Soạn thảo tài liệu kỹ thuật tính năng theo chuẩn 4 góc Diataxis (Tutorial, How-To, Reference, Explanation). | Phase 6B: Lưu vào `docs/features/<slug>/README.md`.     |
-| **`user-guide-with-screenshots`**    | Khởi chạy Playwright chụp ảnh màn hình thật và viết tài liệu hướng dẫn cho người dùng cuối.                 | Phase 6B: Lưu vào `docs/user-guides/<slug>.md`.         |
-| **`writing-for-agents`**             | Kỹ thuật viết tài liệu, rules và hướng dẫn được tối ưu hóa cho AI Agents dễ hiểu và làm theo.               | Khi bổ sung kỹ năng mới hoặc viết prompts cho subagent. |
+| **`user-guide`**    | Viết hướng dẫn văn bản cho người dùng cuối; cập nhật đúng phần đã đổi, giữ nội dung tùy chỉnh.                 | Phase 6B: Lưu vào `docs/user-guides/<slug>.md`.         |
+| **`technical-documentation` (agent-authoring reference)**             | Kỹ thuật viết tài liệu, rules và hướng dẫn được tối ưu hóa cho AI Agents dễ hiểu và làm theo.               | Khi bổ sung kỹ năng mới hoặc viết prompts cho subagent. |
 
 ---
 
@@ -98,7 +97,7 @@
 | **`grilling`**         | Kỹ thuật phỏng vấn đào sâu, liên tục đặt câu hỏi sắc bén để lột trần mọi giả định ngầm.                      | Sử dụng trong Phase 1 Elicitation hoặc khi làm rõ yêu cầu mơ hồ. |
 | **`wait-what`**        | Yêu cầu AI diễn giải lại các đề xuất hoặc thuật ngữ phức tạp bằng ngôn ngữ đời thường, dễ hiểu.              | Khi người dùng thấy AI dùng quá nhiều thuật ngữ khó hiểu.        |
 | **`to-questionnaire`** | Chuyển đổi các thắc mắc nghiệp vụ thành bảng khảo sát có cấu trúc để gửi bất đồng bộ cho stakeholders.       | Khi cần ý kiến từ khách hàng, Product Owner hoặc bên thứ ba.     |
-| **`route`**            | Trợ lý định hướng: gợi ý chính xác kỹ năng, lệnh hoặc giai đoạn tiếp theo cần chạy dựa trên tình huống.      | Khi không chắc chắn bước tiếp theo nên làm gì.                   |
+| **`skills-index`**            | Trợ lý định hướng: gợi ý chính xác kỹ năng, lệnh hoặc giai đoạn tiếp theo cần chạy dựa trên tình huống.      | Khi không chắc chắn bước tiếp theo nên làm gì.                   |
 | **`handoff`**          | Nén và tổng kết toàn bộ ngữ cảnh quan trọng của phiên làm việc để bàn giao cho phiên làm việc mới.           | Khi sắp hết context window hoặc kết thúc ca làm việc.            |
 | **`retro`**            | Hồi cứu phiên làm việc, phân tích những điểm chưa tối ưu để tự động đề xuất tinh chỉnh rules và skills.      | Sau khi hoàn thành một milestone lớn.                            |
 | **`wayfinder`**        | Phân rã mục tiêu lớn thành bản đồ quyết định (Decision Tickets) khi đối mặt với bài toán mơ hồ (Fog of War). | Khi bắt đầu một dự án lớn hoặc bài toán kiến trúc mới toanh.     |

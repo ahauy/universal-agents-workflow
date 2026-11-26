@@ -42,7 +42,7 @@ Produce and review technical documentation that is clear, actionable, and mainta
    - Diataxis Framework: Tutorial | How-To | Reference | Explanation
    - Agent-Friendly: Real paths (clickable), concrete commands, explicit boundaries
       ↓
-4. Execute (Follow references/build.md or references/review.md)
+4. Execute (Follow references/build.md or references/review.md; for agent instructions, read only the needed section of references/writing-for-agents.md)
       ↓
 5. Validate Quality & Link Integrity (IEEE / Markdown lint pass)
 ```
@@ -64,6 +64,12 @@ Every technical document must explicitly match one of the 4 Diataxis quadrants:
 
 ## Agent & Contributor Governance Rules (`AGENTS.md` / `CONTRIBUTING.md`)
 
+For skills, prompts, rules or agent-facing docs, read the relevant section of
+[writing for agents](references/writing-for-agents.md) on demand. Keep terminology,
+short pointers, concrete failure modes, inputs and exit checks aligned with the
+actual project; do not preload the other documentation references.
+
+
 1. **Canonical Source of Truth**:
    - `AGENTS.md` (or `.agents/AGENTS.md`) is the canonical authority for AI workflows.
    - All tool-specific files (`.cursorrules`, `.cursor/rules/*`, `CLAUDE.md`) must act as compatibility aliases or symlinks to maintain **DRY**.
@@ -73,7 +79,7 @@ Every technical document must explicitly match one of the 4 Diataxis quadrants:
    - **`Never`**: Hardcoding credentials/secrets, committing broken builds, swallowing errors silently.
 3. **Concrete & Actionable**:
    - Always provide exact runnable CLI commands (`pnpm test`, `npx prisma migrate dev`).
-   - Use exact clickable file paths (`file:///absolute/path/to/file` or repo-relative links).
+   - Use exact clickable file paths (absolute local file links or valid repo-relative links).
 
 ---
 
@@ -94,9 +100,17 @@ Immediately upon passing Code Review (Stage 4 of implementation / Phase 6):
 
 ---
 
+## Operations and release records (on demand)
+
+For selected release/operations work, read the relevant [production lifecycle](../../../docs/production-lifecycle.md#preparation) section only. Maintain stable `docs/OPERATIONS.md` using the [operations template](../../../../.specify/templates/operations-template.md), and one `docs/releases/<version>.md` using the [release template](../../../../.specify/templates/release-template.md). Create a missing file only from confirmed project evidence; otherwise patch affected sections, preserving custom notes, existing evidence, image/assets and accepted history. Do not overwrite an existing runbook or regenerate every release record.
+
+Operations covers actual commands/environments, responsibility, health/log/alert checks and applicable migration/backup/recovery. Record secret names and secure-store references only, never values. Unknown commands, URLs or platform choices stay ASM-/BLOCKED. Release records link reusable candidate/target/config evidence rather than duplicating reports; record DEV_COMPLETE, RELEASE_READY and PRODUCTION_VERIFIED distinctly. Failed checks and recovery outcomes must remain truthful. Ordinary task docs need neither a new operations document nor a release record; text user guides remain separately requested or release-selected.
+
 ## References
 
 - [`references/principles.md`](./references/principles.md): Matt Palmer 8 rules & OpenAI Cookbook guidelines.
 - [`references/agent-and-contributing.md`](./references/agent-and-contributing.md): Canonical/alias governance for AGENTS.md and CONTRIBUTING.md.
 - [`references/build.md`](./references/build.md): Playbook for writing fresh technical docs.
 - [`references/review.md`](./references/review.md): Audit rubric and review checklist.
+
+- [`references/writing-for-agents.md`](./references/writing-for-agents.md): Dense agent-facing instructions, concrete failure modes, vocabulary and skill template.

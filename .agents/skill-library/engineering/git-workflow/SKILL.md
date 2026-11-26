@@ -56,12 +56,11 @@ Best practices for Git version control, branching strategies, and collaborative 
    - **DO NOT spawn new branches needlessly**. Avoid branch clutter and overhead.
    - **ONLY create a new branch as a last resort** when starting a completely distinct, unrelated feature or epic that cannot logically live on the current branch.
 
-5. **Pre-Commit User Guide Gate (UI features only - 100% Mandatory Real Screenshots)**:
-   - **BEFORE** proposing any `git commit` for a feature or fix that touches UI screens, verify:
-     1. `docs/user-guides/<slug>.md` exists.
-     2. It contains **100% real high-resolution screenshots with visual highlights/callouts** (Red `#EF4444` borders & numbered badges) captured via Playwright/browser.
-     3. The screenshot image files physically exist on disk in `docs/user-guides/images/<slug>/`.
-   - If missing, mocked, or text-only: **STOP IMMEDIATELY**. Run `/command-user-guide <slug>` to capture real screenshots before committing/pushing.
+5. **User Guide Verification (On Request or Release Requirement)**:
+   - Check `docs/user-guides/<slug>.md` only when the user requested a guide or the target release requires it. A UI change alone does not create a guide gate.
+   - Verify concise text instructions against confirmed behavior and check local links. Preserve existing custom content and image assets.
+   - Use `/command-user-guide <slug>` for selected text-guide work; no browser capture, annotation or application startup is required. Text-only guides satisfy this workflow.
+   - UI review and E2E tests retain their own evidence requirements; those are separate from guide production.
 
 6. **Mandatory English Pull Request Description**:
    - Whenever pushing changes to a remote branch (or completing a commit/push cycle), **ALWAYS** provide a ready-to-copy **Pull Request Title and Description in English** following the PR template (`## What & Why`, `## Key Changes`, `## Verification`, `## Screenshots / Artifacts`).

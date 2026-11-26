@@ -10,6 +10,10 @@ import unittest
 ROOT = Path(__file__).resolve().parents[3]
 PACK = 'optional-stack-skills/languages/go/go-patterns'
 DEST = '.agents/skill-library/engineering/go-patterns'
+RETIRED = ['speckit-' + name for name in ('specify', 'plan', 'tasks', 'analyze',
+           'clarify', 'checklist', 'implement', 'converge', 'constitution', 'taskstoissues')]
+RETIRED += ['ponytail-gain', 'ponytail-help', 'ponytail-audit', 'frontend-design', 'ui-taste-pro', 'route', 'setup-workspace',
+            'writing-for-agents', 'ponytail-debt', 'user-guide-with-screenshots']
 
 
 class FullUpdateIntegration(unittest.TestCase):
@@ -50,6 +54,10 @@ class FullUpdateIntegration(unittest.TestCase):
             shutil.copy2(ROOT / '.github/copilot-instructions.md', source / '.github/copilot-instructions.md')
             protected = {
                 'CONTEXT.md': 'custom domain language\n',
+                'docs/OPERATIONS.md': '# Local operations\nCustom deployment and recovery procedure.\n',
+                'docs/releases/1.2.3.md': '# Local release\nCandidate: user-sha\nKeep owner evidence.\n',
+                'docs/user-guides/local-guide.md': '# Custom guide\n\n![Existing image](images/local/step.png)\n',
+                '.agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs': 'custom legacy capture code\n',
                 '.env': 'LOCAL_FIXTURE=unchanged\n',
                 '.specify/features/custom/baseline.md': 'SIGNED-OFF custom baseline\n',
                 'adr/accepted.md': 'accepted project decision\n',
@@ -63,6 +71,10 @@ class FullUpdateIntegration(unittest.TestCase):
                 file = target / rel
                 file.parent.mkdir(parents=True, exist_ok=True)
                 file.write_text(text)
+            image = target / 'docs/user-guides/images/local/step.png'
+            image.parent.mkdir(parents=True, exist_ok=True)
+            image_bytes = b'\x89PNG\r\n\x1a\ncustom image bytes'
+            image.write_bytes(image_bytes)
             engine = source / '.agents/scripts/update-engine.py'
 
             def sync(extra=False):
@@ -76,13 +88,42 @@ class FullUpdateIntegration(unittest.TestCase):
 
             removed_upstream = '.agents/rules/removed-upstream.md'
             (source / removed_upstream).write_text('last installed content\n')
+            # Install an older inventory first, then retire its source trees.
+            retired_paths = []
+            for name in RETIRED:
+                category = 'productivity' if name in ('route', 'setup-workspace') else 'engineering'
+                rel = f'.agents/skill-library/{category}/{name}/SKILL.md'
+                file = source / rel
+                file.parent.mkdir(parents=True, exist_ok=True)
+                file.write_text(f'---\nname: {name}\ndescription: Legacy fixture\n---\nOriginal.\n')
+                retired_paths.append(rel)
             first = sync(extra=True)
+            for number, rel in enumerate(retired_paths):
+                file = target / rel
+                self.assertTrue(file.is_file(), rel)
+                # Both unchanged owned copies and edited copies must survive retirement.
+                if number % 2:
+                    file.write_text(file.read_text() + '\nCustom legacy behavior.\n')
+                protected[rel] = file.read_text()
+                shutil.rmtree((source / rel).parent)
             (source / removed_upstream).unlink()
             protected[removed_upstream] = 'last installed content\n'
             pack_file = target / DEST / 'SKILL.md'
             self.assertTrue(pack_file.is_file())
             pack_file.write_text(pack_file.read_text() + '\nUser customization.\n')
             protected[DEST + '/SKILL.md'] = pack_file.read_text()
+            retained = '.agents/skill-library/productivity/wait-what/SKILL.md'
+            retained_file = target / retained
+            retained_file.write_text(retained_file.read_text() + '\nCustom explanation conventions.\n')
+            protected[retained] = retained_file.read_text()
+            guide = '.agents/skill-library/engineering/user-guide/SKILL.md'
+            guide_file = target / guide
+            guide_file.write_text(guide_file.read_text() + '\nCustom guide policy.\n')
+            protected[guide] = guide_file.read_text()
+            template = '.specify/templates/release-template.md'
+            template_file = target / template
+            template_file.write_text(template_file.read_text() + '\nCustom release checklist.\n')
+            protected[template] = template_file.read_text()
             adapter = '.claude/agents/code-reviewer.md'
             self.assertTrue((target / adapter).is_file())
             (target / adapter).write_text((target / adapter).read_text() + '\nUser adapter customization.\n')
@@ -102,11 +143,15 @@ class FullUpdateIntegration(unittest.TestCase):
             safe_file = '.agents/rules/integration-fixture.md'
             for revision in (2, 3):
                 (source / PACK / 'SKILL.md').write_text('---\nname: go-patterns\ndescription: Go\n---\nUpstream revision ' + str(revision))
+                (source / retained).write_text((source / retained).read_text() + '\nUpstream revision.\n')
+                (source / guide).write_text((source / guide).read_text() + '\nUpstream revision.\n')
+                (source / template).write_text((source / template).read_text() + '\nUpstream release template revision.\n')
                 (source / safe_file).write_text('safe revision ' + str(revision))
                 (source / '.agents/agents/code-reviewer.md').write_text(
                     (source / '.agents/agents/code-reviewer.md').read_text() + '\nUpstream change.\n')
                 current = sync()
                 self.assertEqual('safe revision ' + str(revision), (target / safe_file).read_text())
+                self.assertEqual(image_bytes, image.read_bytes())
                 for rel, text in protected.items():
                     self.assertEqual(text, (target / rel).read_text(), rel)
                 updated_settings = json.loads(settings.read_text())
@@ -116,6 +161,11 @@ class FullUpdateIntegration(unittest.TestCase):
                 self.assertEqual(first['selectedPacks'], current['selectedPacks'])
                 key = PACK + '/SKILL.md=>' + DEST + '/SKILL.md'
                 self.assertEqual(first['fileHashes'][key], current['fileHashes'][key])
+                self.assertEqual(first['fileHashes'][retained], current['fileHashes'][retained])
+                self.assertEqual(first['fileHashes'][guide], current['fileHashes'][guide])
+                self.assertEqual(first['fileHashes'][template], current['fileHashes'][template])
+                for rel in retired_paths:
+                    self.assertEqual(first['fileHashes'][rel], current['fileHashes'][rel], rel)
             for rel in ['.agents/handoffs', '.specify/metrics', 'adr/0003-download-only-distribution.md',
                         '.specify/features/ba-first-workflow', '.agents/skill-library/engineering/archify/examples/web-app-rendered.html']:
                 self.assertFalse((target / rel).exists(), rel)

@@ -603,58 +603,14 @@
     },
     {
       "id": "ponytail-review",
-      "name": "Ponytail Review — Over-Engineering Code Review",
+      "name": "Ponytail Review — Diff and Repository Audit",
       "category": "Anti-Overengineering",
-      "short_description": "Code review focused exclusively on over-engineering. Finds what to delete: reinvented stdlib, unneeded deps, speculative abstractions, dead flexibility. One line per finding with tags (delete:/stdlib:/native:/yagni:/shrink:). Ends with 'net: -N lines possible' or 'Lean already. Ship.' MIT license — bundled from DietrichGebert/ponytail.",
+      "short_description": "Read-only over-engineering review of a diff or whole repository, plus a deliberate-shortcut debt ledger. Use /ponytail-review diff, repo or debt. Debt reports file/line, ceiling, upgrade trigger and missing triggers from ponytail comments; review proposes evidence-backed cuts without applying changes or claiming benchmark-based savings.",
       "detection_markers": [],
       "source_path": ".agents/skill-library/engineering/ponytail-review",
       "target_type": "skill",
       "target_path": ".agents/skill-library/engineering/ponytail-review",
       "recommendation": "recommended"
-    },
-    {
-      "id": "ponytail-audit",
-      "name": "Ponytail Audit — Whole-Repo Bloat Scan",
-      "category": "Anti-Overengineering",
-      "short_description": "Whole-repo audit for over-engineering. Scans the entire codebase (not just a diff) and ranks findings biggest cut first. Same tags as ponytail-review. One-shot report, applies nothing. MIT license — bundled from DietrichGebert/ponytail.",
-      "detection_markers": [],
-      "source_path": ".agents/skill-library/engineering/ponytail-audit",
-      "target_type": "skill",
-      "target_path": ".agents/skill-library/engineering/ponytail-audit",
-      "recommendation": "recommended"
-    },
-    {
-      "id": "ponytail-debt",
-      "name": "Ponytail Debt — Shortcut Ledger",
-      "category": "Anti-Overengineering",
-      "short_description": "Harvests every `ponytail:` comment in the codebase into a debt ledger so deliberate shortcuts don't quietly rot into 'later means never'. Grep-based scan, one row per marker with ceiling and upgrade path. Flags no-trigger entries. MIT license — bundled from DietrichGebert/ponytail.",
-      "detection_markers": [],
-      "source_path": ".agents/skill-library/engineering/ponytail-debt",
-      "target_type": "skill",
-      "target_path": ".agents/skill-library/engineering/ponytail-debt",
-      "recommendation": "recommended"
-    },
-    {
-      "id": "ponytail-gain",
-      "name": "Ponytail Gain — Impact Scoreboard",
-      "category": "Anti-Overengineering",
-      "short_description": "Displays ponytail's measured benchmark impact: ~54% less LOC, ~20% cheaper, ~27% faster, 100% safe (Haiku 4.5, 12 real feature tasks). One-shot scoreboard, changes no mode. MIT license — bundled from DietrichGebert/ponytail.",
-      "detection_markers": [],
-      "source_path": ".agents/skill-library/engineering/ponytail-gain",
-      "target_type": "skill",
-      "target_path": ".agents/skill-library/engineering/ponytail-gain",
-      "recommendation": "optional"
-    },
-    {
-      "id": "ponytail-help",
-      "name": "Ponytail Help — Quick Reference Card",
-      "category": "Anti-Overengineering",
-      "short_description": "Quick-reference card for all ponytail modes (lite/full/ultra), skills, and slash commands. One-shot display. MIT license — bundled from DietrichGebert/ponytail.",
-      "detection_markers": [],
-      "source_path": ".agents/skill-library/engineering/ponytail-help",
-      "target_type": "skill",
-      "target_path": ".agents/skill-library/engineering/ponytail-help",
-      "recommendation": "optional"
     }
   ]
 }

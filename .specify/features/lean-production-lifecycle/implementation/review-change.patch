@@ -1,0 +1,730 @@
+--- before/.agents/docs/pipeline-detail.md
++++ after/.agents/docs/pipeline-detail.md
+@@ -184,10 +184,23 @@
+ `agent-evaluator` is **not** part of the default delivery path. Run it via
+ `/retro` when you want a meta-review of the workflow itself.
+ 
+-## Step 7 — Ship (both lanes, user-triggered only)
++## Step 7 — Code delivery (both lanes, user-triggered only)
+ 
+ `/command-git-push`. Modular commits by layer: `docs(spec)` → `feat(shared-types)`
+ → `feat(api)` → `feat(ui)` → `docs`.
+ 
+ **No autonomous rebase.** If the branch diverged, stop and report the conflict
+ instead of auto-resolving it. Single-line English Conventional Commits.
++
++## Release and production — selected release only
++
++Feature gates close as DEV_COMPLETE; code push is neither RELEASE_READY nor
++PRODUCTION_VERIFIED. For release work read only the matching section of
++[production lifecycle](production-lifecycle.md): preparation → readiness → authorized
++deployment → post-deploy verification or recovery. Reuse candidate/target/config-bound
++evidence; required missing/failed/skipped checks block. Do not add production
++ceremony to each Fast task or execute deployment from /continue or push.
++
++Maintain docs/OPERATIONS.md once and docs/releases/<version>.md per selected release
++from the two templates; update existing custom documents surgically. Real CI/CD
++commands and platforms come from the target product, not this framework.
+--- before/.agents/docs/production-lifecycle.md
++++ after/.agents/docs/production-lifecycle.md
+@@ -0,0 +1,119 @@
++# Lean production lifecycle
++
++Read only the section needed for a selected release or operations task. Feature
++work keeps its Fast/Full gates; this protocol adds no per-task release ceremony.
++`/continue` completes development scope and `/command-git-push` publishes commits.
++Neither deploys a product nor proves that production is working.
++
++| State | Evidence required |
++| --- | --- |
++| `DEV_COMPLETE` | Applicable feature AC, tests/review and lane documentation passed. |
++| `RELEASE_READY` | The candidate has passed all applicable required readiness checks below. |
++| `PRODUCTION_VERIFIED` | Authorized deployment occurred and required post-deploy checks passed for that candidate and target. |
++| `BLOCKED` | A material decision, authorization or required readiness evidence is missing/failed/skipped, or required post-deploy evidence is missing/skipped. |
++| `FAILED` | Deployment or required post-deploy verification failed; record the actual serving state. |
++| `ROLLED_BACK` | Recovery restored the confirmed prior state and its required checks passed; the failed candidate is not production-verified. |
++
++These labels are recorded evidence, not an executable state machine. Keep prior
++outcomes in the release record; do not rewrite a failed attempt as success.
++
++## Preparation
++
++1. Reuse confirmed backlog/AC, manifests, existing CI/deployment configuration and
++   prior decisions. Discover the actual hosting, environments, build/test/deploy
++   commands, health targets and responsible owner. Record material unknowns as
++   `ASM-`/`BLOCKED`; never invent a provider, command, URL or success threshold.
++2. Create `docs/OPERATIONS.md` from the [operations template](../../.specify/templates/operations-template.md)
++   only if absent. Otherwise update only confirmed affected sections, preserving
++   custom instructions, links and accepted decisions. Keep it stable across releases.
++3. For a selected version, create `docs/releases/<version>.md` from the
++   [release template](../../.specify/templates/release-template.md) only if absent.
++   Otherwise append the current attempt/evidence without overwriting prior results.
++   Record an immutable candidate identifier, target environment and configuration
++   revision. Link existing test results instead of duplicating their contents.
++4. Use existing planning/review/documentation skills; `wizard` is for an actual
++   authorized manual procedure, not an automatic extra artifact. Configure real
++   CI/CD only for the confirmed project stack/host when in scope. This framework
++   supplies no executable deployment pipeline or invented vendor defaults.
++
++## Readiness
++
++Scope each check as required or `N/A` with an explicit applicability reason.
++Missing/failed/skipped required checks block `RELEASE_READY`; unknown evidence is
++not `N/A`. Reuse evidence only when it matches the candidate, relevant environment
++and configuration, and no subsequent change invalidates it. Re-run affected checks
++after code, dependency, migration, configuration or environment drift.
++
++- Build, relevant tests/lint/type checks and configured CI pass. Establish which
++  checks are required for this release; absent CI does not count as passing CI.
++- Staging verification, or an explicitly agreed evidenced alternative appropriate
++  to the product, passes. UAT covers the agreed user/business acceptance criteria.
++- Required configuration and secret references are available for the target;
++  document names/locations and verification outcomes, never secret values.
++- Migration order, compatibility and recovery are established when state/data is
++  affected. Backup freshness, retention/access and actual restore evidence meet
++  the confirmed recovery needs. A backup file alone is not proof of restorability.
++- Deployment owner, operational contact, health/smoke checks and relevant logs/
++  alerts are known. Recovery triggers and procedure are usable for this candidate.
++- Zero unresolved Critical findings. Fix High findings or record explicit owner
++  acceptance with the specific risk; acceptance cannot waive a required failed
++  check or label an unverified candidate successful.
++
++Readiness is not deployment authorization. Record `RELEASE_READY` only with linked
++passing evidence; any invalidating change requires a new readiness decision.
++
++## Deployment
++
++Before a production write, require current `RELEASE_READY` and recheck that its
++evidence still matches the candidate, environment and configuration with no
++invalidating changes. `BLOCKED` readiness cannot be overridden by authorization.
++Then verify explicit authorization covers the candidate,
++target and operation. Reuse matching authorization already given; ask only if it
++is missing or the scope changed. Approval to improve this framework, complete a
++feature, push Git or mark release readiness does not authorize a live deployment.
++
++Execute the confirmed project procedure, recording who/when, candidate, target,
++configuration and result. Do not expose secrets in commands/logs. A successful
++deploy command proves execution only; proceed to verification before claiming
++production success. An interrupted or failed attempt records `FAILED` and the
++observed serving/data state, not an assumed rollback or completed deployment.
++
++## Verification
++
++For the actual deployed candidate and target, run the agreed smoke journey and
++health checks, inspect relevant logs/alerts and verify migrations/configuration
++where applicable. Record commands or check references, timestamps and results.
++Missing, skipped or failed required checks cannot yield `PRODUCTION_VERIFIED`.
++Source review, a successful push or staging evidence alone cannot substitute.
++Missing/skipped post-deploy evidence records `BLOCKED`; failed checks record
++`FAILED`. Newly discovered Critical findings also prevent a success verdict.
++Fix newly discovered High findings or obtain explicit owner acceptance of the
++specific risk before `PRODUCTION_VERIFIED`; Critical findings cannot be accepted.
++
++Only after these checks pass record `PRODUCTION_VERIFIED`, the owner/contact and
++any agreed observation/follow-up. A post-deploy failure records `FAILED`, impact
++and recovery action; do not keep the candidate's success label to hide that result.
++
++## Recovery
++
++Use the confirmed rollback, forward-fix or restore procedure appropriate to the
++actual change. Do not assume a database migration is reversible or that reverting
++an application restores data. Confirm compatible code/schema, backup restore point,
++permitted data loss/downtime and required authorization before destructive actions.
++If recovery is unknown or unauthorized, escalate to the responsible owner rather
++than improvise. Contain impact only within the authority already granted.
++
++Record recovery execution and verify the intended serving/data state with its
++required smoke/health checks. Verified restoration of the prior state is
++`ROLLED_BACK`; otherwise keep `FAILED` and the outstanding incident/blocker. A
++forward fix is a new candidate requiring its applicable readiness/deploy checks.
++Retain failed attempts, incident notes and evidence without leaking secrets.
++
++## Document boundaries
++
++Never purge or regenerate customer operations/release documents, guides, images,
++scripts, skills or settings to match these templates. Signed requirements and
++accepted ADRs remain immutable. User-guide production stays text-only and runs
++only when requested or selected for release documentation. UI/E2E verification
++retains its own evidence requirements. Read the two documents by relevant section;
++the templates introduce neither a new skill nor a runtime/dependency.
+--- before/.agents/docs/workflow-step-by-step.md
++++ after/.agents/docs/workflow-step-by-step.md
+@@ -117,7 +117,7 @@
+ - `user-guide`: **khi được yêu cầu hoặc được chọn cho tài liệu release**; viết hướng dẫn văn bản, không có bước chụp ảnh hay chạy ứng dụng bắt buộc.
+ - `agent-evaluator`: chạy qua `/retro`, không nằm trong đường giao mặc định.
+ 
+-## Bước 7 — Ship (cả 2 làn, chỉ khi bạn gõ lệnh)
++## Bước 7 — Đẩy mã (cả 2 làn, chỉ khi bạn gõ lệnh)
+ 
+ - `/command-git-push` → chia modular commit theo tầng: `docs(spec)` →
+   `feat(shared-types)` → `feat(api)` → `feat(ui)` → `docs`, xuất PR brief tiếng Anh.
+@@ -138,3 +138,15 @@
+ | Bài toán quá lớn, mờ mịt | `lập bản đồ quyết định` | `wayfinder` |
+ | Sắp đầy context window | `/handoff` | `handoff` |
+ | Muốn tinh chỉnh chính workflow | `/retro` | `retro` |
++
++## Phát hành và xác nhận production — khi có release
++
++Task/story xong là DEV_COMPLETE; không đồng nghĩa đã deploy. Khi chuẩn bị release,
++đọc phần liên quan trong [production lifecycle](production-lifecycle.md).
++RELEASE_READY cần bằng chứng đúng phiên bản/môi trường; PRODUCTION_VERIFIED cần
++triển khai được ủy quyền và kiểm tra thật sau deploy. Lỗi kiểm tra bắt buộc phải
++được xử lý hoặc phục hồi có xác minh; không báo thành công khi chưa chạy.
++
++Chỉ thêm docs/OPERATIONS.md cho hướng dẫn vận hành ổn định và một
++docs/releases/<version>.md cho mỗi release. Không tạo bộ release cho từng task;
++không tự chạy deploy từ /continue hoặc git push. Giữ nguyên nội dung tùy chỉnh.
+--- before/.agents/scripts/test/test-installers.py
++++ after/.agents/scripts/test/test-installers.py
+@@ -167,6 +167,10 @@
+                                                          'setup-workspace', 'writing-for-agents', 'ponytail-debt',
+                                                          'user-guide-with-screenshots'}))
+                     self.assertIn('user-guide', skills)
++                    for template in ('operations-template.md', 'release-template.md'):
++                        self.assertTrue((target / '.specify/templates' / template).is_file())
++                    self.assertFalse((target / 'docs/OPERATIONS.md').exists())
++                    self.assertFalse((target / 'docs/releases').exists())
+ 
+ 
+ if __name__ == "__main__":
+--- before/.agents/scripts/test/test-production-lifecycle.py
++++ after/.agents/scripts/test/test-production-lifecycle.py
+@@ -0,0 +1,51 @@
++"""Source contracts for the release protocol; no claim of executing deployment."""
++from pathlib import Path
++import re
++import unittest
++
++ROOT = Path(__file__).resolve().parents[3]
++PROTOCOL = ROOT / '.agents/docs/production-lifecycle.md'
++TEMPLATES = [ROOT / '.specify/templates' / name for name in
++             ('operations-template.md', 'release-template.md')]
++
++
++class ProductionLifecycleContracts(unittest.TestCase):
++    def test_protocol_has_distinct_outcomes_and_routed_sections(self):
++        text = PROTOCOL.read_text()
++        for state in ('DEV_COMPLETE', 'RELEASE_READY', 'PRODUCTION_VERIFIED', 'BLOCKED',
++                      'FAILED', 'ROLLED_BACK'):
++            self.assertIn(state, text)
++        headings = set(re.findall(r'(?m)^## (.+)$', text))
++        for section in ('Preparation', 'Readiness', 'Deployment', 'Verification', 'Recovery'):
++            self.assertTrue(any(section.lower() == h.lower() for h in headings), section)
++
++    def test_templates_start_without_claimed_execution_success(self):
++        for path in TEMPLATES:
++            with self.subTest(path=path.name):
++                text = path.read_text()
++                self.assertNotRegex(text, r'(?m)^\s*- \[x\]')
++                self.assertNotRegex(text, r'(?m)^Status:\s*PRODUCTION_VERIFIED\s*$')
++                self.assertRegex(text, r'<[^>]+>', 'Unresolved real-product inputs need placeholders')
++                self.assertNotRegex(text, r'(?i)(?:password|api_key|token)\s*=\s*[A-Za-z0-9]{12,}')
++
++    def test_concrete_protocol_and_template_links_resolve(self):
++        paths = [PROTOCOL, *TEMPLATES]
++        for path in paths:
++            text = re.sub(r'```.*?```', '', path.read_text(), flags=re.S)
++            for href in re.findall(r'\[[^\]]*\]\(([^)]+)\)', text):
++                target = href.split('#', 1)[0]
++                if not target or '://' in target or re.search(r'[<>* ]', target):
++                    continue
++                with self.subTest(path=str(path), link=href):
++                    self.assertTrue((path.parent / target).exists())
++
++    def test_core_and_verification_expose_all_three_outcomes(self):
++        for name in ('AGENTS.md', '.agents/skill-library/engineering/verification-before-completion/SKILL.md'):
++            text = (ROOT / name).read_text()
++            for state in ('DEV_COMPLETE', 'RELEASE_READY', 'PRODUCTION_VERIFIED'):
++                with self.subTest(path=name, state=state):
++                    self.assertIn(state, text)
++
++
++if __name__ == '__main__':
++    unittest.main()
+--- before/.agents/scripts/test/test-update-integration.py
++++ after/.agents/scripts/test/test-update-integration.py
+@@ -54,6 +54,8 @@
+             shutil.copy2(ROOT / '.github/copilot-instructions.md', source / '.github/copilot-instructions.md')
+             protected = {
+                 'CONTEXT.md': 'custom domain language\n',
++                'docs/OPERATIONS.md': '# Local operations\nCustom deployment and recovery procedure.\n',
++                'docs/releases/1.2.3.md': '# Local release\nCandidate: user-sha\nKeep owner evidence.\n',
+                 'docs/user-guides/local-guide.md': '# Custom guide\n\n![Existing image](images/local/step.png)\n',
+                 '.agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs': 'custom legacy capture code\n',
+                 '.env': 'LOCAL_FIXTURE=unchanged\n',
+@@ -118,6 +120,10 @@
+             guide_file = target / guide
+             guide_file.write_text(guide_file.read_text() + '\nCustom guide policy.\n')
+             protected[guide] = guide_file.read_text()
++            template = '.specify/templates/release-template.md'
++            template_file = target / template
++            template_file.write_text(template_file.read_text() + '\nCustom release checklist.\n')
++            protected[template] = template_file.read_text()
+             adapter = '.claude/agents/code-reviewer.md'
+             self.assertTrue((target / adapter).is_file())
+             (target / adapter).write_text((target / adapter).read_text() + '\nUser adapter customization.\n')
+@@ -139,6 +145,7 @@
+                 (source / PACK / 'SKILL.md').write_text('---\nname: go-patterns\ndescription: Go\n---\nUpstream revision ' + str(revision))
+                 (source / retained).write_text((source / retained).read_text() + '\nUpstream revision.\n')
+                 (source / guide).write_text((source / guide).read_text() + '\nUpstream revision.\n')
++                (source / template).write_text((source / template).read_text() + '\nUpstream release template revision.\n')
+                 (source / safe_file).write_text('safe revision ' + str(revision))
+                 (source / '.agents/agents/code-reviewer.md').write_text(
+                     (source / '.agents/agents/code-reviewer.md').read_text() + '\nUpstream change.\n')
+@@ -156,6 +163,7 @@
+                 self.assertEqual(first['fileHashes'][key], current['fileHashes'][key])
+                 self.assertEqual(first['fileHashes'][retained], current['fileHashes'][retained])
+                 self.assertEqual(first['fileHashes'][guide], current['fileHashes'][guide])
++                self.assertEqual(first['fileHashes'][template], current['fileHashes'][template])
+                 for rel in retired_paths:
+                     self.assertEqual(first['fileHashes'][rel], current['fileHashes'][rel], rel)
+             for rel in ['.agents/handoffs', '.specify/metrics', 'adr/0003-download-only-distribution.md',
+--- before/.agents/skill-library/engineering/implementation-plan/SKILL.md
++++ after/.agents/skill-library/engineering/implementation-plan/SKILL.md
+@@ -12,6 +12,8 @@
+ 
+ Write plan.md using .specify/templates/plan-template.md. Map REQ- ids to exact file families and component changes, identify dependency order and independently deliverable slices, and state validation commands and observable outcomes. Plan risk, migration/rollback and compatibility only where applicable. Prefer existing code, native facilities and installed dependencies; do not add a new runtime or mandatory research/data-model/contracts artifacts without a concrete need.
+ 
++If release or operational work is selected, use [production preparation](../../../docs/production-lifecycle.md#preparation) and the relevant readiness/recovery sections to plan actual checks, deployment prerequisites and recovery ownership. Separate development delivery from release readiness and production verification; include staging or an evidenced alternative, applicable UAT/config/secrets and migration/backup checks. Name the candidate/target evidence to collect and reuse. Missing commands or hosting remain unresolved, not invented defaults. Do not require release artifacts on unrelated tasks or treat plan approval as production permission.
++
+ Record consequential architecture choices as proposed ADRs where needed; preserve accepted ADRs and signed-off business artifacts. Describe limitations and the evidence required to resolve them instead of inventing defaults. Plan does not authorize Git writes, deployment, or external mutations.
+ 
+ Hand off to task-breakdown with scoped files and verification boundaries. Gate 2 requires user approval of both plan.md and tasks.md before scaffold or implementation; drafting a plan alone never grants that approval.
+--- before/.agents/skill-library/engineering/task-breakdown/SKILL.md
++++ after/.agents/skill-library/engineering/task-breakdown/SKILL.md
+@@ -12,6 +12,8 @@
+ 
+ Write tasks.md using .specify/templates/tasks-template.md. Give each task a stable T id, relevant REQ-/US- ids, exact files or bounded file families, dependencies, deliverable, and observable verification. Include meaningful failing-test-first implementation tasks followed by verification, review and documentation. For prose-only changes use structural and decision-path checks appropriate to their behavior; do not create tests that merely repeat wording.
+ 
++For a selected release, use the [release lifecycle](../../../docs/production-lifecycle.md#readiness) to order readiness evidence, separately authorized deployment, post-deploy checks and applicable recovery tasks. Name the candidate/environment/config and verification owner. Production tasks remain blocked by missing required evidence or operational authorization; task/Gate 2 approval alone cannot release them. Reuse existing results only where still valid; keep this out of ordinary feature task lists.
++
+ Mark [P] only for slices with disjoint file ownership and no unresolved output dependency. Shared-file edits serialize. Define each Full-lane slice's context-pack.md scope (at most 150 lines), output path and integration owner. Fast work remains one context and never delegates.
+ 
+ Check coverage from every applicable REQ-/acceptance criterion to a task and verification. Do not create speculative foundation work or automatic commits. Route to technical-consistency-review only after spec.md, plan.md and tasks.md all exist. Present plan + tasks for Gate 2 approval; no scaffold or implementation before approval, and material business gaps return to BA.
+--- before/.agents/skill-library/engineering/technical-consistency-review/SKILL.md
++++ after/.agents/skill-library/engineering/technical-consistency-review/SKILL.md
+@@ -12,6 +12,8 @@
+ 
+ Read the context pack then targeted sections. Check BR-/REQ-/US- traceability through design, scoped files, ordered tasks and observable acceptance verification. Identify conflicting contracts/defaults, unsupported architecture, missing boundary validation or failure paths, dependency cycles, overlapping parallel ownership, unaddressed migration risk and hidden business decisions. Compare with project rules and accepted ADRs, not an upstream constitution runtime.
+ 
++For selected release/operations scope, check the [production lifecycle](../../../docs/production-lifecycle.md#readiness) on demand: separate feature completion, release readiness and actual production evidence; trace applicable CI/UAT/config/migration/recovery checks and authorization boundaries through the plan/tasks. Flag missing candidate/target identity, required skipped or stale evidence, assumed rollback of data and production writes inferred from plan approval. Ordinary feature review does not require release artifacts.
++
+ Return findings in chat (or a review artifact only if requested) with severity, evidence path/section, affected ids, consequence and smallest corrective action. Distinguish missing evidence from a demonstrated contradiction. No finding is a substitute for user approval. Critical findings block implementation/delivery; unresolved material business decisions return to BA with ASM- ids. Do not edit artifacts or reinterpret approved intent during this pass.
+ 
+ Report coverage, gaps, remaining questions and recommendation for Gate 2. Gate 2 still requires explicit approval of plan.md + tasks.md; zero findings does not sign them off. This is evidence-based agent review, not executable certification.
+--- before/.agents/skill-library/engineering/technical-documentation/SKILL.md
++++ after/.agents/skill-library/engineering/technical-documentation/SKILL.md
+@@ -100,6 +100,12 @@
+ 
+ ---
+ 
++## Operations and release records (on demand)
++
++For selected release/operations work, read the relevant [production lifecycle](../../../docs/production-lifecycle.md#preparation) section only. Maintain stable `docs/OPERATIONS.md` using the [operations template](../../../../.specify/templates/operations-template.md), and one `docs/releases/<version>.md` using the [release template](../../../../.specify/templates/release-template.md). Create a missing file only from confirmed project evidence; otherwise patch affected sections, preserving custom notes, existing evidence, image/assets and accepted history. Do not overwrite an existing runbook or regenerate every release record.
++
++Operations covers actual commands/environments, responsibility, health/log/alert checks and applicable migration/backup/recovery. Record secret names and secure-store references only, never values. Unknown commands, URLs or platform choices stay ASM-/BLOCKED. Release records link reusable candidate/target/config evidence rather than duplicating reports; record DEV_COMPLETE, RELEASE_READY and PRODUCTION_VERIFIED distinctly. Failed checks and recovery outcomes must remain truthful. Ordinary task docs need neither a new operations document nor a release record; text user guides remain separately requested or release-selected.
++
+ ## References
+ 
+ - [`references/principles.md`](./references/principles.md): Matt Palmer 8 rules & OpenAI Cookbook guidelines.
+--- before/.agents/skill-library/engineering/technical-spec/SKILL.md
++++ after/.agents/skill-library/engineering/technical-spec/SKILL.md
+@@ -14,6 +14,8 @@
+ 
+ Write .specify/features/<slug>/spec.md using .specify/templates/spec-template.md. requirements.md owns intent and acceptance criteria; reference its BR-/REQ-/US- ids rather than authoring a competing business specification. Describe the applicable component boundaries, data flow, contracts/DTO validation, state or schema changes, failure/recovery behavior, and security/operational constraints supported by those requirements. Include exact existing surfaces where known. Mark irrelevant sections not applicable with a reason. Supporting contracts/ or data-model.md are optional, only when their reader and use are clear.
+ 
++For selected release or operational changes, read [production preparation](../../../docs/production-lifecycle.md#preparation) only as relevant. Describe the actual build/deploy surfaces, configuration/secret references, CI verification, migration/data compatibility and recoverability required by the approved scope. Reuse existing operations evidence; do not create release paperwork for an ordinary feature or assume a hosting vendor, command, reversible migration or production authorization. Keep unknowns as ASM- items.
++
+ Resolve material technical choices against repository conventions and evidence. Ask only unresolved questions that affect the contract; recommendations are proposals until accepted. Preserve signed-off content: scope changes require a versioned change record and renewed approval, not an in-place rewrite.
+ 
+ Self-check that each technical decision traces to approved intent and each applicable requirement has a design surface and verification approach. Report artifacts and remaining questions; hand off to implementation-plan when the design is coherent. Do not run upstream CLIs, create branches, or implement code.
+--- before/.agents/skill-library/engineering/verification-before-completion/SKILL.md
++++ after/.agents/skill-library/engineering/verification-before-completion/SKILL.md
+@@ -85,9 +85,46 @@
+ - Append completion evidence to the feature `CHANGELOG.md`; update the requested
+   roadmap story only after all applicable gates pass.
+ 
++## Release verification (selected releases only)
++
++Feature checks above establish **DEV_COMPLETE** for the selected scope, not a
++production claim. A commit or successful push does not establish release readiness
++or deployment. Ordinary Fast/Full task completion needs no release record.
++
++When a release is explicitly selected, read only the needed section of the
++[production lifecycle](../../../docs/production-lifecycle.md#readiness):
++
++- **RELEASE_READY**: verify the candidate revision/artifact, target environment
++  and configuration against applicable build/test/CI, staging or evidenced
++  alternative, UAT/AC, config/secrets references, owner and operational checks.
++  Required failed, missing or skipped evidence blocks readiness. N/A needs a
++  concrete applicability reason. Zero unresolved Critical; fix High findings or
++  obtain explicit owner acceptance. Reuse evidence only for the same candidate,
++  environment and config with no invalidating changes.
++- Before any real deployment, follow [deployment](../../../docs/production-lifecycle.md#deployment).
++  Check matching explicit operational authorization; reuse it when already given.
++  Approval of this framework or a plan does not authorize production writes.
++  Unknown commands, hosting or material choices remain ASM-/BLOCKED.
++- **PRODUCTION_VERIFIED** requires an actual authorized deployment and passing
++  [post-deploy verification](../../../docs/production-lifecycle.md#verification)
++  for that candidate/target: applicable smoke, health, logs and alert checks.
++  Record real evidence; an unexecuted check is not a pass. Failed required
++  post-deploy checks mean FAILED, never a verified candidate.
++- Use [recovery](../../../docs/production-lifecycle.md#recovery) when needed.
++  Account for actual schema/data compatibility and backup/restore evidence;
++  never assume code rollback reverses data changes. Only verified recovery earns
++  ROLLED_BACK; it does not verify the failed candidate.
++
++Record selected release evidence in `docs/releases/<version>.md`, based on the
++[release template](../../../../.specify/templates/release-template.md). Reuse
++`docs/OPERATIONS.md` for stable procedures. Preserve existing custom content and
++assets; store secret names/references only, never values. Report BLOCKED rather
++than inventing commands or evidence. Keep release checks outside ordinary tasks.
++
+ ## Completion report (both lanes)
+ 
+ Report the selected lane, acceptance outcome, executed checks/results, review
+ findings and material limitations. Full also reports approval, traceability and
+-documentation gates. Verdict: COMPLETE or INCOMPLETE with the concrete reason.
++documentation gates. Feature verdict: COMPLETE or INCOMPLETE with the concrete reason; when a release
++was selected, also state its separate lifecycle status and candidate/target evidence.
+ Do not commit, push or merge without explicit user authorization.
+--- before/.agents/skills/engineering/command-continue-project/SKILL.md
++++ after/.agents/skills/engineering/command-continue-project/SKILL.md
+@@ -14,7 +14,8 @@
+ 
+ # Command: Continue Project Workflow (/command-continue-project)
+ 
+-Picks the next story from [PRODUCT_BACKLOG_ROADMAP.md](../../../../docs/PRODUCT_BACKLOG_ROADMAP.md)
++Picks the next story from `docs/PRODUCT_BACKLOG_ROADMAP.md`
++(created using the [roadmap template](../../../../.specify/templates/PRODUCT_BACKLOG_ROADMAP-template.md))
+ and runs it through the **Fast lane** unless a hard trigger says otherwise.
+ Lane rules are owned by [AGENTS.md](../../../../AGENTS.md) §2 — this file only executes them.
+ 
+@@ -163,7 +164,7 @@
+ 
+ - `tech-doc-architect`: `docs/features/<slug>/README.md` + index. ADR only when
+   architecture actually changed.
+-- `user-guide-creator` per release, not per story — skip for backend-only work.
++- Text-only user-guide runs only when requested or selected for release documentation, not on each story.
+ 
+ ### 4f. Close
+ 
+@@ -173,6 +174,15 @@
+ - Commit only on `/command-git-push` or explicit approval.
+ 
+ ---
++
++## Delivery boundary
++
++Roadmap `[x]` and this command completion mean `DEV_COMPLETE` for the story only.
++Do not create release records or deploy from /continue. When the user selects
++release work, read the relevant section of
++[production lifecycle](../../../docs/production-lifecycle.md); establish release
++evidence and reuse matching deployment authorization separately. Push does not
++prove production verification.
+ 
+ ## Output format
+ 
+--- before/.agents/skills/engineering/command-generate-backlog/SKILL.md
++++ after/.agents/skills/engineering/command-generate-backlog/SKILL.md
+@@ -62,6 +62,9 @@
+ 6. Keep deferred ideas `[~]`, blocked decisions `[!]`, and never mark new work
+    `[x]`. Scope sprints and release checks to confirmed priorities and risk;
+    include only applicable security, migration, routing and smoke checks.
++   Roadmap `[x]` means DEV_COMPLETE against story AC, not deployment. Track selected
++   release readiness/production evidence by linking docs/releases/<version>.md;
++   keep the existing roadmap schema and do not create release records per story.
+ 7. Record Won't-Have as confirmed boundaries or explicitly unresolved. Do not
+    derive exclusions from a vague idea. Preserve existing completed stories.
+ 
+--- before/.agents/skills/engineering/command-git-push/SKILL.md
++++ after/.agents/skills/engineering/command-git-push/SKILL.md
+@@ -88,6 +88,21 @@
+ 
+ ---
+ 
++### Source delivery and production status
++
++A successful commit/push is source delivery only. It does not mean a deployment
++ran or production is healthy. Report the actual branch/commit result; use
++DEV_COMPLETE only when feature verification supports it. Do not create release
++records or run deployments automatically from this command.
++
++When the user also selected a release, hand off on demand to
++[release readiness](../../../docs/production-lifecycle.md#readiness) and the
++existing `verification-before-completion` skill. Read deployment/verification/
++recovery sections only when that operational stage is in scope. Reuse matching
++prior production authorization; framework/plan/Git approval alone is not such
++authorization. RELEASE_READY and PRODUCTION_VERIFIED need their own candidate/
++target evidence in `docs/releases/<version>.md`; a push cannot substitute for it.
++
+ ### Step 4: Non-Blocking Advisory & Compact PR Brief
+ 
+ After successful push, output a concise status and ready-to-copy PR Brief in GitHub markdown:
+--- before/.specify/features/README.md
++++ after/.specify/features/README.md
+@@ -1,6 +1,6 @@
+ # Feature documentation
+ 
+-Current implementation: [Lean setup and text guides](lean-setup-text-guides/README.md).
++Current implementation: [Lean production lifecycle](lean-production-lifecycle/README.md).
+ Older feature reports below describe the state accepted at their own completion;
+ Later baselines and ADRs 0005–0007 supersede earlier source-retention decisions.
+ 
+@@ -21,3 +21,6 @@
+ 
+ - [Lean setup and text guides](lean-setup-text-guides/README.md) — merge three owners,
+   remove guide screenshot tooling and retain installed custom data.
++
++- [Lean production lifecycle](lean-production-lifecycle/README.md) — on-demand release
++  verification, two operations/release templates and preserved custom data.
+--- before/.specify/templates/PRODUCT_BACKLOG_ROADMAP-template.md
++++ after/.specify/templates/PRODUCT_BACKLOG_ROADMAP-template.md
+@@ -12,6 +12,10 @@
+ ---
+ 
+ # Product Backlog & Execution Roadmap
++
++> `[x]` xác nhận story DEV_COMPLETE theo AC, không xác nhận đã deploy. Khi có
++> release, dẫn tới docs/releases/<version>.md để ghi RELEASE_READY và kết quả
++> PRODUCTION_VERIFIED hoặc thất bại/phục hồi; không tạo hồ sơ release cho từng task.
+ 
+ > **Sản phẩm:** `<Tên và mô tả đã xác nhận>`
+ > **Cập nhật:** `<YYYY-MM-DD>`
+--- before/.specify/templates/operations-template.md
++++ after/.specify/templates/operations-template.md
+@@ -0,0 +1,53 @@
++# Operations: <product>
++
++> Target: `docs/OPERATIONS.md`. Create only if missing; otherwise patch confirmed
++> affected sections and preserve custom content. Replace placeholders from actual
++> project evidence. Unknowns stay `ASM-`/`BLOCKED`, not executable defaults.
++> Protocol: `.agents/docs/production-lifecycle.md`. Read relevant sections only.
++
++## Ownership and environments
++
++- Responsible owner/contact: <confirmed role and escalation route>
++- Environments/hosting: <actual targets and non-secret references>
++- Environment/configuration revision source: <where versioned/retrieved>
++- Production authorization: <who may approve, scope and where evidence is recorded>
++
++## Build, checks and acceptance
++
++- Build/test/lint/typecheck commands: <verified commands and working directories>
++- CI configuration/results: <existing pipeline reference or unresolved requirement>
++- Staging or agreed alternative: <procedure and applicability>
++- UAT/business AC: <source and how acceptance is recorded>
++- Required smoke/health/log/alert checks: <targets, commands and confirmed criteria>
++
++## Configuration and secrets
++
++| Name/reference | Target and purpose | Secure location/access owner | Verification |
++| --- | --- | --- | --- |
++| <name only> | <environment/use> | <reference, never value> | <check, no disclosure> |
++
++## Deployment
++
++- Candidate identity: <immutable artifact/commit and how serving identity is checked>
++- Verified deployment procedure: <actual commands/runbook and working directory>
++- Order/dependencies/cutover constraints: <confirmed details or justified N/A>
++- Post-deploy verification: <checks above, responsible owner and evidence location>
++
++## Data changes, backup and recovery
++
++- Applicability: <state/data affected, or explicit N/A reason>
++- Migration compatibility/order: <actual supported code/schema combination>
++- Backup/restore: <procedure, retention/access, restore evidence and freshness needs>
++- Recovery goals: <confirmed acceptable data loss/downtime; unresolved if unknown>
++- Failure triggers and recovery path: <rollback, forward-fix or restore procedure>
++- Recovery authorization and validation: <scope, responsible owner, smoke/data checks>
++
++Do not infer reversibility from a down migration or call a backup restorable
++without evidence. Keep secret values out of this document and its linked logs.
++
++## Release evidence
++
++Use `docs/releases/<version>.md` for version-specific scope, candidate/target,
++authorization, results and recovery attempts. Keep this runbook stable; update
++only when the confirmed procedure or ownership changes. Existing guides/images,
++custom scripts and accepted historical decisions remain untouched.
+--- before/.specify/templates/release-template.md
++++ after/.specify/templates/release-template.md
+@@ -0,0 +1,70 @@
++# Release: <version>
++
++> Target: `docs/releases/<version>.md`. Create only if absent; otherwise append
++> evidence/attempts without rewriting history or custom content. Replace placeholders
++> with confirmed facts. Protocol: `.agents/docs/production-lifecycle.md`.
++> Required checks need passing evidence; unresolved or skipped required checks block.
++
++## Identity and scope
++
++- Current state: <DEV_COMPLETE | RELEASE_READY | BLOCKED | FAILED | ROLLED_BACK | PRODUCTION_VERIFIED>
++- Candidate: <immutable artifact/commit identifier>
++- Target environment/config revision: <confirmed identity>
++- Scope and AC/UAT source: <backlog/story links; no duplicated requirement text>
++- Release owner / operational contact: <responsible role and escalation route>
++- Operations runbook: <existing docs/OPERATIONS.md reference>
++- Material unknowns/blockers: <ASM- ids and affected decisions, or none with evidence>
++
++## Readiness decision
++
++For each check, set applicability to required or N/A with a reason; record actual
++PASS/FAIL/MISSING/SKIPPED evidence for required checks. No row is passed by default.
++
++| Check | Applicability/reason | Result and evidence reference | Candidate/target/config and time |
++| --- | --- | --- | --- |
++| Build/tests/lint/typecheck/configured CI | <required or reasoned N/A> | <actual result/link> | <identity/time> |
++| Staging or agreed evidenced alternative | <required or reasoned N/A> | <actual result/link> | <identity/time> |
++| UAT against agreed business AC | <required or reasoned N/A> | <actual result/link> | <identity/time> |
++| Config/secret references available | <required or reasoned N/A> | <names/secure references only> | <identity/time> |
++| Migration compatibility/order | <required or reasoned N/A> | <actual result/link> | <identity/time> |
++| Backup freshness/restore evidence | <required or reasoned N/A> | <actual result/link> | <identity/time> |
++| Recovery procedure/owner/checks | <required or reasoned N/A> | <actual result/link> | <identity/time> |
++| Smoke/health/log/alert checks prepared | <required or reasoned N/A> | <actual result/link> | <identity/time> |
++
++- Evidence reuse: <why prior evidence still matches; invalidating changes require recheck>
++- Findings: <zero unresolved Critical; High fixes or explicit specific owner acceptance>
++- Readiness outcome: <RELEASE_READY only if applicable required checks passed; otherwise BLOCKED>
++- Decision owner/time/evidence: <actual decision; readiness does not authorize deploy>
++
++## Deployment attempt <id>
++
++- Readiness recheck: <current RELEASE_READY; evidence still matches candidate/target/config with no invalidating changes; BLOCKED cannot be overridden by authorization>
++- Authorization: <existing explicit approval covering candidate/target/action; absent means no production write>
++- Executor/time/candidate/target/config: <actual values>
++- Execution/result: <verified procedure, command/result reference; no secret values>
++- Observed serving/data state: <actual state, including partial/failed deployment>
++
++## Post-deploy verification
++
++| Required check | Actual candidate/target/config | Time, result and evidence |
++| --- | --- | --- |
++| Smoke journey and health | <deployed identity> | <actual result/link> |
++| Relevant logs/alerts | <deployed identity> | <actual result/link> |
++| Migration/config/data checks if applicable | <deployed identity or justified N/A> | <actual result/link> |
++
++- Outcome: <PRODUCTION_VERIFIED only after actual authorized deployment and required checks pass; BLOCKED if evidence missing/skipped, FAILED if a check failed>
++- New findings: <Critical blocks success and cannot be accepted; High fixed or explicit specific owner risk acceptance before PRODUCTION_VERIFIED>
++- Owner/contact and agreed observation/follow-up: <confirmed responsibility and checks>
++
++## Recovery / follow-up
++
++- Failure/impact/trigger: <facts, or no recovery needed with reason>
++- Authorized recovery action: <actual rollback/restore or new forward-fix candidate>
++- Compatibility/restore point/data-loss constraints: <confirmed evidence, no assumed reversibility>
++- Execution and resulting serving/data state: <actual result/link>
++- Recovery verification: <required smoke/health/data results and time>
++- Outcome: <ROLLED_BACK only after prior state restoration is verified; otherwise FAILED>
++- Outstanding incident/blockers: <owner and next action; retain failed-attempt evidence>
++
++Text-only user documentation is optional unless requested or required for this
++release. Preserve existing guides/images/scripts and unrelated custom notes.
+--- before/AGENTS.md
++++ after/AGENTS.md
+@@ -37,10 +37,17 @@
+ | 4 | TDD implementation | Fast: one context. Full: `implementation-orchestrator` + scoped slices | tests green |
+ | 5 | Review | Fast: self-check. Full: `code-reviewer` (+ `ui-ux-reviewer` if UI changed) | **Gate 3**: zero Critical |
+ | 6 | Docs — **Full lane only** | `technical-documentation` | feature README indexed |
+-| 7 | Ship (user-triggered) | `/command-git-push` | commits pushed |
++| 7 | Code delivery (user-triggered) | `/command-git-push` | commits pushed; no deployment claim |
+ 
+ Fast lane is steps **1 → 4 → 5 (self-check) → 7**. Full lane is all seven.
+ Full detail: **`.agents/docs/pipeline-detail.md`**.
++
++Feature completion is `DEV_COMPLETE`, not a release/deployment claim. For a selected
++release only, use [production lifecycle](.agents/docs/production-lifecycle.md):
++`RELEASE_READY` requires candidate/target-bound evidence; `PRODUCTION_VERIFIED`
++requires authorized deployment and actual post-deploy checks. Reuse matching
++authorization; commit/push or framework approval never authorizes production writes.
++Keep operations/release records per release, not per task.
+ 
+ Two names that are easy to confuse:
+ 
+--- before/README.md
++++ after/README.md
+@@ -225,6 +225,25 @@
+ | **5** | **Phản Biện (Full lane)**        | `code-reviewer`, `ui-design-review`, `ponytail-review`     | Báo cáo 3 tầng: Bảo mật, Spec fidelity & Tối giản hoá mã nguồn.                            |
+ | **6** | **Tài Liệu Hóa (Full lane)**     | `tech-doc-architect`, `command-user-guide`      | `docs/features/<slug>/README.md`, `docs/user-guides/<slug>.md`, sơ đồ Mermaid.               |
+ | **7** | **Đóng Gói & Đẩy Mã**            | `/command-git-push`                                        | Tự động chia Modular Commits theo tầng và push an toàn.                                    |
++
++### Từ dev tới production
++
++Task hoàn thành là **DEV_COMPLETE**. Release đạt các kiểm tra áp dụng là
++**RELEASE_READY**; chỉ sau deploy được ủy quyền và kiểm tra thật mới là
++**PRODUCTION_VERIFIED**. Push code không đồng nghĩa đã deploy.
++
++Luồng release dùng skill hiện có, đọc theo nhu cầu trong
++[production lifecycle](.agents/docs/production-lifecycle.md). Chỉ cần hai loại hồ sơ:
++`docs/OPERATIONS.md` ổn định và `docs/releases/<version>.md` cho release đã chọn,
++từ [operations template](.specify/templates/operations-template.md) và
++[release template](.specify/templates/release-template.md). Giữ nội dung tùy chỉnh;
++không lưu giá trị secrets hoặc giả định nền tảng triển khai. CI/CD cụ thể được
++thiết lập theo stack và hosting thật của sản phẩm, không phải tự động từ framework.
++
++Bắt đầu với Product Backlog là đủ nếu đã có mục tiêu, người dùng, phạm vi và AC.
++Khi có code, README ghi cách chạy/kiểm tra; CONTEXT bổ sung thuật ngữ cần thiết.
++Requirements/spec/plan/tasks chỉ theo Full lane; ADR chỉ cho quyết định quan trọng.
++Không cần viết thêm BRD/PRD/SRS trùng nội dung nếu không có người nhận cụ thể.
+ 
+ > 📖 **Xem hướng dẫn thao tác chi tiết từng bước 1 tại**: [📘 .agents/docs/workflow-step-by-step.md](.agents/docs/workflow-step-by-step.md)
+ 
+--- before/adr/0008-release-evidence-and-production-boundaries.md
++++ after/adr/0008-release-evidence-and-production-boundaries.md
+@@ -0,0 +1,13 @@
++# 0008: Release evidence and production boundaries
++
++Status: Accepted
++Date: 2026-11-26
++Authority: owner approved the proposed lightweight dev-to-production extension.
++
++## Decision
++
++Keep the existing 50 skills and Fast/Full feature gates. Canonical production-lifecycle.md defines DEV_COMPLETE, RELEASE_READY and PRODUCTION_VERIFIED with candidate/target/config-bound evidence, required-check blockers, matching operational authorization and verified failure/recovery outcomes. Existing skills route to applicable sections on demand. Add only operations-template.md for docs/OPERATIONS.md and release-template.md for docs/releases/<version>.md. No release artifact per ordinary task and no executable vendor CI/deploy pipeline in this framework change.
++
++## Consequences
++
++Code push proves no deployment. Real project CI/CD, UAT, monitoring and recovery require actual commands/platforms and evidence. Existing matching authorization is reused; framework approval never authorizes production mutation. Required failed/missing/skipped evidence blocks, Critical cannot be waived, and rollback needs actual serving/data recovery checks. Target operations/release documents, customized templates and earlier accepted artifacts remain protected by the unchanged updater. This extends prior BA-first and text-guide decisions; it does not rewrite them or add new runtime/global configuration.
+--- before/adr/README.md
++++ after/adr/README.md
+@@ -11,3 +11,4 @@
+ | [0005: Project-local workflow and Mermaid diagrams](0005-project-local-mermaid-workflow.md) | Accepted |
+ | [0006: Consolidated native skill library](0006-consolidated-native-skill-library.md) | Accepted; inventory count superseded by 0007 |
+ | [0007: Lean setup and text guides](0007-lean-setup-and-text-guides.md) | Accepted |
++| [0008: Release evidence and production boundaries](0008-release-evidence-and-production-boundaries.md) | Accepted |
+--- before/docs/features/README.md
++++ after/docs/features/README.md
+@@ -2,3 +2,4 @@
+ 
+ - [Consolidated UAW skills](skill-consolidation/README.md) — current skill owners and safe upgrades.
+ - [Lean setup and text guides](lean-setup-text-guides/README.md) — current setup/debt/authoring owners and text-only guides.
++- [Lean dev-to-production lifecycle](lean-production-lifecycle/README.md) — release evidence, operations templates and verified production boundaries.
+--- before/docs/features/lean-production-lifecycle/README.md
++++ after/docs/features/lean-production-lifecycle/README.md
+@@ -0,0 +1,26 @@
++# Lean dev-to-production lifecycle
++
++Status: Implemented; verification evidence is recorded in the acceptance report.
++Last updated: 2026-11-26
++
++UAW retains 50 skills (9 hot/41 cold). Release work reuses existing planning, review, documentation and verification owners; ordinary Fast/Full tasks keep their own gates.
++
++| Outcome | Meaning |
++| --- | --- |
++| DEV_COMPLETE | Selected feature AC, required checks/review and lane docs are complete |
++| RELEASE_READY | Applicable required checks pass for the selected candidate/target/config |
++| PRODUCTION_VERIFIED | Authorized deployment occurred and actual required post-deploy checks passed |
++
++Read only the relevant [production lifecycle](../../../.agents/docs/production-lifecycle.md) section. A push does not deploy, and framework approval does not authorize production writes. Missing/failed/skipped required evidence blocks readiness or verification. N/A requires an applicability reason; reuse evidence only while candidate/environment/config validity remains. Failed deployment/smoke records FAILED; ROLLED_BACK requires confirmed prior serving/data restoration and verification.
++
++## Two document types
++
++Use [operations-template.md](../../../.specify/templates/operations-template.md) to create docs/OPERATIONS.md only when needed and missing. It captures actual procedures, responsibility, configuration/secret references, health checks and applicable recovery. Preserve existing custom sections. Never place secret values in docs.
++
++Use [release-template.md](../../../.specify/templates/release-template.md) for docs/releases/<version>.md per selected release. Record candidate/target, scope/AC, readiness evidence, matching authorization, actual execution/verification and recovery outcomes. Append attempts without rewriting failed history. Do not create release paperwork per task or invent CI/CD commands, hosts or thresholds.
++
++Text user guides stay optional/on request or release need; no screenshot workflow is restored. Existing wizard is used only for an actual authorized manual procedure. No new skill, runtime, dependency, vendor pipeline or live deployment is included.
++
++## Evidence and limits
++
++[Acceptance report](../../../.specify/features/lean-production-lifecycle/acceptance-report.md), [test plan](../../../.specify/features/lean-production-lifecycle/test-plan.md) and [manual scenario matrix](../../../.specify/features/lean-production-lifecycle/implementation/scenario-review.md) separate source/integration tests from real production execution. The protocol is an agent-followed evidence contract, not an executable deployment state machine. CI/CD/UAT/monitoring/restore validation must be completed for the actual target product before claiming production readiness.

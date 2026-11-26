@@ -11,6 +11,8 @@ description: Anti-slop frontend skill for landing pages, portfolios, and redesig
 
 ---
 
+For initial direction and stack detection, read [shared design foundations](references/shared-design-foundations.md#detect-stack-and-surface), then only the relevant section on visual direction, the design anchor or the final check. Reuse the actual project stack and approved tokens; the examples below do not authorize a framework switch, new dependencies or invented business behavior.
+
 ## 0. BRIEF INFERENCE (Read the Room Before Anything Else)
 
 Before touching code or tweaking dials, **infer what the user actually wants**. Most LLM design output is bad because the model jumps to a default aesthetic instead of reading the room.
@@ -122,10 +124,10 @@ For these directions, there is **no single official package**. Build with native
 
 ## 3. DEFAULT ARCHITECTURE & CONVENTIONS
 
-Unless the design read picks a real design system (Section 2.A), these are the defaults:
+Use the detected project stack and existing conventions first. The examples below apply only when compatible with confirmed project choices; ask about an unestablished stack instead of silently choosing one:
 
 ### 3.A Stack
-* **Framework:** React or Next.js. Default to Server Components (RSC).
+* **React/Next.js projects only:** preserve the project's rendering model; use Server Components where its existing architecture supports them.
   * **RSC SAFETY:** Global state works ONLY in Client Components. In Next.js, wrap providers in a `"use client"` component.
   * **INTERACTIVITY ISOLATION:** Any component using Motion, scroll listeners, or pointer physics MUST be an isolated leaf with `'use client'` at the top. Server Components render static layouts only.
 * **Styling:** **Tailwind v4** (default). Tailwind v3 only if the existing project demands it.
@@ -361,6 +363,8 @@ matches what you are about to do.
 
 | You are about to… | Open |
 | --- | --- |
+| Establish stack, subject-specific visual direction, copy or a persistent design anchor | `references/shared-design-foundations.md` (matching section only) |
+| Finish the cross-surface quality pass after the marketing rubric | `references/shared-design-foundations.md#shared-final-check` |
 | Build a scroll-driven or pinned section (sticky stack, horizontal pan, reveal stagger) | `references/patterns-skeletons.md` |
 | Ship a page and check motion, dark mode, Core Web Vitals, z-index, DOM cost | `references/perf-and-dark-mode.md` |
 | Sanity-check for "AI tells" before delivering (fonts, copy, em-dashes, fake data) | `references/ai-tells.md` |
@@ -370,6 +374,6 @@ matches what you are about to do.
 Rules of use:
 
 1. Read the router section of a reference file, then the one subsection you need.
-2. Never load all five. If you think you need all five, the brief is too broad —
+2. Never load every reference. If you think you need all five, the brief is too broad —
    split the work.
 3. If a reference contradicts the core above, the core wins.

@@ -1,0 +1,14 @@
+{
+  "removed_source_files": 9,
+  "paths": [
+    ".agents/skill-library/productivity/setup-workspace/SKILL.md",
+    ".agents/skill-library/engineering/writing-for-agents/SKILL.md",
+    ".agents/skill-library/engineering/user-guide-with-screenshots/SETUP.md",
+    ".agents/skill-library/engineering/user-guide-with-screenshots/SKILL.md",
+    ".agents/skill-library/engineering/ponytail-debt/SKILL.md",
+    ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/screenshot-plan.example.json",
+    ".agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs",
+    ".agents/skill-library/engineering/user-guide-with-screenshots/templates/user-guide-template.md",
+    ".agents/scripts/test/test-capture-screenshots.mjs"
+  ]
+}

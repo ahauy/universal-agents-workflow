@@ -130,7 +130,7 @@ agents:
   user-guide-creator:
     interface:
       display_name: "User Guide Creator"
-      short_description: "Generates end-user visual guides with real browser screenshots and red callout badges"
+      short_description: "Writes concise end-user text guides from confirmed feature behavior"
       default_model: "gemini-3.7-flash"
     policy:
       allow_implicit_invocation: true

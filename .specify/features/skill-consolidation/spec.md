@@ -1,0 +1,3 @@
+# Technical design
+
+Source-only skill removal uses the existing no-deletion update engine unchanged. UI shared guidance belongs under retained design-taste-frontend/references and is referenced selectively by design-taste-product. skills-index owns symptom routing. ponytail-review owns diff and repository audit. Remove obsolete generator group entries and regenerate the source index using an isolated root if source ownership prevents writing; never reset customer provenance. Optional-stack catalog mirrors remain synchronized. Update regression tests from alias retention to retirement and cover customized retired-skill paths explicitly.

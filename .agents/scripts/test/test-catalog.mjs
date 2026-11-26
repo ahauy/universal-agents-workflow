@@ -8,9 +8,12 @@ const root=process.cwd();
 const authority=path.join(root,'optional-stack-skills/catalog.json');
 const runtime=path.join(root,'.agents/catalog.json');
 test('runtime catalog is byte-identical to its authority',()=>assert.ok(fs.readFileSync(runtime).equals(fs.readFileSync(authority))));
-test('removed diagram tool has no selectable catalog owner',()=>{
+test('retired tools and utilities have no selectable catalog owner',()=>{
  const items=JSON.parse(fs.readFileSync(authority)).items;
- assert.equal(items.some(item=>item.id==='archify'),false);
+ const retired=new Set(['archify','ponytail-audit','ponytail-gain','ponytail-help',
+   'route','frontend-design','ui-taste-pro','setup-workspace',
+   'writing-for-agents','ponytail-debt','user-guide-with-screenshots']);
+ assert.equal(items.some(item=>retired.has(item.id)||item.id.startsWith('speckit-')),false);
 });
 test('catalog maintenance command detects stale mirror and regenerates exact bytes',t=>{
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'uaw-catalog-')); t.after(()=>fs.rmSync(temp,{recursive:true,force:true}));

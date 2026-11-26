@@ -211,20 +211,39 @@ flowchart TD
     S2 -->|🛑 Gate 1: Baseline Signed-Off| S3["3. Phase 2-4: UAW Native Planning<br/>(spec.md, plan.md, tasks.md)"]
     S3 -->|🛑 Gate 2: Tech Plan Approved| S4["4. Phase 5: TDD Implementation<br/>(Red -> Green -> Refactor theo Slice)"]
     S4 --> S5["5. Phase 6A: Tri-Pass Review<br/>(Bảo mật, Spec & Tối giản hoá Anti-Overengineering)"]
-    S5 --> S6["6. Phase 6B: Docs & User Guide<br/>(Diataxis Docs + Ảnh chụp Playwright thật)"]
+    S5 --> S6["6. Docs (Full); User Guide khi cần<br/>(Hướng dẫn văn bản từ hành vi đã xác nhận)"]
     S6 --> S7["7. /command-git-push<br/>(Modular Commits chuẩn Conventional)"]
     F --> S7
 ```
 
 | Bước  | Tên Giai Đoạn                    | Kỹ Năng / Subagent Đảm Nhiệm                               | Đầu Ra Bắt Buộc (Artifacts)                                                                |
 | :---: | :------------------------------- | :--------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
-| **1** | **Onboarding Stack**             | `/skill-setup`, `setup-workspace`                          | `.agents/catalog.json`, skills, rules & subagents theo stack.                              |
+| **1** | **Onboarding Stack**             | `/skill-setup`                          | `.agents/catalog.json`, skills, rules & subagents theo stack.                              |
 | **2** | **Nghiệp Vụ (Full lane)**        | `intake-classifier`, `elicitation-interview`, `grilling`   | `.specify/features/<slug>/baseline.md` (**Ký duyệt v1.0**).                                |
 | **3** | **Đặc Tả & Thiết Kế (Full lane)**| `technical-spec`, `implementation-plan`, `task-breakdown`         | `spec.md`, `plan.md`, `data-model.md`, `tasks.md`.                                         |
 | **4** | **Lập Trình TDD**                | `code-explorer`, `backend-developer`, `frontend-developer` | Fast: không file thủ tục. Full: `test-plan.md` + Unit Tests đỏ → xanh.                     |
 | **5** | **Phản Biện (Full lane)**        | `code-reviewer`, `ui-design-review`, `ponytail-review`     | Báo cáo 3 tầng: Bảo mật, Spec fidelity & Tối giản hoá mã nguồn.                            |
 | **6** | **Tài Liệu Hóa (Full lane)**     | `tech-doc-architect`, `command-user-guide`      | `docs/features/<slug>/README.md`, `docs/user-guides/<slug>.md`, sơ đồ Mermaid.               |
 | **7** | **Đóng Gói & Đẩy Mã**            | `/command-git-push`                                        | Tự động chia Modular Commits theo tầng và push an toàn.                                    |
+
+### Từ dev tới production
+
+Task hoàn thành là **DEV_COMPLETE**. Release đạt các kiểm tra áp dụng là
+**RELEASE_READY**; chỉ sau deploy được ủy quyền và kiểm tra thật mới là
+**PRODUCTION_VERIFIED**. Push code không đồng nghĩa đã deploy.
+
+Luồng release dùng skill hiện có, đọc theo nhu cầu trong
+[production lifecycle](.agents/docs/production-lifecycle.md). Chỉ cần hai loại hồ sơ:
+`docs/OPERATIONS.md` ổn định và `docs/releases/<version>.md` cho release đã chọn,
+từ [operations template](.specify/templates/operations-template.md) và
+[release template](.specify/templates/release-template.md). Giữ nội dung tùy chỉnh;
+không lưu giá trị secrets hoặc giả định nền tảng triển khai. CI/CD cụ thể được
+thiết lập theo stack và hosting thật của sản phẩm, không phải tự động từ framework.
+
+Bắt đầu với Product Backlog là đủ nếu đã có mục tiêu, người dùng, phạm vi và AC.
+Khi có code, README ghi cách chạy/kiểm tra; CONTEXT bổ sung thuật ngữ cần thiết.
+Requirements/spec/plan/tasks chỉ theo Full lane; ADR chỉ cho quyết định quan trọng.
+Không cần viết thêm BRD/PRD/SRS trùng nội dung nếu không có người nhận cụ thể.
 
 > 📖 **Xem hướng dẫn thao tác chi tiết từng bước 1 tại**: [📘 .agents/docs/workflow-step-by-step.md](.agents/docs/workflow-step-by-step.md)
 
@@ -249,10 +268,9 @@ flowchart TD
 ### 🎯 Các Kỹ Năng & Công Cụ Đi Kèm
 
 - **`ponytail`**: Kích hoạt tư duy tối giản xuyên suốt toàn bộ phiên làm việc (`/ponytail lite|full|ultra`).
-- **`ponytail-review`**: Đánh giá git diff với 5 thẻ chuẩn (`delete:`, `stdlib:`, `native:`, `yagni:`, `shrink:`) và chỉ số định lượng `net: -N lines possible`.
-- **`ponytail-audit`**: Quét toàn bộ repository để tìm mã rác, code phình to cần cắt tỉa.
-- **`ponytail-debt`**: Quét và lập bảng theo dõi vi nợ kỹ thuật từ các comment `// ponytail: <ceiling>, <upgrade-trigger>`.
-- **`ponytail-gain`**: Xem bảng tổng kết định lượng hiệu quả benchmark (-54% LOC, -20% chi phí token, 100% an toàn).
+- **`ponytail-review`**: Rà git diff (`/ponytail-review diff`) hoặc toàn repository (`/ponytail-review repo`) với 5 thẻ `delete:`, `stdlib:`, `native:`, `yagni:`, `shrink:`; chỉ báo cáo đề xuất, không tự xóa.
+- **`ponytail-review debt`**: Quét và lập bảng theo dõi vi nợ kỹ thuật từ các comment `// ponytail: <ceiling>, <upgrade-trigger>`.
+Hướng dẫn chế độ và cách dùng: [Ponytail quick reference](.agents/docs/ponytail-usage.md). Không suy ra mức tiết kiệm của dự án từ benchmark bên ngoài.
 
 📂 **Xem thư viện ví dụ đối chiếu thực tế (Before & After) tại**: [📑 docs/examples/README.md](docs/examples/README.md)
 
@@ -266,17 +284,27 @@ flowchart TD
 | **`/generate-backlog`**   | `/create-roadmap` | Phỏng vấn nghiệp vụ theo scope và tự sinh roadmap chuẩn chống hallucination.            |
 | **`/continue`**           | `/next`           | Quét roadmap, phỏng vấn gỡ blocker `[!]` và kích hoạt làm story kế tiếp. |
 | **`/command-git-push`**   | `/push`, `/ship`  | Kiểm tra cổng tài liệu, phân tách Modular Commits và push an toàn.       |
-| **`/command-user-guide`** | `/guide`          | Mở Playwright chụp ảnh giao diện thật và viết hướng dẫn sử dụng.         |
+| **`/command-user-guide`** | `/guide`          | Viết hướng dẫn sử dụng bằng văn bản, không có bước chụp ảnh.         |
 | **`/update`**             | `/upgrade`        | Cập nhật framework an toàn với động cơ 3-Way Hash.                       |
 | **`/ponytail`**           | `/be-lazy`        | Kích hoạt tư duy tối giản Senior Dev (chế độ: lite / full / ultra).      |
-| **`/ponytail-review`**    | `/simplify`       | Rà soát và chỉ điểm cắt giảm code thừa trong git diff (Net LOC).         |
-| **`/ponytail-debt`**      | `/debt-ledger`    | Thu hoạch vi nợ kỹ thuật từ các comment ponytail trong codebase.         |
-| **`/ponytail-audit`**     | `/audit-bloat`    | Quét toàn bộ repository tìm mã over-engineering cần loại bỏ.             |
-| **`/route`**              | `bước tiếp theo?` | Trợ lý thông minh định hướng bước đi hoặc lệnh cần chạy tiếp theo.       |
+| **`/ponytail-review diff`** | `review diff` | Rà soát code thừa trong thay đổi hiện tại. |
+| **`/ponytail-review debt`**      | `/debt-ledger`    | Thu hoạch vi nợ kỹ thuật từ các comment ponytail trong codebase.         |
+| **`/ponytail-review repo`** | `audit repository` | Quét toàn bộ repository tìm mã over-engineering cần loại bỏ. |
+| **`skills-index`** | `bước tiếp theo?` | Đọc catalog, chọn đúng skill và chỉ dẫn bước tiếp theo. |
 | **`/wait-what`**          | `nói dễ hiểu hơn` | Yêu cầu AI giải thích lại thuật ngữ bằng ngôn ngữ đời thường.            |
 
 > 📑 **Mục lục kỹ năng (nguồn chuẩn)**: [`.agents/SKILLS.md`](.agents/SKILLS.md) — sinh tự động từ frontmatter, có `--check` chống lệch.
 > Giải thích tiếng Việt chi tiết: [`.agents/docs/skills-cheatsheet.md`](.agents/docs/skills-cheatsheet.md).
+
+Bộ nguồn hiện có **50 skill: 9 hot và 41 cold**. Các skill `speckit-*` đã
+ngừng cung cấp; dùng `technical-spec`, `implementation-plan`, `task-breakdown`
+và `technical-consistency-review` trong quy trình UAW. Định tuyến chuyển về
+`skills-index`, audit toàn repo chuyển về `ponytail-review repo`; hướng dẫn
+Ponytail nằm trong tài liệu. Onboarding được gộp vào `command-skill-setup`, hướng dẫn viết cho agent nằm trong reference của `technical-documentation`, và debt ledger dùng `ponytail-review debt`. `wait-what` tiếp tục được giữ nguyên.
+User guide dùng skill `user-guide` theo yêu cầu/tài liệu release, không bắt buộc chụp ảnh, đánh dấu ảnh hay chạy ứng dụng.
+Các tên lệnh cũ đã loại bỏ không còn được hỗ trợ ở bản cài mới. Khi cập nhật,
+framework giữ nguyên bản cũ đã cài và dữ liệu tùy chỉnh; không tự xóa chúng.
+
 
 ---
 
@@ -323,7 +351,7 @@ Thư mục dự án:
 ├── docs/                               # 🟢 100% TÀI LIỆU HỆ THỐNG DỰ ÁN CỦA BẠN (Diataxis)
 │   ├── architecture/                   # Kiến trúc hệ thống, ERD, Language Pack & Model Contracts
 │   ├── features/                       # Tài liệu kỹ thuật từng tính năng sản phẩm
-│   ├── user-guides/                    # Hướng dẫn sử dụng app có ảnh chụp thật
+│   ├── user-guides/                    # Hướng dẫn sử dụng bằng văn bản
 │   └── PRODUCT_BACKLOG_ROADMAP.md      # Roadmap phát triển sản phẩm (dự án cá nhân)
 │
 ├── .agents/                            # 🤖 BỘ NÃO & ĐỘNG CƠ CỦA AI FRAMEWORK

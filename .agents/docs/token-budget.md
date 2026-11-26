@@ -21,8 +21,9 @@ reading its `SKILL.md` **is** the load.
 
 **Interpretation:** the measurement script estimates text size as characters ÷ 4,
 not actual model tokens, cache behavior, billed usage or money saved. Keep the
-hot entry-point set small; native planning skills and compatibility aliases stay
-cold. Available provider telemetry is required to establish real cost changes;
+hot entry-point set small; native planning and specialized guidance stay cold.
+Retired compatibility aliases are absent from new source installs. Available
+provider telemetry is required to establish real cost changes;
 this workflow makes no guaranteed monetary savings claim.
 
 ## Fixed cost per request (OpenCode, this repo)

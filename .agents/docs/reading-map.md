@@ -25,7 +25,7 @@
 | Merge vs rebase decision, conflict handling | `Merge vs Rebase` / `Conflict Resolution` | `git-workflow` → `references/merge-rebase-conflicts.md` |
 | PR description or release steps | `Pull Request Workflow` / `Release Management` | `git-workflow` → `references/pr-and-release.md` |
 | Git hooks, config, anti-patterns | `Git Hooks` / `Anti-Patterns` | `git-workflow` → `references/config-hooks-antipatterns.md` |
-| Design tokens, palette, type scale | `Design anchor` / `Palette` / `Type` | `design-taste-product` → `references/design-anchor.md` |
+| Project stack, visual direction, design anchor or common UI self-audit | the matching heading only | `design-taste-frontend` → `references/shared-design-foundations.md` (shared by product UI) |
 | Empty/loading/error states, a11y, i18n | `UX states` / `Accessibility` / `i18n` | `design-taste-product` → `references/ux-states-a11y-i18n.md` |
 | Streaks/XP/rewards, product-UI AI tells | `Engagement mechanics` / `AI tells` | `design-taste-product` → `references/engagement-and-ai-tells.md` |
 | Scroll/hover skeletons, motion perf, dark mode | the one skeleton or section | `design-taste-frontend` → `references/*.md` |

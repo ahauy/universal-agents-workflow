@@ -37,10 +37,17 @@ Deep detail lives in `.agents/docs/` and is read on demand, not at session start
 | 4 | TDD implementation | Fast: one context. Full: `implementation-orchestrator` + scoped slices | tests green |
 | 5 | Review | Fast: self-check. Full: `code-reviewer` (+ `ui-ux-reviewer` if UI changed) | **Gate 3**: zero Critical |
 | 6 | Docs — **Full lane only** | `technical-documentation` | feature README indexed |
-| 7 | Ship (user-triggered) | `/command-git-push` | commits pushed |
+| 7 | Code delivery (user-triggered) | `/command-git-push` | commits pushed; no deployment claim |
 
 Fast lane is steps **1 → 4 → 5 (self-check) → 7**. Full lane is all seven.
 Full detail: **`.agents/docs/pipeline-detail.md`**.
+
+Feature completion is `DEV_COMPLETE`, not a release/deployment claim. For a selected
+release only, use [production lifecycle](.agents/docs/production-lifecycle.md):
+`RELEASE_READY` requires candidate/target-bound evidence; `PRODUCTION_VERIFIED`
+requires authorized deployment and actual post-deploy checks. Reuse matching
+authorization; commit/push or framework approval never authorizes production writes.
+Keep operations/release records per release, not per task.
 
 Two names that are easy to confuse:
 

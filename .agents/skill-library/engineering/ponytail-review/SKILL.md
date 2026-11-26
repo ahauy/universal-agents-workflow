@@ -1,7 +1,7 @@
 ---
 name: ponytail-review
 description: >
-  Code review focused exclusively on over-engineering. Finds what to delete:
+  Diff/repository complexity review or a debt ledger of deliberate ponytail shortcuts. Finds what to delete:
   reinvented standard library, unneeded dependencies, speculative abstractions,
   dead flexibility. One line per finding: location, what to cut, what replaces
   it. Use when the user says "review for over-engineering", "what can we
@@ -10,8 +10,25 @@ description: >
   hunts complexity.
 ---
 
-Review diffs for unnecessary complexity. One line per finding: location, what
-to cut, what replaces it. The diff's best outcome is getting shorter.
+Review unnecessary complexity in the requested scope. One line per finding:
+location, what to cut, what replaces it. This is a read-only report.
+
+## Scope
+
+- **Diff**: `/ponytail-review diff` or a request to review changes. Inspect the
+  specified diff and enough callers to justify each proposed cut.
+- **Repository**: `/ponytail-review repo` or an explicit whole-codebase audit
+  request. Scan source, dependencies and callers across the repository; exclude
+  dependency/vendor trees, build outputs, Git internals and generated artifacts.
+  Rank findings by the largest justified reduction first.
+- **Debt**: `/ponytail-review debt` or a request to list deferred shortcuts.
+  Follow the debt ledger section below; no complexity-cut review is implied.
+- If the requested scope is unclear, clarify it before a repository-wide scan.
+
+Look for dependencies covered by stdlib/native features, single-implementation
+interfaces, one-product factories, forwarding wrappers, dead flags/config,
+speculative flexibility and hand-rolled stdlib. Prove reachability and consumer
+impact before suggesting deletion; a small file is not itself evidence of bloat.
 
 ## Format
 
@@ -43,9 +60,31 @@ considered whether all these validation rules are needed at this stage?"
 
 ## Scoring
 
-End with the only metric that matters: `net: -<N> lines possible.`
+End with `net: -<N> lines possible.` For repository audits also report
+`-<M> dependencies possible` when backed by dependency/caller evidence. Label
+figures as estimates, avoid double-counting overlapping cuts, and never present
+external benchmarks or elapsed time as this project's token or cost savings.
 
 If there is nothing to cut, say `Lean already. Ship.` and stop.
+
+## Debt ledger
+
+For debt mode, scan comment markers such as `# ponytail:` or `// ponytail:`;
+exclude dependencies/vendor trees, .git and build/generated output. Use rg first,
+for example `rg -n '(#|//) ?ponytail:'` over the relevant source paths, adding
+comment prefixes appropriate to the actual language. Prose that merely mentions
+the convention is not a debt item.
+
+Group one row per marker by file. Report `<file>:<line>`, what was simplified,
+`ceiling: <limit>`, and `upgrade: <trigger>`, using only the marker's evidence.
+Flag a missing upgrade trigger as `no-trigger`; do not invent a deadline or owner.
+Read-only `git blame` may supply an owner when requested. End with `<N> markers,
+<M> with no trigger`; if none, report `No ponytail: debt. Clean ledger.` This mode
+does not use the estimated-lines-reduction score above.
+
+Report without changing files. Persist a ledger only when explicitly requested,
+then preserve existing custom content and use the requested destination. The mode
+ends after the report; `normal mode` returns to ordinary review behavior.
 
 ## Boundaries
 

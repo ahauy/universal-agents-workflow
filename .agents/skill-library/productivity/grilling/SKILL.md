@@ -6,7 +6,7 @@ description: >
   about a plan, design, decision, or domain until every branch of the design tree is
   resolved or explicitly accepted as an assumption. Zero-silent-assumption policy:
   if something is unknown or ambiguous, keep asking — never fill it in. This is the
-  engine behind `grill-with-docs`, `triage`, `wayfinder`, and `improve-codebase-architecture`.
+  engine behind `elicitation-interview`, `wayfinder`, and `improve-codebase-architecture`.
   Model-invoked when a session needs to reach alignment before writing code, spec, or
   decision, or when the user has just given a vague brief and every downstream step
   depends on getting it right.
@@ -60,6 +60,6 @@ that user-invoked wrappers call into.
 
 ## When to use
 
-- Any user-invoked skill that needs an interview: `grill-with-docs`, `triage`, `wayfinder`,
+- Any user-invoked skill that needs an interview: `elicitation-interview`, `wayfinder`,
   `improve-codebase-architecture`, `intake-classifier` (Stage 2 of your BA pipeline).
 - Any point where a session is about to produce an artifact and the brief is vague.
