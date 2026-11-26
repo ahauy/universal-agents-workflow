@@ -7,7 +7,7 @@ paths:
 ---
 # TypeScript/JavaScript Coding Style
 
-> This file extends [common/coding-style.md](../common/coding-style.md) with TypeScript/JavaScript specific content.
+> These TypeScript/JavaScript rules are self-contained; no unshipped common rule pack is required.
 
 ## Types and Interfaces
 

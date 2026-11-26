@@ -11,8 +11,8 @@ See `.agents/AGENTS.md` for the unified pipeline and mandatory quality gates.
 
 | Subagent                  | Role                                                                              |   Lifecycle Phase   | Model     |
 |:--------------------------|:----------------------------------------------------------------------------------| :------------------: |-----------|
-| **`business-analyst`**    | 8-Stage BA Pipeline, IEEE 29148, BR- rules, SRS/US, Baseline Sign-off             |     **Phase 1**     | `inherit` |
-| **`system-architect`**    | Speckit Specify/Plan/Tasks, API DTO contracts, Database migrations, ADRs          |    **Phase 2-4**    | `inherit` |
+| **`business-analyst`**    | Domain baseline (6 stages), IEEE 29148, BR- rules, SRS/US, Baseline Sign-off        |     **Phase 1**     | `inherit` |
+| **`system-architect`**    | UAW technical-spec / implementation-plan / task-breakdown, API DTO contracts, Database migrations, ADRs          |    **Phase 2-4**    | `inherit` |
 | **`code-explorer`**       | Read-only codebase research, execution path tracing, dependency mapping           |     **Phase 5**     | `inherit` |
 | **`backend-developer`**   | Polyglot backend, API DTOs, database schema migrations, unit/integration tests    |     **Phase 5**     | `inherit` |
 | **`frontend-developer`**  | Polyglot frontend UI, design tokens, 4 UX states, WCAG AA a11y, component tests   |     **Phase 5**     | `inherit` |
@@ -40,20 +40,19 @@ Every agent ships with `model: inherit`, so subagents run on whatever model the 
 
 ## Parallel Task Execution
 
-ALWAYS use parallel task execution for independent operations:
+Parallelism belongs to the **Full lane**. Independent slices run concurrently;
+dependent ones serialize. In the Fast lane there is nothing to parallelize — one
+context does the work.
 
 ```markdown
-# GOOD: Parallel execution
+# GOOD: Full lane, independent slices
 
-Launch 3 agents in parallel:
+Launch 2 subagents in parallel:
 
-1. Agent 1: Security analysis of auth module
-2. Agent 2: Performance review of cache system
-3. Agent 3: Type checking of utilities
+1. Slice A: data + domain logic
+2. Slice B: UI against the agreed contract
 
-# BAD: Sequential when unnecessary
-
-First agent 1, then agent 2, then agent 3
+# BAD: serializing independent work, or fanning out a Fast-lane task
 ```
 
 ---
@@ -64,6 +63,7 @@ Single source of truth: **`AGENTS.md` §4 (Delegation contract)**. It covers dis
 hygiene (short ASCII `task` strings, reference by path), the two-strike fallback that
 prevents deadlock, subagent transparency, and the completion contract.
 
-Delegation is **tier-gated**: Tier 1 and Tier 2 may be implemented directly by the
-orchestrator; only Tier 3 fans out into slices. Do not spawn micro-subagents for a
+Delegation is **lane-gated**: the Fast lane is implemented directly by the
+orchestrator, in one context. Only the Full lane fans out into slices, and only
+when the slices are genuinely independent. Do not spawn micro-subagents for a
 two-file change.

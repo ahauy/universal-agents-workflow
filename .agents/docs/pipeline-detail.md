@@ -1,63 +1,81 @@
-# Pipeline Detail — 7 Steps, Merged Stages
+# Pipeline Detail — Two Lanes
 
-> Reference for `AGENTS.md`. Read the section for the step you are executing,
-> not the whole file.
+> Reference for `AGENTS.md`. Read the section for the lane you are in, not the
+> whole file. Lane rules and escalation triggers live in `AGENTS.md` §2 — this
+> file does not restate them.
 
 ```mermaid
 graph TD
-    S1["1. Intake & Tier Classification"] --> T{"Tier?"}
-    T -->|Tier 1| S4["4. TDD Implementation"]
-    T -->|Tier 2| S4
-    T -->|Tier 3| S2["2. Domain Baseline"]
+    S1["1. BA checkpoint → lane"] --> L{"Trigger fired?"}
+    L -->|no| F["Fast lane: one context<br/>read → plan → red → green → verify → self-check"]
+    L -->|yes| S2["2. Domain baseline"]
     S2 --> G1["Gate 1: baseline SIGNED-OFF"]
-    G1 --> S3["3. Technical Plan"]
+    G1 --> S3["3. Technical plan"]
     S3 --> G2["Gate 2: plan approved"]
     G2 --> S35["3.5 Scaffold (greenfield only)"]
-    S35 --> S4
-    S4 --> S5["5. Review"]
+    S35 --> S4["4. Sliced TDD implementation"]
+    S4 --> S5["5. Dual-pass review"]
     S5 --> S6["6. Docs"]
     S6 --> S7["7. Ship (user-triggered)"]
+    F --> S7
 ```
 
 ---
 
-## Step 1 — Intake & Tier Classification
+## Step 1 — Intake → lane
 
-Entry point for every request. `intake-classifier` picks the lane from measurable
-signals, not from vibes.
+`intake-classifier` establishes outcome, affected behavior, scope, evidence,
+material unknowns and observable acceptance before implementation. Reuse answered
+questions and existing AC. Fast applies to bounded confirmed behavior with no
+T1–T7 trigger; read-only research does not recurse through implementation BA.
 
-| Tier | Signal | Ceremony | Token budget |
-| --- | --- | --- | --- |
-| **1 — Fast-track** | < 80 lines, bug fix, typo, single config | none: reproduce → failing test → fix → verify → one commit | ≤ 20k |
-| **2 — Lean task** | 80–250 lines, roadmap story with AC, not marked `[!]` | `test-plan.md` → TDD → review | ≤ 80k |
-| **3 — Full feature** | > 250 lines, new core entity, cross-cutting auth/billing, or `[!]` | full domain baseline + plan | ≤ 250k |
-| **Spike** | research question | note only, no feature folder | ≤ 15k |
+Announce the lane once, with the trigger when escalating. A user override is
+recorded, never silently applied.
 
-If a run exceeds its budget by > 50 %, stop and report before continuing.
+## Fast lane (default)
 
-## Step 2 — Domain Baseline (Tier 3 only)
+Steps 1 → 4 → 5 (self-check) → 7. One context, no feature folder, no subagents.
 
-Six sub-stages, down from eight. Merges are deliberate: each merge removes one
-full re-read of the same artifact.
+1. **Read before writing** — the files named by the request, their tests, and the
+   relevant `CONTEXT.md` terms. Stop when the exact files to change are known.
+2. **Plan in ≤ 5 lines** in chat: files, approach, tests, risk.
+3. **Red** — failing test or reproduction, run it.
+4. **Green** — minimal implementation, run the focused test.
+5. **Verify** — the repo's test/lint/typecheck for the touched area. No invented
+   tooling; if no runner exists, say so.
+6. **Self-check** against the same buckets the reviewer uses: `SECURITY`,
+   `SPEC_FIDELITY`, `RELIABILITY`. No separate reviewer context.
+7. **Close** — one Conventional Commit, only when the user asked.
 
-**2a. `elicitation-interview`** — MANDATORY interactive gate. Pause and ask the
-user 2–3 questions per batch across the six pillars: RBAC, state machine,
-business rules/formulas, workflows/edge cases, data & privacy, UX/NFRs. Record
-answers and `ASM-` IDs into `01-elicitation.md`. Never invent a business rule.
+`test-plan.md` is written only when the task needs more than three test cases.
+`baseline.md`, `00-intake.md`, `CHANGELOG.md`, and `context-pack.md` do not exist
+in this lane.
 
-**2b. `domain-modeling`** — now includes gap analysis (previously a separate
-stage with the same inputs). Produces AS-IS / TO-BE, RBAC matrix, Mermaid state
-diagrams, numbered `BR-<SLUG>-###`, ERD, NFRs. Syncs `CONTEXT.md` and records
-load-bearing decisions in `adr/`.
+Escalate mid-task only when a trigger fires (see `AGENTS.md` §2): announce, create
+the feature folder, record the trigger, continue from Step 2. One-way.
 
-**2c. `consistency-scan`** — merged `risk-contradiction-scanner` +
-`speckit-analyze`. One pass that looks for logic contradictions, state
-deadlocks, backward-compatibility breaks, and spec/plan drift. Builds the
-`RISK-` register, consolidates `ASM-` entries, locks MoSCoW scope including an
-explicit Won't-Have list.
+## Step 2 — Domain Baseline (Full lane)
 
-**2d. `spec-writer`** — writes ONE `requirements.md` with four sections instead of
-four separately-authored documents:
+Six sub-stages, scoped to material gaps in existing signed-off evidence. Do not
+repeat answered interviews or manufacture documents for irrelevant pillars.
+
+**2a. `elicitation-interview`** — interactive gate. 2–3 questions per batch across
+the six pillars: RBAC, state machine, business rules/formulas, workflows/edge
+cases, data & privacy, UX/NFRs. Anchor on roadmap AC; never re-ask what the AC
+settles. Record answers and `ASM-` ids in `01-elicitation.md`. Never invent a
+business rule.
+
+**2b. `domain-modeling`** — includes gap analysis. Produces AS-IS / TO-BE, RBAC
+matrix, Mermaid state diagrams, numbered `BR-<SLUG>-###`, ERD, NFRs. Syncs
+`CONTEXT.md` and records load-bearing decisions in `adr/`.
+
+**2c. `risk-contradiction-scanner`** — checks business logic contradictions,
+state deadlocks, backward compatibility and scope. Builds the `RISK-` register,
+consolidates `ASM-` entries and confirmed MoSCoW boundaries. This does not run
+technical analysis on spec/plan/tasks that do not yet exist.
+
+**2d. `spec-writer`** — ONE `requirements.md` with four sections instead of four
+separately-authored documents:
 
 ```
 requirements.md
@@ -71,7 +89,7 @@ Every `REQ-` carries a **Derived from** pointer to a `BR-` or `ASM-` id.
 
 > **Naming — do not confuse the two.** `requirements.md` is *what and why* (this
 > stage). `spec.md` is *how* — DTOs, contracts, schema — and belongs to
-> `speckit-specify` in Step 3. Never write `spec.md` from here.
+> `technical-spec` in Step 3. Never write `spec.md` from here.
 
 **Rendering, not re-authoring.** The four sections map 1:1 onto the classic four
 documents, so splitting is an export step. Default: do not split. Render
@@ -91,60 +109,55 @@ Framing may differ per audience; ids and facts may not.
 builds the traceability matrix against `requirements.md`. Loops back to 2d on
 failure. Hard cap: 2 loops.
 
-**2f. `handover`** — verifies exit gates, marks `baseline.md` as
-`SIGNED-OFF v1.0`, and appends a **Dev Handover Brief** section to the same file
-(previously a separate document). No separate brief file. It also records whether
-audience exports were rendered, and for whom.
+**2f. `handover`** — verifies exit gates, obtains explicit user approval, marks `baseline.md` as
+`SIGNED-OFF v1.0`, and appends a **Dev Handover Brief** section to the same file.
+No separate brief file. Records whether audience exports were rendered, and for whom.
 
-> **Gate 1**: no code and no technical spec before `baseline.md` is SIGNED-OFF.
+> **Gate 1**: no technical spec and no code before `baseline.md` is SIGNED-OFF.
 
-## Step 3 — Technical Plan
+## Step 3 — Technical Plan (Full lane)
 
-`speckit-specify` → `speckit-plan` → `speckit-tasks`. Enforce `/api/v1/...`
-versioning and structured DTO contracts. Apply `codebase-design`: minimal public
+`technical-spec` → `implementation-plan` → `task-breakdown` →
+`technical-consistency-review`. Review technical consistency only once all three
+artifacts exist. Apply versioning and DTO contracts when relevant; supporting
+models/contracts are optional and scope-driven. Apply `codebase-design`: minimal public
 interfaces, hidden implementation, no shallow pass-through wrappers.
 
 > **Gate 2**: user approves `plan.md` + `tasks.md`.
 
-## Step 3.5 — Scaffold (greenfield only)
+## Step 3.5 — Scaffold (Full lane, greenfield only)
 
 `scaffold-architecture` runs **only when the repo has no established structure**
-(no entry module, no layer convention). For an existing codebase, skip it —
-follow the existing layout instead. When it does run, ask the user to pick one
-blueprint: C4 Layered, Hexagonal, or Feature-Based. Record the choice in
-`adr/ADR-ARCH-001`.
+(no entry module, no layer convention). For an existing codebase, skip it — follow
+the existing layout. When it does run, ask the user to pick one blueprint: C4
+Layered, Hexagonal, or Feature-Based. Record the choice in `adr/ADR-ARCH-001`.
 
-## Step 4 — TDD Implementation
+## Step 4 — Sliced TDD Implementation (Full lane)
 
 `implementation-orchestrator` decomposes into vertical slices
-(Data → Logic → API → UI) and delegates each slice with **scoped excerpts only**.
+(Data → Logic → API → UI) and delegates each slice with **scoped excerpts only**,
+through `context-pack.md`.
 
-Slice count by tier:
-
-- Tier 1 — no slicing, single developer turn.
-- Tier 2 — cohesive slicing: one developer handles Data+Logic+API, one handles UI.
-  Do **not** split into four micro-subagents.
-- Tier 3 — four slices by dependency layer.
+- One developer per cohesive slice (Data+Logic+API together, UI separately).
+- Never split a slice into four micro-subagents.
+- Dispatch **independent slices in parallel**; serialize only on real data
+  dependencies. The slice plan must mark which slices are parallel-safe.
+- `code-explorer` runs only when the affected files cannot be named directly.
+- `build-resolver` handles type/compile errors; `diagnosing-bugs` handles flaky or
+  non-obvious failures.
 
 TDD loop: `test-plan.md` (map `US-` → `TC-###`) → Red → Green → Refactor.
 
-`code-explorer` runs only when the orchestrator cannot determine the affected
-files itself (unfamiliar repo, cross-cutting change). Otherwise the orchestrator
-scopes directly and skips it.
+## Step 5 — Review (Full lane)
 
-`build-resolver` handles type/compile errors; `diagnosing-bugs` handles flaky or
-non-obvious failures.
-
-## Step 5 — Review
-
-`code-reviewer` runs a **2-pass** review by default:
+`code-reviewer` runs a **2-pass** review:
 
 - Pass A — standards & security (injection, secrets, authz, type safety, async).
 - Pass B — spec fidelity (`REQ-`/`BR-` coverage, state transitions, `CONTEXT.md`
   vocabulary).
 
 **Pass C (lean / anti-overengineering) runs only when the diff exceeds 300
-lines.** Small diffs do not need a third sweep.
+lines.**
 
 Stopping rules are non-negotiable:
 
@@ -156,28 +169,25 @@ Stopping rules are non-negotiable:
    state tracking. Never re-report a resolved or accepted finding.
 
 `ui-ux-reviewer` runs **only when the diff touches UI files**
-(`.tsx .jsx .css .scss .html .vue .svelte`). A backend-only change skips it
-entirely.
+(`.tsx .jsx .css .scss .html .vue .svelte`).
 
 > **Bug Severity Gate**: zero unresolved `Critical` findings.
 
-## Step 6 — Docs
+## Step 6 — Docs (Full lane)
 
 `tech-doc-architect` writes `docs/features/<slug>/README.md` and updates the
 feature index. Update `docs/architecture/` + an ADR only when the feature changes
 architecture (new entity, service, or contract).
 
-`user-guide-with-screenshots` runs **per release, not per feature**. Accumulate
-UI changes and generate the visual guide once per release batch. A single
-feature with a UI tweak does not justify a Playwright screenshot run.
+`user-guide-with-screenshots` runs **per release, not per feature**.
 
 `agent-evaluator` is **not** part of the default delivery path. Run it via
 `/retro` when you want a meta-review of the workflow itself.
 
-## Step 7 — Ship (user-triggered only)
+## Step 7 — Ship (both lanes, user-triggered only)
 
 `/command-git-push`. Modular commits by layer: `docs(spec)` → `feat(shared-types)`
 → `feat(api)` → `feat(ui)` → `docs`.
 
-**No autonomous rebase.** If the branch diverged, stop and report the conflict to
-the user instead of auto-resolving it. Single-line English Conventional Commits.
+**No autonomous rebase.** If the branch diverged, stop and report the conflict
+instead of auto-resolving it. Single-line English Conventional Commits.

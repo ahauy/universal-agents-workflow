@@ -1,51 +1,34 @@
-# How to install this skill in your AI tool
+# Use the screenshot guide skill
 
-This skill folder contains:
+The authoritative instructions are in
+[SKILL.md](SKILL.md), under
+`.agents/skill-library/engineering/user-guide-with-screenshots/`.
+This is a cold skill: open it through `.agents/SKILLS.md` when needed. Harness
+adapters expose it according to the project's harness configuration.
 
+The reusable files are:
+
+- `scripts/capture-screenshots.mjs`: capture from a running app with Playwright.
+- `scripts/screenshot-plan.example.json`: generic route/action/selector plan.
+- `templates/user-guide-template.md`: non-technical guide template.
+
+Check the target project's manifests for Playwright and use its existing package
+manager/setup. This framework does not assume an `apps/web` package or install a
+browser globally. Before capture, start the app and replace the sample `baseUrl`,
+route and selectors with actual values from that app.
+
+From the project root:
+
+```bash
+node .agents/skill-library/engineering/user-guide-with-screenshots/scripts/capture-screenshots.mjs path/to/capture-plan.json
 ```
-user-guide-with-screenshots/
-├── SKILL.md                              ← main skill instructions
-├── SETUP.md                              ← this file
-├── scripts/
-│   ├── capture-screenshots.mjs           ← automated screenshot script (Playwright)
-│   └── screenshot-plan.example.json      ← example capture plan file
-└── templates/
-    ├── user-guide-template.md            ← blank guide template
-    └── user-guide-example-card-creation.md  ← filled example — use as a tone reference
-```
 
-## 1. Copy the folder into your project
+Review the real screenshots, then save the guide under
+`docs/user-guides/<slug>.md` with its images. Reuse the generic template; no
+application-specific scripts or prefilled product guide are required.
 
-The skill is already placed at `.agents/skill-library/user-guide-with-screenshots/`.
-Antigravity picks it up automatically from this location.
-
-## 2. Point your AI tool at this skill
-
-- **Antigravity**: the skill is auto-discovered from `.agents/skill-library/`. No extra
-  config needed — Antigravity matches it by the `triggers` list in the frontmatter.
-- **Cursor**: create `.cursor/rules/user-guide-with-screenshots.mdc` and paste in
-  the contents of `SKILL.md`. Set `alwaysApply: false` so it only applies when
-  relevant, or `alwaysApply: true` if you want it in every session.
-- **Other tools with file access**: tell the AI "read
-  `.agents/skill-library/user-guide-with-screenshots/SKILL.md` and follow it" — since
-  the tool can read files, it will open and follow the instructions directly.
-
-## 3. Before using for the first time
-
-- Playwright is already installed in `apps/web` (added via `pnpm add -D playwright --filter web`).
-- Open `scripts/screenshot-plan.example.json` and update `baseUrl`, the `url`
-  values, and especially the `selector` values to match your actual HTML
-  (e.g. change `[data-testid=add-card-modal]` to the correct selector in your
-  code). If a component doesn't have a `data-testid` yet, add one — it makes
-  selectors stable over time and avoids capturing the wrong element when
-  text or class names change.
-
-## 4. Daily usage
-
-After the AI finishes a feature or a UI change, type:
-
-> "Done, now create/update the user guide using the user-guide-with-screenshots skill."
-
-The AI will follow the 5-step process in `SKILL.md`: read the change → list
-the steps to illustrate → run the screenshot script → write the guide → save
-to `docs/user-guides/<slug>.md`.
+The generic script supports `click`, `fill`, `hover`, `waitForSelector` and `wait`.
+A failed or unknown action exits nonzero; browser cleanup runs even if capture
+fails. Fix the plan and rerun before reporting completion. The script does not
+add highlights or numbered badges: use a browser automation step before capture
+or annotate the real image afterward, then visually inspect it.

@@ -24,18 +24,19 @@
  *   --clean               remove everything previously generated (uses manifest)
  *   --quiet               only errors
  *
- * Safety: a file is only overwritten when it carries this script's marker, or
- * when it does not exist. User-authored files are never clobbered.
+ * Safety: only verified last-written outputs are overwritten or removed.
+ * Markers and legacy path lists do not establish ownership.
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import ownership from "./derived-state.cjs";
 
 const MARKER_TOKEN = "universal-agents-workflow sync-harnesses";
 const MARKER = `<!-- ${MARKER_TOKEN} — do not edit -->`;
 const MARKER_TOML = `# ${MARKER_TOKEN} — do not edit`;
-const MANIFEST_REL = path.join(".agents", "harness-manifest.json");
+const MANIFEST_REL = ".agents/harness-manifest.json";
 
 const args = process.argv.slice(2);
 const opt = {
@@ -62,70 +63,81 @@ for (let i = 0; i < args.length; i++) {
 }
 
 const ALL = ["claude", "cursor", "windsurf", "copilot", "gemini", "workbuddy"];
-const selected = opt.harnesses ?? ALL;
+let selected = opt.harnesses ?? ALL;
 const log = (...m) => (opt.quiet ? null : console.log(...m));
 const warn = (...m) => console.warn(...m);
 
 const created = [];
 const skipped = [];
 
-function abs(rel) {
-  return path.join(opt.target, rel);
-}
-
-function writeGenerated(rel, content) {
-  const dest = abs(rel);
-  if (fs.existsSync(dest)) {
-    const existing = fs.readFileSync(dest, "utf8");
-    // Check the token, not the HTML comment: TOML has no HTML comments.
-    if (!existing.includes(MARKER_TOKEN)) {
-      skipped.push(`${rel} (user-owned, left alone)`);
-      return false;
-    }
+let state;
+const pending = [];
+const allowed = rel => /^(CLAUDE\.md|GEMINI\.md|\.cursorrules|\.windsurfrules|\.github\/copilot-instructions\.md|\.workbuddy-ai\/harness-note\.md)$/.test(rel)
+  || [".claude/skills/", ".claude/agents/", ".claude/commands/", ".cursor/rules/", ".cursor/commands/",
+    ".windsurf/rules/", ".windsurf/workflows/", ".github/prompts/", ".gemini/commands/", ".workbuddy-ai/skills/"].some(prefix => rel.startsWith(prefix));
+function abs(rel) { return ownership.resolve(opt.target, rel, false); }
+function writeGenerated(rel, content, source = "AGENTS.md") {
+  if (!allowed(rel)) throw new Error(`Invalid adapter path: ${rel}`);
+  abs(rel);
+  const prior = pending.find(task => task.rel === rel);
+  if (prior) {
+    if (prior.source !== source || String(prior.content) !== String(content)) throw new Error(`Conflicting adapter outputs: ${rel}`);
+    return true;
   }
-  if (opt.dryRun) {
-    log(`  would write  ${rel}`);
-  } else {
-    fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.writeFileSync(dest, content, "utf8");
-    log(`  wrote        ${rel}`);
-  }
-  created.push(rel);
+  pending.push({rel,content,source});
   return true;
 }
-
-function linkOrCopy(relLink, sourceRel) {
-  const dest = abs(relLink);
-  if (fs.existsSync(dest) || isLink(dest)) {
-    skipped.push(`${relLink} (exists)`);
+function copyFiles(rel, source) {
+  const src = ownership.resolve(opt.target, source);
+  if (fs.statSync(src).isDirectory()) {
+    for (const name of fs.readdirSync(src)) copyFiles(`${rel}/${name}`, `${source}/${name}`);
     return;
   }
-  if (opt.dryRun) {
-    log(`  would ${opt.mode === "copy" ? "copy " : "link "} ${relLink}`);
-    created.push(relLink);
-    return;
-  }
-  fs.mkdirSync(path.dirname(dest), { recursive: true });
-  if (opt.mode === "copy") {
-    fs.cpSync(abs(sourceRel), dest, { recursive: true });
-  } else {
-    try {
-      const relTarget = path.relative(path.dirname(dest), abs(sourceRel));
-      fs.symlinkSync(relTarget, dest, "dir");
-    } catch {
-      // Windows without developer mode, or a filesystem that refuses symlinks.
-      fs.cpSync(abs(sourceRel), dest, { recursive: true });
-    }
-  }
-  log(`  ${opt.mode === "copy" ? "copied " : "linked "} ${relLink}`);
-  created.push(relLink);
+  writeGenerated(rel, fs.readFileSync(src), source);
 }
-
-function isLink(p) {
-  try {
-    return fs.lstatSync(p).isSymbolicLink();
-  } catch {
-    return false;
+function linkOrCopy(rel, source) {
+  ownership.resolve(opt.target,source);
+  abs(rel);
+  const previous = state.outputs[rel];
+  const copying = opt.mode === "copy" || Object.keys(state.outputs).some(file => file.startsWith(`${rel}/`));
+  if (copying) {
+    if (ownership.exists(abs(rel)) && !fs.lstatSync(abs(rel)).isDirectory()) {
+      skipped.push(`${rel} (conflict: expected directory)`);
+      return;
+    }
+    copyFiles(rel,source);
+  } else {
+    pending.push({rel,source,linkTarget:path.relative(path.dirname(abs(rel)),abs(source)), previous});
+  }
+}
+function execute() {
+  for (const task of pending) {
+    const {rel,content,source,linkTarget} = task;
+    if (content !== undefined) {
+      if (!ownership.write(opt.target,rel,content,source,state,opt.dryRun)) {
+        skipped.push(`${rel} (conflict: edited or unverified)`);
+        continue;
+      }
+    } else {
+      const dest = abs(rel);
+      if (ownership.exists(dest) && (!ownership.matches(opt.target,rel,state.outputs[rel]) || state.outputs[rel]?.source !== source)) {
+        skipped.push(`${rel} (conflict: edited or unverified link)`);
+        continue;
+      }
+      if (!opt.dryRun) {
+        fs.mkdirSync(path.dirname(dest),{recursive:true});
+        if (ownership.exists(dest)) fs.unlinkSync(dest);
+        try { fs.symlinkSync(linkTarget,dest,"dir"); }
+        catch (error) {
+          if (!["EPERM","EACCES","ENOTSUP"].includes(error.code)) throw error;
+          copyFiles(rel,source);
+          continue;
+        }
+        state.outputs = {...state.outputs,[rel]:{kind:"symlink",source,linkTarget}};
+      }
+    }
+    created.push(rel);
+    if (!opt.dryRun) ownership.store(opt.target,MANIFEST_REL,state);
   }
 }
 
@@ -170,7 +182,7 @@ const adapters = {
 @AGENTS.md
 
 Behavioural deltas that are specific to Claude-family models live in
-\`GEMINI.md\`-style delta docs only when they differ; the pipeline, gates, tier
+\`GEMINI.md\`-style delta docs only when they differ; the pipeline, gates, Fast/Full
 lanes and delegation contract are all in \`AGENTS.md\` — read that first.
 
 Subagents: \`.claude/agents/\` (generated from \`.agents/agents/\`).
@@ -195,7 +207,7 @@ alwaysApply: true
 ${MARKER}
 
 Read \`AGENTS.md\` at the repository root before acting. It holds the
-non-negotiables, the 7-step pipeline, the tier lanes and the gates.
+non-negotiables, the 7-step pipeline, the Fast/Full lanes and the gates.
 
 On-demand references: \`.agents/docs/pipeline-detail.md\` (step detail),
 \`.agents/docs/skill-matrix.md\` (skill lookup), \`.agents/docs/failure-modes.md\`
@@ -252,7 +264,7 @@ On-demand: .agents/docs/{pipeline-detail,skill-matrix,failure-modes,reading-map}
 # GitHub Copilot instructions
 
 Follow [\`AGENTS.md\`](../AGENTS.md) — it is the single source of truth for the
-pipeline, gates, tier lanes and code standards.
+pipeline, gates, Fast/Full lanes and code standards.
 
 On-demand references: [\`pipeline-detail.md\`](../.agents/docs/pipeline-detail.md),
 [\`skill-matrix.md\`](../.agents/docs/skill-matrix.md),
@@ -270,10 +282,6 @@ Do not add rules here that are missing from \`AGENTS.md\`; add them there.
     // a silent hole.
     fanOutCommands("gemini");
     // Gemini CLI and Antigravity read GEMINI.md. Keep model-specific deltas only.
-    if (fs.existsSync(abs("GEMINI.md")) && !fs.readFileSync(abs("GEMINI.md"), "utf8").includes(MARKER)) {
-      skipped.push("GEMINI.md (hand-written delta doc kept as-is)");
-      return;
-    }
     writeGenerated(
       "GEMINI.md",
       `${MARKER}
@@ -306,8 +314,9 @@ Commands come from the skills themselves: \`/command-git-push\`,
 command name. **Aliases are not created here** (\`/push\`, \`/ship\`); use the full
 skill name. Antigravity works the same way since it retired \`.agents/workflows\`.
 
-MCP: register \`packages/mcp-server\` in the MCP config if you want the
-\`uaw_*\` tools. That is optional — every rule also works from plain files.
+Install framework files with \`install.sh\` or \`install.ps1\`. Read skills and
+artifacts locally; validation uses the \`spec-validator\` skill from
+\`.agents/SKILLS.md\`.
 `,
     );
   },
@@ -322,13 +331,13 @@ function listSkills() {
   if (!fs.existsSync(root)) return [];
   const out = [];
   for (const group of fs.readdirSync(root)) {
-    const groupDir = path.join(root, group);
+    const groupDir = ownership.resolve(opt.target, `.agents/skills/${group}`);
     if (!fs.statSync(groupDir).isDirectory()) continue;
     for (const name of fs.readdirSync(groupDir)) {
-      const dir = path.join(groupDir, name);
+      const dir = ownership.resolve(opt.target, `.agents/skills/${group}/${name}`);
       if (!fs.statSync(dir).isDirectory()) continue;
-      if (!fs.existsSync(path.join(dir, "SKILL.md"))) continue;
-      out.push({ name, rel: path.join(".agents", "skills", group, name) });
+      if (!fs.existsSync(path.resolve(dir, "SKILL.md"))) continue;
+      out.push({ name, rel: path.posix.join(".agents", "skills", group, name) });
     }
   }
   return out;
@@ -342,7 +351,7 @@ function fanOutSkills(destDir) {
   }
   log(`  skills → ${destDir} (${skills.length})`);
   for (const s of skills) {
-    linkOrCopy(path.join(destDir, s.name), s.rel);
+    linkOrCopy(path.posix.join(destDir, s.name), s.rel);
   }
 }
 
@@ -413,7 +422,7 @@ function readSkillMeta(file) {
 function listCommands() {
   const out = [];
   for (const s of listSkills()) {
-    const meta = readSkillMeta(abs(path.join(s.rel, "SKILL.md")));
+    const meta = readSkillMeta(abs(path.posix.join(s.rel, "SKILL.md")));
     if (!meta) continue;
     const names = meta.triggers.filter((t) => t.startsWith("/")).map((t) => t.slice(1).trim());
     if (names.length === 0) continue;
@@ -481,8 +490,8 @@ function fanOutCommands(harnessKey) {
   let count = 0;
   for (const c of cmds) {
     for (const alias of c.names) {
-      const rel = path.join(surface.dir, alias + surface.suffix);
-      writeGenerated(rel, commandBody(surface.kind, c, surface.args));
+      const rel = path.posix.join(surface.dir, alias + surface.suffix);
+      writeGenerated(rel, commandBody(surface.kind, c, surface.args), `${c.skill}/SKILL.md`);
       count++;
     }
   }
@@ -506,8 +515,8 @@ function loadModelData() {
     }
   };
   return {
-    caps: read(path.join(".agents", "models", "capabilities.json")),
-    profiles: read(path.join(".agents", "models", "profiles.json")),
+    caps: read(path.posix.join(".agents", "models", "capabilities.json")),
+    profiles: read(path.posix.join(".agents", "models", "profiles.json")),
   };
 }
 
@@ -528,7 +537,7 @@ function convertAgents(destDir, harnessId) {
   log(`  agents → ${destDir} (${files.length})`);
   let resolved = 0;
   for (const file of files) {
-    const raw = fs.readFileSync(path.join(srcDir, file), "utf8");
+    const raw = fs.readFileSync(ownership.resolve(opt.target, `.agents/agents/${file}`), "utf8");
     const m = raw.match(/^---\n([\s\S]*?)\n---\n?/);
     if (!m) {
       skipped.push(`${destDir}/${file} (no frontmatter)`);
@@ -556,7 +565,7 @@ function convertAgents(destDir, harnessId) {
     if (modelId) lines.push(`model: ${modelId}`);
     lines.push("---", "");
     lines.push(MARKER, "");
-    writeGenerated(path.join(destDir, file), lines.join("\n") + body);
+    writeGenerated(path.posix.join(destDir, file), lines.join("\n") + body, `.agents/agents/${file}`);
   }
   if (resolved > 0) log(`  models resolved: ${resolved}/${files.length} (rest inherit)`);
   else if (files.length) log(`  models: all inherit (no profiles.json entry for ${harnessId})`);
@@ -567,73 +576,64 @@ function convertAgents(destDir, harnessId) {
 // ---------------------------------------------------------------------------
 
 function clean() {
-  const manifestPath = abs(MANIFEST_REL);
-  if (!fs.existsSync(manifestPath)) {
-    warn("no manifest — nothing to clean");
-    return;
-  }
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-  for (const rel of manifest.generated || []) {
-    const dest = abs(rel);
-    if (!fs.existsSync(dest) && !isLink(dest)) continue;
-    if (opt.dryRun) {
-      log(`  would remove ${rel}`);
+  for (const [rel, record] of Object.entries(state.outputs)) {
+    if (!ownership.exists(abs(rel))) continue;
+    if (!ownership.matches(opt.target,rel,record)) {
+      skipped.push(`${rel} (conflict: edited)`);
       continue;
     }
-    fs.rmSync(dest, { recursive: true, force: true });
-    log(`  removed      ${rel}`);
+    if (!opt.dryRun) {
+      fs.unlinkSync(abs(rel));
+      const outputs = {...state.outputs};
+      delete outputs[rel];
+      state = {...state,outputs};
+      ownership.store(opt.target,MANIFEST_REL,state);
+    }
+    created.push(rel);
   }
-  if (!opt.dryRun) fs.rmSync(manifestPath, { force: true });
-}
-
-// ---------------------------------------------------------------------------
-// Main
-// ---------------------------------------------------------------------------
-
-if (!fs.existsSync(abs("AGENTS.md"))) {
-  warn(`error: no AGENTS.md in ${opt.target} — this is not a UAW project`);
-  process.exit(1);
-}
-
-if (opt.clean) {
-  log(`Cleaning generated adapters in ${opt.target}`);
-  clean();
-  process.exit(0);
-}
-
-log(`Syncing harness adapters into ${opt.target}${opt.dryRun ? " (dry run)" : ""}`);
-log(`Harnesses: ${selected.join(", ")}`);
-
-for (const h of selected) {
-  const fn = adapters[h];
-  if (!fn) {
-    warn(`  unknown harness "${h}" — skipping`);
-    continue;
+  for (const rel of state.generated || []) {
+    if (!state.outputs[rel] && ownership.exists(abs(rel))) skipped.push(`${rel} (legacy unverified)`);
   }
-  log(`\n[${h}]`);
-  fn();
 }
 
-if (!opt.dryRun) {
-  const manifestPath = abs(MANIFEST_REL);
-  const prev = fs.existsSync(manifestPath)
-    ? JSON.parse(fs.readFileSync(manifestPath, "utf8"))
-    : { generated: [] };
-  const merged = Array.from(new Set([...(prev.generated || []), ...created]));
-  fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
-  fs.writeFileSync(
-    manifestPath,
-    JSON.stringify(
-      { version: 1, generatedAt: new Date().toISOString(), harnesses: selected, generated: merged },
-      null,
-      2,
-    ),
-    "utf8",
-  );
+function validateOutputParents() {
+  const surfaces = {
+    claude: [".claude/skills", ".claude/agents", ".claude/commands"],
+    cursor: [".cursor/rules", ".cursor/commands"],
+    windsurf: [".windsurf/rules", ".windsurf/workflows"],
+    copilot: [".github/prompts"],
+    gemini: [".gemini/commands"],
+    workbuddy: [".workbuddy-ai/skills"],
+  };
+  for (const harness of selected) {
+    for (const rel of surfaces[harness]) {
+      const dir = ownership.resolve(opt.target,rel);
+      if (ownership.exists(dir) && !fs.statSync(dir).isDirectory()) throw new Error(`Adapter output parent is not a directory: ${rel}`);
+    }
+  }
 }
 
-log(`\nDone. ${created.length} generated, ${skipped.length} left alone.`);
-if (skipped.length) {
-  log("Left alone:");
-  for (const s of skipped) log(`  - ${s}`);
+function main() {
+  opt.target = fs.realpathSync(opt.target);
+
+  state = ownership.load(opt.target,MANIFEST_REL,allowed,true);
+  if (!args.includes("--mode") && state.mode) opt.mode = state.mode;
+  if (!opt.harnesses && Array.isArray(state.harnesses)) selected = state.harnesses;
+  if (!["copy","link"].includes(opt.mode)) throw new Error("Invalid adapter mode");
+  if (selected.some(h => !ALL.includes(h))) throw new Error("Unknown harness");
+  if (state.mode !== undefined && !["copy","link"].includes(state.mode)) throw new Error("Invalid recorded adapter mode");
+  if (state.harnesses !== undefined && (!Array.isArray(state.harnesses) || state.harnesses.some(h => !ALL.includes(h)))) throw new Error("Invalid recorded harnesses");
+  if (!opt.clean) validateOutputParents();
+  if (args.includes("--validate-only")) return;
+  if (!fs.existsSync(abs("AGENTS.md"))) throw new Error(`No AGENTS.md in ${opt.target}`);
+  if (opt.clean) clean();
+  else {
+    for (const h of selected) adapters[h]();
+    execute();
+    if (!opt.dryRun) ownership.store(opt.target,MANIFEST_REL,{...state,mode:opt.mode,harnesses:selected});
+  }
+  for (const message of skipped) console.log(`Kept: ${message}`);
+  ownership.summary("adapters",created.length,skipped.length);
 }
+try { main(); }
+catch (error) { console.error(`sync-harnesses: ${error.message}`); ownership.summary("adapters",created.length,skipped.length,1); process.exitCode=1; }

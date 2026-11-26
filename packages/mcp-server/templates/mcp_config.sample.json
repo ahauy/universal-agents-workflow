@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "universal-agents": {
-      "command": "npx",
-      "args": ["-y", "@universal-agents/mcp-server@latest"]
-    }
-  }
-}

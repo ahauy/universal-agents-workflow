@@ -76,7 +76,7 @@ Mọi thành phần của gói ngôn ngữ phải được đăng ký vào [`.ag
   ],
   "source_path": "optional-stack-skills/languages/<lang>/<path>",
   "target_type": "skill | rule | agent | config",
-  "target_path": ".agents/skills/engineering/<name> | .agents/rules/<name> | .agents/agents | <root-file>",
+  "target_path": ".agents/skill-library/engineering/<name> | .agents/rules/<name> | .agents/agents | <root-file>",
   "recommendation": "recommended | optional"
 }
 ```

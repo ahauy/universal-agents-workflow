@@ -19,3 +19,7 @@ All architectural guidelines, multi-agent lifecycle protocols, behavioral constr
    - Touch only what is strictly required to fulfill the user request. Never reformat or refactor unrelated code.
 5. **Git Discipline**:
    - Never generate autonomous git commit/push commands. Staging, committing, and pushing can only be initiated by the human developer or via `/command-git-push`.
+
+Before implementation, use the concise BA checkpoint in `AGENTS.md` §2. Reuse
+confirmed evidence, ask only material gaps, and apply T1–T7 to roadmap work too.
+Fast uses one context; Full uses baseline and technical approval gates.

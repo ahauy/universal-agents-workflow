@@ -21,22 +21,27 @@ symptom and points you directly to the correct skill and invocation command.
 
 ---
 
+For implementation requests, route through the BA checkpoint and lane rules in
+AGENTS.md before downstream work. Fast remains one context without a feature
+folder; native planning requires a signed-off Full baseline, and implementation
+requires Gate 2 approval of plan + tasks. Read-only navigation needs no BA ceremony.
+
 ## Routing Matrix
 
 ### 1. By Lifecycle Phase (Control Plane)
 
 | You want to...                         | Recommended Entry Point                                   | Next Step                                                              |
 | -------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Start a brand new feature or idea      | `intake-classifier`                                       | Classifies complexity and creates `.specify/features/<slug>/`          |
+| Start a brand new feature or idea      | `intake-classifier`                                       | Establishes intent/evidence and lane; only Full creates a feature folder          |
 | Explore open business/domain questions | `grilling` / `elicitation-interview`                      | Interactive interview covering business value and the 6 domain pillars |
 | Model RBAC, states, rules, ERD         | `domain-modeling`                                         | Produces formal models, updates `CONTEXT.md`, and writes ADRs          |
 | Scan for contradictions or scope risks | `risk-contradiction-scanner`                              | Consolidates assumptions, builds risk register, locks MoSCoW           |
 | Draft PRD/SRS/User Stories             | `spec-writer`                                             | Generates IEEE 29148 compliant specifications                          |
 | Validate spec quality & trace          | `spec-validator`                                          | Adversarial quality check against requirements                         |
-| Formally sign off domain baseline      | `handover`                                                | Verifies all gates and unlocks implementation phase                    |
-| Draft technical spec & architecture    | `speckit-specify` & `speckit-plan`                        | Creates spec.md, plan.md, and contract DTOs                            |
-| Generate granular task breakdown       | `speckit-tasks`                                           | Breaks implementation into testable slices                             |
-| Implement slices with TDD              | `implementation-orchestrator`                             | Vertical slice execution (Data → Logic → API → UI)                     |
+| Formally sign off domain baseline      | `handover`                                                | Confirms Gate 1; technical planning and Gate 2 still precede implementation                    |
+| Draft technical spec & architecture    | `technical-spec` & `implementation-plan`                        | Full: technical design and scoped plan; optional contracts when needed                            |
+| Generate granular task breakdown       | `task-breakdown`                                           | Breaks implementation into testable slices                             |
+| Implement slices with TDD              | `implementation-orchestrator`                             | Full after Gates 1 + 2; Fast implements and self-checks in one context                     |
 | Adversarially review code & UI         | `code-reviewer` & `ui-design-review`                      | Dual-pass review: Standards Pass + Spec Fidelity Pass                  |
 | Generate technical docs & user guides  | `technical-documentation` & `user-guide-with-screenshots` | Post-review documentation with visual evidence                         |
 

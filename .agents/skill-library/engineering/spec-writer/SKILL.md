@@ -2,7 +2,7 @@
 invocation: model
 name: spec-writer
 description: >
-  Use for Lean Task or Full Feature work once elicitation, domain modeling, and
+  Use for Full-lane work once elicitation, domain modeling, and
   the consistency scan are complete. Compiles the accumulated business analysis
   into ONE consolidated requirements.md with four sections (business context,
   product behaviour, requirements, user stories), assigning REQ-/US- IDs so every
@@ -16,11 +16,17 @@ metadata:
   stage: "BA Pipeline — Stage 5 of 6"
   phase: "Phase 2: Specification"
   model_recommendation: "Standard thinking sufficient — structured document assembly from upstream artifacts"
-  prev_skill: "consistency-scan"
+  prev_skill: "risk-contradiction-scanner"
   next_skill: "spec-validator"
 ---
 
 # Spec Writer
+
+Reuse confirmed answers, existing requirements and signed-off evidence within the
+current scope. Ask only material gaps; no fixed total interview count and no
+invented business defaults. Fast uses the checkpoint in AGENTS.md in one context;
+these Full-lane artifacts do not exempt any request from understanding behavior.
+
 
 Phase 2, Stage 5. This is the first stage whose output looks like a traditional
 deliverable — but it's still assembly, not authorship: every sentence should trace
@@ -35,7 +41,7 @@ Two different artifacts share the word "spec". Keep them apart:
 | Artifact | Answers | Owner | Path |
 | --- | --- | --- | --- |
 | `requirements.md` | **What** and **why** | This skill (BA, Phase 1) | `.specify/features/<slug>/requirements.md` |
-| `spec.md` | **How** — DTOs, contracts, schema | `speckit-specify` (Phase 2) | `.specify/features/<slug>/spec.md` |
+| `spec.md` | **How** — DTOs, contracts, schema | `technical-spec` (Phase 2) | `.specify/features/<slug>/spec.md` |
 
 Never write to `spec.md` from this skill. That file belongs to the technical phase
 and is generated downstream from the baseline.
@@ -54,7 +60,7 @@ agent. Author **one** `requirements.md` with four sections instead.
 | 3. Requirements | `REQ-<SLUG>-###`, precise and testable | Dev / QA / architect |
 | 4. User stories | `US-<SLUG>-###`, Given-When-Then | Dev / QA |
 
-A Lean Task may ship with only sections 3–4. Never produce more than these four
+A narrow Full-lane scope can keep sections 1–2 concise. Never produce more than these four
 sections; a fifth section means the scope is too broad — split the feature.
 
 ## 2. Section 1 — Business context
@@ -169,7 +175,7 @@ Proceed to `spec-validator`. Append one line to `CHANGELOG.md`.
 ## Exit checklist
 
 - [ ] Exactly one `requirements.md` exists, with no more than four sections
-- [ ] `spec.md` was **not** touched — that file belongs to `speckit-specify`
+- [ ] `spec.md` was **not** touched — that file belongs to `technical-spec`
 - [ ] Every REQ has a **Derived from** line citing an upstream `BR-`/`ASM-` item —
       none invented fresh at this stage
 - [ ] Every user story has both a happy-path and an edge-case scenario

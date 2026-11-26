@@ -4,7 +4,7 @@
 > the full artifact chain. Hard limit: 150 lines. If it does not fit, the scope is
 > too large — split the feature, do not grow the pack.
 
-**Phase written:** `<1 | 2 | 3 | 4 | 5>` · **Updated:** `<YYYY-MM-DD>` · **Tier:** `<1|2|3>`
+**Phase written:** `<1 | 2 | 3 | 4 | 5>` · **Updated:** `<YYYY-MM-DD>` · **Lane:** `Full`
 
 ---
 

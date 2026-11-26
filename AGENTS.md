@@ -1,6 +1,7 @@
 # Universal Agent Development Workflow
 
-Unified pipeline: **BA Skill Pack** (analysis) → **Speckit** (planning) → **Superpowers** (execution).
+Unified pipeline with two lanes: **Fast** (default, one context) and **Full**
+(BA baseline → UAW native planning → scoped TDD). Lane rules in §2.
 
 This file is the **core contract**. It is deliberately short so it is never truncated.
 Deep detail lives in `.agents/docs/` and is read on demand, not at session start.
@@ -12,8 +13,9 @@ Deep detail lives in `.agents/docs/` and is read on demand, not at session start
 1. **Zero autonomous git.** Never run `git add`, `git commit`, or `git push` unless
    the user explicitly ran `/command-git-push`, or you proposed the exact changes
    and received explicit approval. Never auto-rebase or auto-resolve conflicts.
-2. **Zero code before a signed-off baseline.** Tier 3 work starts only after
-   `baseline.md` reads `SIGNED-OFF`. Tier 1/2 bypass this and go straight to TDD.
+2. **Zero code before a signed-off baseline — in the Full lane.** Full-lane work
+   starts only after `baseline.md` reads `SIGNED-OFF`. The Fast lane (the default)
+   uses a concise BA checkpoint in chat before TDD; it creates no baseline artifact.
 3. **Zero `Critical` bugs.** A branch with an unresolved `Critical` finding is not
    complete. No exceptions.
 4. **Zero silent assumptions.** Never invent a business rule, formula, default,
@@ -28,16 +30,17 @@ Deep detail lives in `.agents/docs/` and is read on demand, not at session start
 
 | # | Step | Entry skill | Exit gate |
 | --- | --- | --- | --- |
-| 1 | Intake & tier classification | `intake-classifier` | tier assigned |
-| 2 | Domain baseline (Tier 3) | `elicitation-interview` → `domain-modeling` → `consistency-scan` → `spec-writer` → `spec-validator` → `handover` | **Gate 1**: baseline SIGNED-OFF |
-| 3 | Technical plan | `speckit-specify` → `speckit-plan` → `speckit-tasks` | **Gate 2**: plan + tasks approved |
-| 3.5 | Scaffold (greenfield only) | `scaffold-architecture` | blueprint ADR |
-| 4 | TDD implementation | `implementation-orchestrator` | tests green |
-| 5 | Review | `code-reviewer` (+ `ui-ux-reviewer` if UI changed) | **Gate 3**: zero Critical |
-| 6 | Docs | `technical-documentation` | feature README indexed |
+| 1 | BA checkpoint → pick lane | `intake-classifier` | Fast (default) or Full (trigger) |
+| 2 | Domain baseline — **Full lane only** | `elicitation-interview` → `domain-modeling` → `risk-contradiction-scanner` → `spec-writer` → `spec-validator` → `handover` | **Gate 1**: baseline SIGNED-OFF |
+| 3 | Technical plan — **Full lane only** | `technical-spec` → `implementation-plan` → `task-breakdown` → `technical-consistency-review` | **Gate 2**: plan + tasks approved |
+| 3.5 | Scaffold — Full lane, greenfield only | `scaffold-architecture` | blueprint ADR |
+| 4 | TDD implementation | Fast: one context. Full: `implementation-orchestrator` + scoped slices | tests green |
+| 5 | Review | Fast: self-check. Full: `code-reviewer` (+ `ui-ux-reviewer` if UI changed) | **Gate 3**: zero Critical |
+| 6 | Docs — **Full lane only** | `technical-documentation` | feature README indexed |
 | 7 | Ship (user-triggered) | `/command-git-push` | commits pushed |
 
-Full stage detail: **`.agents/docs/pipeline-detail.md`** — read only the step you are on.
+Fast lane is steps **1 → 4 → 5 (self-check) → 7**. Full lane is all seven.
+Full detail: **`.agents/docs/pipeline-detail.md`**.
 
 Two names that are easy to confuse:
 
@@ -45,28 +48,62 @@ Two names that are easy to confuse:
   Audience documents (BRD / PRD / SRS / user stories) are **rendered** from it only
   when a real external audience exists — never authored separately.
 - `spec.md` — **how** (DTOs, contracts, schema). Written in Step 3 by
-  `speckit-specify`. Never write it from Step 2.
+  `technical-spec`. Never write it from Step 2.
 
 Note: `handover` (BA exit gate) ≠ `handoff` (session compaction).
 
 ---
 
-## 2. Three-tier speed lanes
+## 2. Two lanes: Fast by default, Full on trigger
 
-`intake-classifier` assigns the lane from measurable signals.
+Before implementation, establish the outcome, affected behavior, scope, existing
+evidence, material unknowns and observable acceptance expectations. Reuse answered
+questions and confirmed requirements; ask only for missing material decisions.
+Keep this checkpoint in chat for clear bounded work. Read-only research does not
+start a recursive BA implementation process.
 
-| Tier | Signal | Ceremony | Token budget |
+Default is **Fast** for bounded work with confirmed existing behavior and no
+trigger. Escalate the moment a trigger fires. Sizing labels (Tier 1/2/3, roadmap S/M/L/XL) describe
+**scope only** — the lane decides ceremony.
+
+| Lane | Entry | Ceremony | Token budget |
 | --- | --- | --- | --- |
-| 1 | < 80 lines, bug fix, typo, single config | none — reproduce → failing test → fix → verify → one commit | ≤ 20k |
-| 2 | 80–250 lines, roadmap story with AC, not `[!]` | `test-plan.md` → TDD → review | ≤ 80k |
-| 3 | > 250 lines, new core entity, auth/billing, or `[!]` | full domain baseline + plan | ≤ 250k |
-| Spike | research question | note only, no feature folder | ≤ 15k |
+| **Fast** (default) | bounded, confirmed behavior; no trigger | one context: BA checkpoint + target/AC → 5-line plan → failing test → code → verify → self-check → done (commit only on request) | ≤ 40k |
+| **Full** (triggered or requested) | any escalation trigger, or the user says `/full` | domain baseline (Gate 1) → plan + tasks (Gate 2) → slices → dual-pass review → docs | ≤ 250k |
 
-**Roadmap bypass:** a planned story from `docs/PRODUCT_BACKLOG_ROADMAP.md` that is
-not marked `[!]` never re-enters BA ceremony. Go straight to Tier 1 or Tier 2 TDD.
+### Escalation triggers — any one is enough
+
+| # | Trigger |
+| --- | --- |
+| T1 | Expected diff > 250 lines or > 8 files |
+| T2 | Breaking/structural DB schema change, or a migration with data-loss risk |
+| T3 | Auth, permissions/RBAC, billing/payments, or PII |
+| T4 | A new core domain entity, service, or public API contract |
+| T5 | Roadmap story marked `[!]` |
+| T6 | The user asks for `/full`, enterprise re-elicitation, or audit-grade artifacts |
+| T7 | New or unresolved business behavior, rules, defaults or material acceptance decisions |
+
+Escalation is **one-way for that task**: announce it once
+(`Escalating to Full lane: T3 auth`), create `.specify/features/<slug>/`, and
+continue from Step 2. Never downgrade mid-task. Never run Full-lane ceremony
+"just in case".
+
+Fast lane never creates a feature folder. It writes `test-plan.md` only when the
+task needs more than three test cases.
+
+**Roadmap evidence:** reuse confirmed story AC and dependencies in the checkpoint.
+An unblocked S/M label never exempts a story from T1–T7. Minor resolved technical
+questions alone do not require Full. Full reuses signed-off evidence and fills
+only material gaps; never repeat an answered interview.
 
 **Budget discipline:** if a run exceeds its lane budget by more than 50 %, stop and
 report before continuing. Silent overrun is a process bug.
+
+**Evidence:** when the lane is announced run
+`node .agents/scripts/metrics.mjs start --lane <fast|full> --story <id>`, and when the
+task closes run `node .agents/scripts/metrics.mjs end`. `... report` prints medians per
+lane. Do this for the first 10 tasks after any workflow change — "feels faster" is
+not evidence.
 
 ---
 
@@ -78,11 +115,13 @@ This is the highest-leverage rule in the framework. Context is the scarce resour
   skill only when the current step needs it, and open only the section you need.
 - **Never read a whole artifact when a section will do.** Use targeted reads
   (`offset` / `limit`) on large specs, templates, and references.
-- **Context Pack between phases.** Before delegating or starting a new phase, write
+- **Context Pack between phases (Full lane only).** Before delegating a Full-lane
+  slice or starting a new Full-lane phase, write
   `.specify/features/<slug>/context-pack.md` (≤ 150 lines) from
   `.specify/templates/context-pack.md`. It carries only: scope, the `BR-`/`REQ-`
   ids in play, acceptance criteria, contracts, and the exact files to touch.
-  Downstream agents read the pack, not the full spec chain.
+  Downstream agents read the pack, not the full spec chain. The Fast lane delegates
+  nothing, so it writes no pack.
 - **Skills are cold by default.** `.agents/skills/` holds only entry points and
   slash commands — that is the set every harness indexes on every request.
   Everything else lives in `.agents/skill-library/` and costs nothing until read.
@@ -105,13 +144,13 @@ Reference index (consult by situation, not by reading all of it):
 
 ## 4. Delegation contract
 
-Delegation is encouraged, not mandatory at every step. Match the mechanism to the
-work size.
+Delegation is a **Full-lane** tool. The Fast lane runs in one context.
 
-- **Tier 1 / Tier 2**: the orchestrator may implement directly. Do not fan out into
-  micro-subagents for a two-file change.
-- **Tier 3**: delegate slices. Pass **scoped excerpts** (via the context pack), never
-  the full spec chain.
+- **Fast lane**: no subagents. Implement, verify, and self-check in the same
+  context. A two-file change never fans out.
+- **Full lane**: delegate slices. Pass **scoped excerpts** (via the context pack),
+  never the full spec chain. Dispatch independent slices in parallel; serialize
+  only when one slice consumes another's output.
 - **Subagents return summaries**, not transcripts: what changed, which files, which
   findings. Never paste file contents back.
 
@@ -136,10 +175,12 @@ name & role, active model, task scope, output artifact path.
 
 | Gate | Condition | Blocks |
 | --- | --- | --- |
-| 1 | `baseline.md` = `SIGNED-OFF v1.0` | Steps 3–7 |
-| 2 | `plan.md` + `tasks.md` approved by user | Steps 3.5–7 |
-| 3 | Zero unresolved `Critical` findings | merge / delivery |
-| 4 | Feature README exists and is indexed | delivery |
+| 1 | `baseline.md` = `SIGNED-OFF v1.0` | Full lane, Steps 3–7 |
+| 2 | `plan.md` + `tasks.md` approved by user | Full lane, Steps 3.5–7 |
+| 3 | Zero unresolved `Critical` findings | merge / delivery (both lanes) |
+| 4 | Feature README exists and is indexed | Full-lane delivery |
+
+Fast lane closes on: tests green + self-check clean + (if requested) one commit.
 
 Post-sign-off scope changes bump a version in `CHANGELOG.md`. Never edit
 signed-off content in place.
@@ -156,9 +197,13 @@ signed-off content in place.
 - Mark deliberate simplifications with a `ponytail:` comment naming the ceiling and
   the upgrade path.
 
-Review runs dual-pass by default (A: standards & security, B: spec fidelity).
-Pass C (lean) only for diffs over 300 lines. Full protocol and the 4 stopping
-rules: `.agents/agents/code-reviewer.md`.
+**Full lane**: dual-pass review (A: standards & security, B: spec fidelity). Pass C
+(lean) only for diffs over 300 lines. Full protocol and the 4 stopping rules:
+`.agents/agents/code-reviewer.md`.
+
+**Fast lane**: a self-check against the same buckets (security, spec fidelity,
+reliability), no separate reviewer context. Escalate to `code-reviewer` only when
+the diff touches auth/payments/PII or exceeds 300 lines.
 
 UI work additionally requires: no unrequested gradients, no glassmorphism, 1px
 hairline borders, explicit type hierarchy, stable outer anchor for hover physics.
@@ -175,6 +220,7 @@ hairline borders, explicit type hierarchy, stable outer anchor for hover physics
 | `.specify/features/<slug>/exports/` | Rendered audience documents (BRD/PRD/SRS/US). Derived from `requirements.md` — never hand-edited. |
 | `.specify/templates/` | Templates for spec, plan, tasks, test-plan, context-pack. |
 
-MCP server (`packages/mcp-server`) exposes safe writes for these artifacts:
-`uaw_update_context`, `uaw_record_adr`, `uaw_scaffold_feature`, `uaw_validate_spec`,
-`uaw_ponytail_scan`, `uaw_check_git_locks`.
+Distribution uses `install.sh` or `install.ps1` to download local framework files.
+Read and edit artifacts directly, following their immutability and sign-off rules.
+Use the `spec-validator` skill from `.agents/SKILLS.md` for evidence-based review;
+it is an agent workflow, not an executable compliance certification.

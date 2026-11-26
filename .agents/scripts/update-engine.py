@@ -12,6 +12,8 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import importlib.util
+import subprocess
 import fnmatch
 import hashlib
 import json
@@ -23,6 +25,10 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+
+_state_spec = importlib.util.spec_from_file_location("update_state", Path(__file__).with_name("update-state.py"))
+state = importlib.util.module_from_spec(_state_spec)
+_state_spec.loader.exec_module(state)
 
 # ── Constants ────────────────────────────────────────────────────────────────
 REPO_URL = "https://github.com/ahauy/universal-agents-workflow.git"
@@ -91,6 +97,8 @@ NOISE_SUFFIXES = (".pyc", ".pyo", ".bak", ".upstream", ".orig", ".rej", ".swp")
 
 def is_noise(rel_path: str) -> bool:
     """True for paths that should never be copied into a user project."""
+    if state.excluded(rel_path):
+        return True
     parts = rel_path.replace("\\", "/").split("/")
     if any(p in NOISE_DIRS for p in parts[:-1]):
         return True
@@ -144,19 +152,11 @@ def fetch_json(url: str, timeout: int = 8) -> Optional[dict]:
 
 def load_workflow_source(target_dir: Path) -> dict:
     """Load .agents/workflow-source.json from target directory."""
-    ws_path = target_dir / WORKFLOW_SOURCE_PATH
-    if ws_path.exists():
-        try:
-            return json.loads(ws_path.read_text(encoding="utf-8"))
-        except Exception:
-            pass
-    return {}
+    return state.load(target_dir)
 
 
 def save_workflow_source(target_dir: Path, data: dict) -> None:
-    ws_path = target_dir / WORKFLOW_SOURCE_PATH
-    ws_path.parent.mkdir(parents=True, exist_ok=True)
-    ws_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    state.save(target_dir, data)
 
 
 def get_protected_paths(ws_data: dict) -> tuple[list[str], list[str]]:
@@ -245,7 +245,9 @@ def _expand_ship_entry(source_dir: Path, entry: str) -> dict[str, tuple[Path, st
     if not src_part:
         return {}
 
-    src = source_dir / src_part
+    state.relative(src_part)
+    state.relative(dest_part)
+    src = state.contained(source_dir, src_part)
     if not src.exists():
         return {}
 
@@ -257,9 +259,12 @@ def _expand_ship_entry(source_dir: Path, entry: str) -> dict[str, tuple[Path, st
         return result
 
     for root, dirs, files in os.walk(src):
+        for d in dirs:
+            if (Path(root) / d).is_symlink():
+                raise ValueError("Source symlink directory is not supported")
         dirs[:] = [d for d in dirs if d not in NOISE_DIRS]
         for fname in files:
-            abs_path = Path(root) / fname
+            abs_path = state.contained(source_dir, (Path(root) / fname).relative_to(source_dir).as_posix())
             src_rel = abs_path.relative_to(source_dir).as_posix()
             if is_noise(src_rel):
                 continue
@@ -279,25 +284,21 @@ def collect_framework_files(
     `only` restricts the result to the given ship entries (see
     _expand_ship_entry). This is what lets the installer share this engine while
     still shipping a curated subset — optional-stack-skills is NOT copied
-    wholesale, only the packs the user selected, and those are remapped into
-    .agents/skills/ rather than dumped at their repo location.
+    wholesale, only the packs the user selected, and those land in
+    .agents/skill-library/ (the cold tier) rather than at their repo location,
+    so installing a language pack does not inflate the always-on index.
     """
     if only is None:
         only = INSTALL_SHIP_LIST
 
     result: dict[str, tuple[Path, str]] = {}
     for entry in only:
-        result.update(_expand_ship_entry(source_dir, entry))
+        expanded = _expand_ship_entry(source_dir, entry)
+        for dest, source in expanded.items():
+            if dest in result and result[dest] != source:
+                raise ValueError("Conflicting mapping: " + dest)
+            result[dest] = source
 
-    if not only:  # empty list explicitly means "everything"
-        for root, dirs, files in os.walk(source_dir):
-            dirs[:] = [d for d in dirs if d not in NOISE_DIRS]
-            for fname in files:
-                abs_path = Path(root) / fname
-                rel = abs_path.relative_to(source_dir).as_posix()
-                if is_noise(rel):
-                    continue
-                result[rel] = (abs_path, rel)
     return result
 
 
@@ -344,18 +345,31 @@ def ask_overwrite(rel: str, reason: str, non_interactive: bool) -> str:
     return {"k": "keep", "o": "overwrite", "d": "diff"}[choice]
 
 
+def copy_atomic(source: Path, destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as stream:
+            temporary = Path(stream.name)
+        shutil.copy2(source, temporary)
+        os.replace(temporary, destination)
+    finally:
+        if temporary is not None and temporary.exists():
+            temporary.unlink()
+
+
 def apply_one(rel: str, src_abs: Path, dest_abs: Path, decision: str,
               stats: dict, manifest: dict) -> None:
     """Carry out a resolved decision for a single file."""
     if decision == "overwrite":
         if dest_abs.exists():
-            shutil.copy2(dest_abs, Path(str(dest_abs) + ".bak"))
+            copy_atomic(dest_abs, Path(str(dest_abs) + ".bak"))
         dest_abs.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src_abs, dest_abs)
+        copy_atomic(src_abs, dest_abs)
         manifest[rel] = sha256_file(dest_abs)
         stats["conflicts"].append(f"{rel} \u2192 [O]verwritten (.bak saved)")
     elif decision == "diff":
-        shutil.copy2(src_abs, Path(str(dest_abs) + ".upstream"))
+        copy_atomic(src_abs, Path(str(dest_abs) + ".upstream"))
         stats["conflicts"].append(f"{rel} \u2192 [D]iff (.upstream saved)")
         # Deliberately NOT recorded in the manifest: the user's file is still
         # in place and unbaselined, so this stays a conflict next run until
@@ -366,105 +380,55 @@ def apply_one(rel: str, src_abs: Path, dest_abs: Path, decision: str,
         # Same reasoning: a kept user file must not become the baseline.
 
 
+def sync_file(dest_rel: str, src_abs: Path, src_rel: str, target_dir: Path,
+              manifest: dict, protected: list[str], exceptions: list[str],
+              non_interactive: bool, stats: dict) -> None:
+    dest_abs = target_dir / dest_rel
+    key = src_rel if src_rel == dest_rel else src_rel + "=>" + dest_rel
+    if is_protected(dest_rel, protected, exceptions):
+        if dest_abs.exists():
+            stats["protected"].append(dest_rel)
+        else:
+            copy_atomic(src_abs, dest_abs)
+            stats["updated"].append(dest_rel)
+        return
+    if not dest_abs.exists():
+        copy_atomic(src_abs, dest_abs)
+        manifest[key] = sha256_file(dest_abs)
+        stats["updated"].append(dest_rel)
+        return
+    current_hash = sha256_file(dest_abs)
+    installed_hash = manifest.get(key)
+    new_hash = sha256_file(src_abs)
+    if current_hash == installed_hash:
+        if current_hash == new_hash:
+            stats["skipped"].append(dest_rel)
+        else:
+            copy_atomic(src_abs, dest_abs)
+            manifest[key] = sha256_file(dest_abs)
+            stats["updated"].append(dest_rel)
+        return
+    reason = ("This framework file has been locally modified." if installed_hash
+              else "Existing file has no verified baseline; identical bytes do not grant ownership.")
+    decision = ask_overwrite(dest_rel, reason, non_interactive)
+    apply_one(key, src_abs, dest_abs, decision, stats, manifest)
+
+
 def sync_tree(source_dir: Path, target_dir: Path, manifest: dict[str, str],
               protected: list[str], exceptions: list[str],
               non_interactive: bool, ship: Optional[list[str]] = None) -> dict:
-    """Copy framework files into target, never overwriting user work silently.
-
-    Rules, in order of precedence:
-      0. noise                       -> never copied
-      1. protected + exists          -> untouched, unconditionally (user data)
-      2. protected + missing         -> created once (first delivery of our doc)
-      3. unbaselined + differs       -> ASK (no manifest entry to trust)
-      4. hash == upstream            -> skip, nothing to do
-      5. hash == manifest baseline   -> auto-update (user never touched it)
-      6. otherwise                   -> ASK (user edited it)
-
-    `manifest` is updated in place with the hash of every file we actually
-    wrote. Files the user kept are deliberately left out.
-    """
-    stats: dict[str, list] = {
-        "updated": [], "protected": [], "user_custom": [],
-        "conflicts": [], "skipped": [],
-    }
-    # Install and update deliver the same curated set. Walking the whole repo
-    # would push README.md, install.sh and every optional language pack into the
-    # user's project.
-    all_source_files = collect_framework_files(
-        source_dir, only=ship if ship is not None else INSTALL_SHIP_LIST)
-
-    for dest_rel, (src_abs, src_rel) in sorted(all_source_files.items()):
-        dest_abs = target_dir / dest_rel
-        # The baseline is keyed by SOURCE path, so a pack that lands at
-        # .agents/skills/flutter/... stays recognisable as coming from
-        # optional-stack-skills/languages/flutter/... on the next update.
-        key = src_rel
-
-        # 1 & 2 - protected paths. A protected file that already exists is user
-        # territory: never read for writing, never hashed, never touched.
-        if is_protected(dest_rel, protected, exceptions):
-            if dest_abs.exists():
-                stats["protected"].append(dest_rel)
-                continue
-            dest_abs.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(src_abs, dest_abs)
-            stats["updated"].append(dest_rel)
-            continue
-
-        # 3 - file exists but we have no baseline for it. This happens for
-        # projects installed before manifests were written, and for a user who
-        # created their own file at a path we also ship. Content comparison is
-        # the only safe arbiter.
-        if dest_abs.exists() and key not in manifest:
-            if sha256_file(dest_abs) == sha256_file(src_abs):
-                manifest[key] = sha256_file(dest_abs)
-                stats["skipped"].append(dest_rel)
-                continue
-            decision = ask_overwrite(
-                dest_rel,
-                "This file exists in your project but was not installed by this "
-                "tool, so there is no baseline to compare against.",
-                non_interactive,
-            )
-            apply_one(key, src_abs, dest_abs, decision, stats, manifest)
-            continue
-
-        new_hash = sha256_file(src_abs)
-
-        # Brand new upstream file.
-        if not dest_abs.exists():
-            dest_abs.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(src_abs, dest_abs)
-            manifest[key] = sha256_file(dest_abs)
-            stats["updated"].append(dest_rel)
-            continue
-
-        current_hash = sha256_file(dest_abs)
-
-        # 4 - already identical.
-        if current_hash == new_hash:
-            manifest[key] = current_hash
-            stats["skipped"].append(dest_rel)
-            continue
-
-        installed_hash = manifest.get(key, "")
-
-        # 5 - untouched since we installed it: safe to refresh.
-        if installed_hash and current_hash == installed_hash:
-            shutil.copy2(src_abs, dest_abs)
-            manifest[key] = new_hash
-            stats["updated"].append(dest_rel)
-            continue
-
-        # 6 - the user edited a file we installed. Ask.
-        decision = ask_overwrite(
-            dest_rel,
-            "This framework file has been locally modified.",
-            non_interactive,
-        )
-        apply_one(key, src_abs, dest_abs, decision, stats, manifest)
-
-    stats["total_source"] = len(all_source_files)
+    """Write only missing files or unchanged owned files; never adopt kept bytes."""
+    stats = {key: [] for key in ("updated", "protected", "user_custom", "conflicts", "skipped")}
+    files = collect_framework_files(source_dir, only=ship if ship is not None else INSTALL_SHIP_LIST)
+    destinations = sorted(files)
+    for index, dest_rel in enumerate(destinations):
+        state.contained(target_dir, dest_rel)
+        if index and dest_rel.startswith(destinations[index - 1] + "/"):
+            raise ValueError("File/directory mapping collision: " + dest_rel)
+    for dest_rel, (src_abs, src_rel) in sorted(files.items()):
+        sync_file(dest_rel, src_abs, src_rel, target_dir, manifest, protected,
+                  exceptions, non_interactive, stats)
+    stats["total_source"] = len(files)
     return stats
 
 
@@ -474,83 +438,79 @@ def print_sync_summary(stats: dict, version: str) -> None:
     print(f"  \u2705 Updated / installed:   {len(stats['updated'])} files")
     print(f"  \U0001f6e1  Protected (untouched):  {len(stats['protected'])} paths")
     print(f"  \u23ed  Already identical:      {len(stats['skipped'])} files")
-    print(f"  \u26a0\ufe0f  Conflicts resolved:     {len(stats['conflicts'])} files")
+    print(f"  \u26a0\ufe0f  Conflicts kept/reviewed:     {len(stats['conflicts'])} files")
+    print(f"  Unavailable packs: {len(stats.get('unavailable', []))}")
     for c in stats["conflicts"]:
         print(f"       {c}")
     if version:
-        print(f"\n  \U0001f389 Framework at v{version}!")
+        print(f"\n  Framework source version: {version}")
     print("\u2501" * 62)
 
 
 
-def sync_hooks(target_dir: Path) -> None:
-    """Re-register harness hooks after framework files were updated.
-
-    .agents/hooks.json is the single source of truth (Antigravity dialect).
-    Claude Code needs the same hooks mirrored into .claude/settings.json, so
-    any update that touched hooks.json or the hook scripts must regenerate it.
-    Best-effort: a missing Node.js runtime must never fail the update.
-    """
-    installer = target_dir / ".agents" / "scripts" / "install-hooks.js"
-    if not installer.is_file():
-        return
-    if shutil.which("node") is None:
-        print("  ⚠️  Node.js not found - skipped hook re-registration.")
-        print("     Run manually after installing Node: node .agents/scripts/install-hooks.js --target .")
-        return
-
-    import subprocess
-
-    try:
-        proc = subprocess.run(
-            ["node", str(installer), "--target", str(target_dir), "--harness", "auto"],
-            capture_output=True, text=True, timeout=60,
-        )
-        out = (proc.stdout or "").strip()
-        if proc.returncode == 0:
-            print(f"  🪝  Hooks: {out or 'in sync'}")
+def run_derived(source_dir: Path, target_dir: Path) -> list[dict]:
+    commands = [
+        ("index", "build-skill-index.mjs", ["--root", str(target_dir), "--prune", "--quiet"]),
+        ("adapters", "sync-harnesses.mjs", ["--target", str(target_dir), "--quiet"]),
+        ("hooks", "install-hooks.js", ["--target", str(target_dir), "--harness", "auto"]),
+    ]
+    results = []
+    for phase, name, args in commands:
+        script = state.contained(source_dir, ".agents/scripts/" + name)
+        if not script.is_file():
+            results.append({"phase": phase, "status": "unavailable", "error": "Verified source generator missing; phase not run"})
+            print("  " + phase + ": unavailable (source generator missing)")
+            continue
+        result = {"phase": phase, "status": "failed"}
+        if not shutil.which("node"):
+            result["error"] = "Node.js unavailable; phase not run"
         else:
-            err = (proc.stderr or out or "").strip().splitlines()
-            print(f"  ⚠️  Hook re-registration failed: {err[-1] if err else proc.returncode}")
-    except Exception as exc:  # pragma: no cover - defensive
-        print(f"  ⚠️  Hook re-registration error: {exc}")
+            try:
+                proc = subprocess.run(["node", str(script), *args], cwd=target_dir,
+                                      capture_output=True, text=True, timeout=60)
+                result.update(status="ok" if proc.returncode == 0 else "failed",
+                              returncode=proc.returncode, stdout=proc.stdout, stderr=proc.stderr)
+                for line in reversed(proc.stdout.splitlines()):
+                    try:
+                        detail = json.loads(line)
+                    except ValueError:
+                        continue
+                    if isinstance(detail, dict) and detail.get("phase"):
+                        result["detail"] = detail
+                        if detail.get("status") == "partial": result["status"] = "partial"
+                        break
+            except (OSError, subprocess.TimeoutExpired) as exc:
+                result["error"] = str(exc)
+        print("  " + phase + ": " + result["status"])
+        if result["status"] == "failed":
+            print(result.get("error") or result.get("stderr") or result.get("stdout") or "Phase failed")
+        results.append(result)
+    return results
 
 
-def normalize_skill_tiers(target_dir: Path) -> None:
-    """Collapse the two-tier skill layout on projects installed before it existed.
-
-    An older install keeps every skill under `.agents/skills/`, so the harness
-    still injects ~65 descriptions (~7k tokens) into every request and every
-    subagent. The catalog generator knows which skills belong in the indexed
-    tier; `--prune` removes the duplicates already present in the library and
-    rewrites `.agents/SKILLS.md`. Best-effort: never fail an update over it.
-    """
-    script = target_dir / ".agents" / "scripts" / "build-skill-index.mjs"
-    if not script.is_file():
+def preflight_derived(source_dir: Path, target_dir: Path, ship: list[str]) -> None:
+    files = collect_framework_files(source_dir, ship)
+    for rel in files:
+        state.contained(target_dir, rel)
+    commands = [("build-skill-index.mjs", "--root"),
+                ("sync-harnesses.mjs", "--target"), ("install-hooks.js", "--target")]
+    states = ["harness-manifest.json", "derived-state-index.json", "derived-state-hooks.json"]
+    if not shutil.which("node"):
+        if any(state.contained(target_dir, ".agents/" + name).exists() for name in states):
+            raise ValueError("Node.js required to validate existing derived ownership before source writes")
         return
-    if shutil.which("node") is None:
-        print("  \u26a0\ufe0f  Node.js not found - skipped skill tier normalization.")
-        return
-
-    import subprocess
-
-    try:
-        proc = subprocess.run(
-            ["node", str(script), "--prune", "--quiet"],
-            cwd=str(target_dir), capture_output=True, text=True, timeout=60,
-        )
-        if proc.returncode == 0:
-            print("  \U0001f4d1  Skill tiers: normalized (hot set + .agents/SKILLS.md)")
-        else:
-            err = (proc.stderr or proc.stdout or "").strip().splitlines()
-            print(f"  \u26a0\ufe0f  Skill tier normalization failed: {err[-1] if err else proc.returncode}")
-    except Exception as exc:  # pragma: no cover - defensive
-        print(f"  \u26a0\ufe0f  Skill tier normalization error: {exc}")
+    for name, flag in commands:
+        script = state.contained(source_dir, ".agents/scripts/" + name)
+        if script.is_file():
+            proc = subprocess.run(["node", str(script), flag, str(target_dir), "--validate-only"],
+                                  cwd=target_dir, capture_output=True, text=True, timeout=60)
+            if proc.returncode:
+                raise ValueError("Derived preflight rejected " + name + ": " + proc.stderr.strip())
 
 
 def cmd_sync(target_dir: Path, source_dir: Path, version: str,
              ship: Optional[list[str]] = None, non_interactive: bool = False,
-             git_mode: str = "") -> int:
+             git_mode: str = "", detect_packs: bool = False, installer_paths: bool = False) -> int:
     """Install (or re-install) framework files from a local source tree.
 
     This is the fresh-install path, and it shares sync_tree() with --apply so a
@@ -558,8 +518,13 @@ def cmd_sync(target_dir: Path, source_dir: Path, version: str,
     data is never touched, and a locally modified framework file triggers a
     prompt instead of a silent overwrite.
     """
+    if installer_paths:
+        for rel in (".gitignore", ".git/info/exclude", "UPGRADE_NOTICE.md"):
+            state.contained(target_dir, rel)
     ws_data = load_workflow_source(target_dir)
-    manifest: dict[str, str] = ws_data.get("manifest", {})
+    manifest: dict[str, str] = dict(ws_data.get("fileHashes", ws_data.get("manifest", {})))
+    packs, ship = state.selections(source_dir, target_dir, ws_data, ship,
+                                   INSTALL_SHIP_LIST, detect_packs, non_interactive, _read_line)
     protected, exceptions = get_protected_paths(ws_data)
 
     print()
@@ -571,19 +536,28 @@ def cmd_sync(target_dir: Path, source_dir: Path, version: str,
 
     # Prefer the version shipped in the source tree over whatever the caller
     # passed, so the recorded version can never drift from the files installed.
-    src_version = source_dir / "version.json"
+    src_version = state.contained(source_dir, "version.json")
     if src_version.is_file():
         try:
             meta = json.loads(src_version.read_text(encoding="utf-8"))
-            if meta.get("version"):
-                version = meta["version"]
-        except Exception:
-            pass
+        except (ValueError, OSError) as exc:
+            raise ValueError("Invalid source version.json") from exc
+        if not isinstance(meta, dict) or not isinstance(meta.get("version"), str) or not meta["version"]:
+            raise ValueError("Invalid source version metadata")
+        version = meta["version"]
+    if ws_data and "selectedPacks" not in ws_data:
+        print("  Legacy registry has no confirmed optional packs; reconfirm selections explicitly.")
 
+    unavailable = [p["id"] for p in packs if not state.contained(source_dir, p["source_path"]).exists()]
+    preflight_derived(source_dir, target_dir, ship)
     stats = sync_tree(source_dir, target_dir, manifest, protected, exceptions,
                       non_interactive, ship=ship)
+    stats["unavailable"] = unavailable
 
     ws_data.update({
+        "schemaVersion": 2,
+        "selectedPacks": packs,
+        "fileHashes": manifest,
         "sourceRepo": ws_data.get("sourceRepo", REPO_URL),
         "sourcePath": str(source_dir),
         "version": version,
@@ -596,17 +570,19 @@ def cmd_sync(target_dir: Path, source_dir: Path, version: str,
     })
     save_workflow_source(target_dir, ws_data)
 
+    phases = run_derived(source_dir, target_dir)
+    ws_data["lastSync"] = {"files": stats, "phases": phases,
+                           "status": "partial" if stats["conflicts"] or unavailable or any(p["status"] != "ok" for p in phases) else "ok"}
+    save_workflow_source(target_dir, ws_data)
     print_sync_summary(stats, version)
-    return 0
+    print("  Refresh status: " + ws_data["lastSync"]["status"])
+    return int(any(p["status"] == "failed" for p in phases))
 
 
 def cmd_apply(target_dir: Path, non_interactive: bool = False) -> int:
     """Apply update from a fresh clone of the remote repo."""
     ws_data = load_workflow_source(target_dir)
     current_version = ws_data.get("version", "unknown")
-    manifest: dict[str, str] = ws_data.get("manifest", {})
-    protected, exceptions = get_protected_paths(ws_data)
-
     print()
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print("  🔄 Universal Agents Workflow — Smart Update Engine")
@@ -622,10 +598,6 @@ def cmd_apply(target_dir: Path, non_interactive: bool = False) -> int:
     remote_version = remote_meta.get("version", "?")
     print(f"\n  Remote version: v{remote_version}")
 
-    if remote_version == current_version:
-        print(f"  ✅ Already up-to-date at v{current_version}. Nothing to do.")
-        return 0
-
     # 2. Clone remote to temp dir
     print("\n  📥 Cloning latest framework...")
     tmp_dir = tempfile.mkdtemp(prefix="uaw-update-")
@@ -640,27 +612,8 @@ def cmd_apply(target_dir: Path, non_interactive: bool = False) -> int:
             return 1
 
         source_dir = Path(tmp_dir)
-        stats = sync_tree(source_dir, target_dir, manifest, protected, exceptions,
-                          non_interactive)
-
-        # 4. Persist the manifest that sync_tree maintained. We deliberately do
-        # NOT rebuild it by hashing the target tree: a file the user chose to
-        # keep must not become the baseline, or the next update would treat our
-        # own upstream copy as safe to write over their work.
-        ws_data.update({
-            "version": remote_version,
-            "lastCheckedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "manifest": manifest,
-        })
-        save_workflow_source(target_dir, ws_data)
-
-        # 5. Re-register harness hooks (Claude Code mirror of .agents/hooks.json)
-        sync_hooks(target_dir)
-        normalize_skill_tiers(target_dir)
-
-        # 6. Summary report
-        print_sync_summary(stats, remote_version)
-        return 0
+        return cmd_sync(target_dir, source_dir, remote_version,
+                        non_interactive=non_interactive)
 
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
@@ -687,6 +640,8 @@ def main() -> int:
     parser.add_argument("--extra-ship", default="",
                         help="Comma-separated entries ADDED to the default install "
                              "set, e.g. the language packs the user selected")
+    parser.add_argument("--installer-paths", action="store_true", help="Preflight final installer ignore/notice paths")
+    parser.add_argument("--detect-packs", action="store_true", help="Offer detected catalog packs before synchronization")
     parser.add_argument("--git-mode", default="",
                         help="Record this git mode in workflow-source.json")
     args = parser.parse_args()
@@ -712,7 +667,7 @@ def main() -> int:
         else:
             ship = None
         return cmd_sync(target_dir, source_dir, args.version or "unknown",
-                        ship=ship, non_interactive=args.yes, git_mode=args.git_mode)
+                        ship=ship, non_interactive=args.yes, git_mode=args.git_mode, detect_packs=args.detect_packs, installer_paths=args.installer_paths)
 
     if args.check:
         return cmd_check(target_dir)
@@ -721,4 +676,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except (ValueError, OSError) as exc:
+        print("Safe update rejected: " + str(exc), file=sys.stderr)
+        sys.exit(1)

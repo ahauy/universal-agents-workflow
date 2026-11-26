@@ -18,6 +18,7 @@ set -euo pipefail
 
 # Colors for terminal output
 BOLD="\033[1m"
+DIM="\033[2m"
 GREEN="\033[0;32m"
 BLUE="\033[0;34m"
 YELLOW="\033[0;33m"
@@ -278,66 +279,6 @@ WORKFLOW_ASSETS=(
   ".github/copilot-instructions.md"
 )
 
-# A target counts as "already carrying content" when it holds a previous
-# install marker OR any asset we are about to write. AGENTS.md in particular is
-# a cross-tool standard: another agent framework may own it, and silently
-# replacing it would destroy the user's instructions.
-target_needs_safe_sync() {
-  [ -f "$TARGET_DIR/.agents/workflow-source.json" ] && return 0
-  local asset
-  for asset in "${WORKFLOW_ASSETS[@]}"; do
-    [ -e "$TARGET_DIR/$asset" ] && return 0
-  done
-  return 1
-}
-
-is_project_data() {
-  local dest_rel="${1#$TARGET_DIR/}"
-  for protected in "${PROTECTED_DATA_PATHS[@]}"; do
-    if [ "$dest_rel" = "$protected" ] || \
-       [ "$dest_rel" = "$protected/" ] || \
-       [[ "$dest_rel" == "$protected/"* ]]; then
-      return 0  # is protected
-    fi
-  done
-  return 1  # not protected
-}
-
-copy_item() {
-  local src="$1"
-  local dest="$2"
-  local name="$3"
-
-  # HARD GUARD: TUYỆT ĐỐI KHÔNG sao chép vào thư mục root nếu target_path rỗng hoặc bằng TARGET_DIR
-  if [ -z "$dest" ] || [ "$dest" = "$TARGET_DIR" ] || [ "$dest" = "$TARGET_DIR/" ]; then
-    echo -e "  ⚠️  ${RED}CẢNH BÁO AN TOÀN: Phát hiện đường dẫn đích không hợp lệ hoặc trỏ vào root: ${name}. Bỏ qua!${NC}"
-    return 1
-  fi
-
-  # PROTECTION GATE: Skip project data files that already exist
-  if [ -e "$dest" ] && is_project_data "$dest"; then
-    local rel_dest="${dest#$TARGET_DIR/}"
-    echo -e "  🛡️  Bảo vệ dữ liệu dự án: ${CYAN}${name}${NC} ➔ ${YELLOW}${rel_dest} (đã tồn tại, bỏ qua)${NC}"
-    return 0
-  fi
-
-  if [ -e "$src" ]; then
-    if [ -d "$src" ]; then
-      mkdir -p "$dest"
-      cp -R "$src/"* "$dest/" 2>/dev/null || true
-      # Also copy hidden files if any
-      cp -R "$src/".[!.]* "$dest/" 2>/dev/null || true
-    else
-      mkdir -p "$(dirname "$dest")"
-      cp -p "$src" "$dest"
-    fi
-    local rel_dest="${dest#$TARGET_DIR/}"
-    echo -e "  ✅ Đã tích hợp: ${CYAN}${name}${NC} ➔ ${GREEN}${rel_dest}${NC}"
-  else
-    echo -e "  ⚠️ Không tìm thấy nguồn: ${name}"
-  fi
-}
-
 # ── Smart Update Mode: delegate to the Python engine, then stop ──────────────
 # --apply clones the remote repo and 3-way-merges it into the target, so it
 # must NOT be preceded by a local copy: that copy would already have clobbered
@@ -357,271 +298,19 @@ if [ "$UPDATE_MODE" = true ]; then
   fi
 fi
 
-# ── Fresh install: safe sync when the target already carries content ─────────
-# A clean target gets a plain copy. Anything else — a previous install, or
-# another framework's AGENTS.md — goes through the engine's 3-way-hash sync,
-# which never overwrites user content without asking. copy_item() cannot make
-# that distinction: it blind-copies over whatever is there.
+# All installations share validated mappings, recorded hashes and ordered refresh.
 ENGINE_SRC="$SOURCE_DIR/.agents/scripts/update-engine.py"
-SAFE_SYNC_DONE=false
-
-if target_needs_safe_sync && command -v python3 >/dev/null 2>&1 && [ -f "$ENGINE_SRC" ]; then
-  echo -e "  🛡️  ${YELLOW}Dự án đích đã có nội dung — dùng Safe Sync (3-way hash) thay vì chép đè.${NC}"
-  SYNC_ARGS=(--sync --source "$SOURCE_DIR" --target "$TARGET_DIR" --git-mode "$MODE")
-  [ "$NON_INTERACTIVE" = true ] && SYNC_ARGS+=(--yes)
-  if python3 "$ENGINE_SRC" "${SYNC_ARGS[@]}"; then
-    SAFE_SYNC_DONE=true
-  else
-    echo -e "  ${RED}Safe Sync thất bại — dừng lại, không sao chép đè mù.${NC}"
-    echo -e "  ${DIM}   Sửa lỗi trên rồi chạy lại, hoặc dùng --update cho chế độ 3-way hash.${NC}"
-    exit 1
-  fi
+if ! command -v python3 >/dev/null 2>&1 || [ ! -f "$ENGINE_SRC" ]; then
+  echo "Python 3 and the update engine are required for safe installation."
+  exit 1
 fi
-
-if [ "$SAFE_SYNC_DONE" != true ]; then
-  copy_item "$SOURCE_DIR/.agents" "$TARGET_DIR/.agents" ".agents/"
-  copy_item "$SOURCE_DIR/.specify" "$TARGET_DIR/.specify" ".specify/"
-  copy_item "$SOURCE_DIR/adr" "$TARGET_DIR/adr" "adr/"
-  copy_item "$SOURCE_DIR/CONTEXT.md" "$TARGET_DIR/CONTEXT.md" "CONTEXT.md"
-  copy_item "$SOURCE_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md" "AGENTS.md"
-  copy_item "$SOURCE_DIR/GEMINI.md" "$TARGET_DIR/GEMINI.md" "GEMINI.md"
-  copy_item "$SOURCE_DIR/CLAUDE.md" "$TARGET_DIR/CLAUDE.md" "CLAUDE.md"
-  copy_item "$SOURCE_DIR/.cursorrules" "$TARGET_DIR/.cursorrules" ".cursorrules"
-  copy_item "$SOURCE_DIR/.windsurfrules" "$TARGET_DIR/.windsurfrules" ".windsurfrules"
-  copy_item "$SOURCE_DIR/.github/copilot-instructions.md" "$TARGET_DIR/.github/copilot-instructions.md" ".github/copilot-instructions.md"
-fi
-
-# ==============================================================================
-# BƯỚC 3.3a — CHUẨN HÓA HAI TẦNG SKILL (hot / cold)
-# ==============================================================================
-# Bản cài cũ giữ toàn bộ skill trong .agents/skills/, nên mọi harness vẫn index
-# hàng chục mô tả trên mỗi request và mỗi subagent (~7k token). --prune xóa bản
-# trùng đã có trong .agents/skill-library/ rồi sinh lại .agents/SKILLS.md.
-if command -v node >/dev/null 2>&1 && [ -f "$TARGET_DIR/.agents/scripts/build-skill-index.mjs" ]; then
-  if ( cd "$TARGET_DIR" && node .agents/scripts/build-skill-index.mjs --prune --quiet ); then
-    echo -e "  ${GREEN}✓${NC} Skill 2 tầng đã chuẩn hóa (hot set + .agents/SKILLS.md)"
-  else
-    echo -e "  ${YELLOW}⚠ Bỏ qua chuẩn hóa skill (script lỗi).${NC}"
-  fi
-fi
-
-# ==============================================================================
-# BƯỚC 3.3b — SINH ADAPTER ĐA HARNESS (một nguồn, nhiều spokes)
-# ==============================================================================
-# Thay vì bảo trì tay 6 file cầu nối (nguồn drift lớn nhất của framework), sinh
-# chúng từ AGENTS.md, fan-out skills, và sinh slash command cho từng harness:
-#   .claude/{agents,skills,commands}   .cursor/{rules,commands}
-#   .windsurf/{rules,workflows}        .github/{copilot-instructions,prompts}
-#   .gemini/commands                   .workbuddy-ai/skills
-# Idempotent: chỉ ghi file do script tạo (có marker), không đụng file người dùng.
-if command -v node >/dev/null 2>&1; then
-  if node "$TARGET_DIR/.agents/scripts/sync-harnesses.mjs" --target "$TARGET_DIR" --mode link --quiet; then
-    echo -e "  ${GREEN}✓${NC} Adapter + slash command đã sinh cho mọi harness"
-  else
-    echo -e "  ${YELLOW}⚠ Bỏ qua bước sinh adapter harness (script lỗi).${NC}"
-  fi
+SYNC_ARGS=(--sync --source "$SOURCE_DIR" --target "$TARGET_DIR" --git-mode "$MODE" --detect-packs --installer-paths)
+[ "$NON_INTERACTIVE" = true ] && SYNC_ARGS+=(--yes)
+if python3 "$ENGINE_SRC" "${SYNC_ARGS[@]}"; then
+  echo "Source and derived phase results are shown above."
 else
-  echo -e "  ${YELLOW}⚠ Không có node — bỏ qua bước sinh adapter harness.${NC}"
-fi
-
-# ==============================================================================
-# BƯỘC 3.4 — XÁC MINH HỢP ĐỒNG AGENT (Layer A + Layer B)
-# ==============================================================================
-# validate-agents.py kiểm hai lớp lỗi làm hỏng việc phân phối subagent mà runtime
-# không phát hiện được cho tới khi phiên chạy thất bại:
-#   Layer B: model ID hardcode khiến harness loại agent khỏi registry
-#   Layer A: ví dụ gọi agent dạng pseudo-JSON single-quote trong prompt/skill
-# Bước này chỉ xác minh sau khi copy — không abort, vì cài đặt đã hoàn tất.
-VALIDATE_SCRIPT="$TARGET_DIR/.agents/scripts/validate-agents.py"
-if command -v python3 >/dev/null 2>&1 && [ -f "$VALIDATE_SCRIPT" ]; then
-  echo ""
-  echo -e "${YELLOW}🔎 Đang xác minh hợp đồng agent/tool-call...${NC}"
-  if VALIDATE_OUT="$(python3 "$VALIDATE_SCRIPT" --root "$TARGET_DIR" 2>&1)"; then
-    echo -e "  ${GREEN}✅ $(echo "$VALIDATE_OUT" | tail -1)${NC}"
-  else
-    echo -e "  ${RED}⚠️ Phát hiện vi phạm hợp đồng — subagent có thể không gọi được:${NC}"
-    echo "$VALIDATE_OUT" | sed 's/^/     /'
-    echo -e "  ${DIM}   Xem docs/architecture/MODEL_AND_TOOLCALL_CONTRACT.md để biết cách sửa.${NC}"
-  fi
-fi
-
-# ==============================================================================
-# BƯỘC 3.5 — ĐĂNG KÝ WORKFLOW HOOKS CHO HARNESS HIỆN TẠI
-# ==============================================================================
-# .agents/hooks.json là nguồn duy nhất, viết theo dialect của Antigravity.
-# Với Claude Code, sinh .claude/settings.json từ nguồn đó (tên event và tool
-# matcher đã được dịch). Script idempotent và không ghiè đấp hook người dùng
-# tự thêm.
-HOOK_SCRIPT="$TARGET_DIR/.agents/scripts/install-hooks.js"
-if ! command -v node >/dev/null 2>&1; then
-  echo ""
-  echo -e "  ${YELLOW}⚠️ Không tìm thấy 'node' — bỏ qua đăng ký hooks.${NC}"
-  echo -e "  ${DIM}   Cài Node.js rồi chạy: node .agents/scripts/install-hooks.js --target .${NC}"
-elif [ -f "$HOOK_SCRIPT" ]; then
-  echo ""
-  echo -e "${YELLOW}🪝 Đang đăng ký workflow hooks cho harness hiện tại...${NC}"
-  if node "$HOOK_SCRIPT" --target "$TARGET_DIR" --harness auto; then
-    echo -e "  ${GREEN}✅ Đã đồng bộ hooks (Antigravity: .agents/hooks.json │ Claude Code: .claude/settings.json).${NC}"
-  else
-    echo -e "  ${DIM}⏭️ Không sinh được settings hooks — bỏ qua, không ảnh hưởng cài đặt.${NC}"
-  fi
-fi
-
-# Record workflow source repository metadata (with full protectedPaths)
-#
-# Skipped when Safe Sync already ran: the engine wrote this file itself, with a
-# populated manifest that is the baseline for every future 3-way-hash update.
-# Rewriting it here would blank the manifest and silently authorise overwriting
-# user files on the next --update.
-#
-# Version comes from version.json in the source tree — the single source of
-# truth shared with the update engine — so a fresh install can never record a
-# version that drifted from the files actually copied. Falls back to the last
-# known good value only if the file is missing or unparseable.
-resolve_version() {
-  local vf="$SOURCE_DIR/version.json"
-  local v=""
-  if [ -f "$vf" ]; then
-    if command -v python3 >/dev/null 2>&1; then
-      v="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("version",""))' "$vf" 2>/dev/null || true)"
-    fi
-    if [ -z "$v" ]; then
-      v="$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$vf" | head -1 | sed 's/.*:[[:space:]]*"\(.*\)"/\1/' || true)"
-    fi
-  fi
-  [ -n "$v" ] || v="1.2.0"
-  printf '%s' "$v"
-}
-WORKFLOW_VERSION="$(resolve_version)"
-
-if [ "$SAFE_SYNC_DONE" != true ]; then
-INSTALL_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-cat > "$TARGET_DIR/.agents/workflow-source.json" << EOF
-{
-  "sourceRepo": "https://github.com/ahauy/universal-agents-workflow.git",
-  "sourcePath": "$SOURCE_DIR",
-  "version": "$WORKFLOW_VERSION",
-  "gitMode": "$MODE",
-  "installedAt": "$INSTALL_DATE",
-  "lastCheckedAt": "$INSTALL_DATE",
-  "protectedPaths": [
-    "CONTEXT.md",
-    "PRODUCT_BACKLOG_ROADMAP.md",
-    "CHANGELOG.md",
-    "UPGRADE_NOTICE.md",
-    "adr/",
-    "!adr/adr-template.md",
-    "docs/features/",
-    "docs/user-guides/",
-    "docs/architecture/",
-    "docs/RUN_AND_TEST.md",
-    ".specify/features/",
-    "src/",
-    ".env",
-    ".env.*",
-    "*.local",
-    "*.local.md"
-  ],
-  "manifest": {}
-}
-EOF
-fi
-
-# Ensure catalog.json exists inside .agents/
-if [ -f "$SOURCE_DIR/optional-stack-skills/catalog.json" ] && [ ! -f "$TARGET_DIR/.agents/catalog.json" ]; then
-  cp "$SOURCE_DIR/optional-stack-skills/catalog.json" "$TARGET_DIR/.agents/catalog.json"
-fi
-
-# ------------------------------------------------------------------------------
-# 5. Smart Stack Scan & Selective Skill Injection (Registry-Driven Engine)
-# ------------------------------------------------------------------------------
-echo -e "\n🔍 ${BOLD}Đang quét Tech Stack của dự án đích (Registry-Driven)...${NC}"
-
-CATALOG_PATH="$SOURCE_DIR/optional-stack-skills/catalog.json"
-MATCHED_ENTRIES=""
-
-if command -v python3 >/dev/null 2>&1 && [ -f "$CATALOG_PATH" ]; then
-  MATCHED_ENTRIES=$(python3 -c '
-import json, os, sys, fnmatch
-
-target = sys.argv[1]
-catalog_file = sys.argv[2]
-
-try:
-    with open(catalog_file) as f:
-        data = json.load(f)
-except Exception:
-    sys.exit(0)
-
-for item in data.get("items", []):
-    if item.get("target_type") == "mcp":
-        continue
-    markers = item.get("detection_markers", [])
-    is_matched = False
-    for m in markers:
-        if ":" in m:
-            parts = m.split(":", 1)
-            filepath = os.path.join(target, parts[0])
-            keyword = parts[1].strip().strip("\"").strip("\x27")
-            if os.path.isfile(filepath):
-                try:
-                    with open(filepath, "r", errors="ignore") as pf:
-                        if keyword in pf.read():
-                            is_matched = True
-                            break
-                except Exception:
-                    pass
-        elif "*" in m:
-            for root, dirs, files in os.walk(target):
-                dirs[:] = [d for d in dirs if d not in [".git", ".agents", "node_modules", "DerivedData", ".build"]]
-                if any(fnmatch.fnmatch(fn, m) for fn in files + dirs):
-                    is_matched = True
-                    break
-            if is_matched:
-                break
-        else:
-            if os.path.exists(os.path.join(target, m)):
-                is_matched = True
-                break
-    if is_matched:
-        src = item.get("source_path", "").strip()
-        tgt = item.get("target_path", "").strip()
-        name = item.get("name", item.get("id", "")).strip()
-        mid = item.get("id", "").strip()
-        if src and tgt:
-            print(src)
-            print(tgt)
-            print(name)
-            print(mid)
-' "$TARGET_DIR" "$CATALOG_PATH" 2>/dev/null)
-fi
-
-if [ -n "$MATCHED_ENTRIES" ]; then
-  echo -e "  🎯 ${GREEN}Phát hiện các thành phần tech stack phù hợp trong catalog.json:${NC}"
-  while read -r src && read -r tgt && read -r name && read -r mid; do
-    [ -z "$name" ] && continue
-    echo -e "     - ${CYAN}${name}${NC} (${mid}) ➔ ${tgt}"
-  done <<< "$MATCHED_ENTRIES"
-  
-  DO_INJECT=true
-  if [ "$NON_INTERACTIVE" != true ]; then
-    INJECT_CHOICE=""
-    prompt_read "👉 Bạn có muốn tự động nạp các thành phần trên vào dự án? [Y/n]: " INJECT_CHOICE
-    case "${INJECT_CHOICE:-y}" in
-      n|N) DO_INJECT=false ;;
-      *) DO_INJECT=true ;;
-    esac
-  fi
-
-  if [ "$DO_INJECT" = true ]; then
-    while read -r src && read -r tgt && read -r name && read -r mid; do
-      [ -z "$src" ] || [ -z "$tgt" ] && continue
-      copy_item "$SOURCE_DIR/$src" "$TARGET_DIR/$tgt" "$name"
-    done <<< "$MATCHED_ENTRIES"
-  fi
-else
-  echo -e "  ℹ️  ${CYAN}Không phát hiện tech stack đặc thù trong danh mục catalog.json.${NC}"
-  echo -e "  ✨ ${GREEN}Giữ dự án 100% sạch sẽ: Không sao chép các kỹ năng thừa!${NC}"
+  echo "Installation is partial or rejected; inspect the phase results and retry."
+  exit 1
 fi
 
 # ------------------------------------------------------------------------------
@@ -756,7 +445,7 @@ fi
 # ------------------------------------------------------------------------------
 # 8. Final Summary & Next Steps
 # ------------------------------------------------------------------------------
-echo -e "\n${BOLD}${GREEN}🎉 Cài đặt hoàn tất thành công!${NC}"
+echo -e "\n${BOLD}Installation results: see the source and phase summaries above.${NC}"
 echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo -e "👉 ${BOLD}Bước tiếp theo:${NC}"
 echo -e "  1. Mở dự án đích trong AI Editor (Antigravity IDE, Cursor, Windsurf, Claude Code)."

@@ -3,10 +3,10 @@
 **Feature slug**: `<feature-slug>`
 **Baseline version**: 1.0 (SIGNED-OFF)
 **Written by**: AI (Antigravity) — Stage TDD (trước implement)
-**Traces to**: `.specify/features/<slug>/spec/user-stories.md`
+**Traces to**: `requirements.md` acceptance criteria and `spec.md` technical surfaces
 
 > **Mục đích**: Document này mô tả test cases ở dạng Gherkin trước khi viết code.
-> Sau khi implement xong, actual test files được viết dựa trên document này.
+> Executable tests are written before implementation and verified failing, then green.
 
 ---
 

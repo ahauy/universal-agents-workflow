@@ -1,139 +1,117 @@
 ---
 invocation: user
 name: intake-classifier
-description: "MANDATORY first step for any new request: classify Micro-Task/Spike/Bounded/Full Feature, pick pipeline depth, create the feature folder. Before elicitation, spec, or code."
+description: "BA checkpoint and lane selector: reuse confirmed evidence; Fast for bounded existing behavior, Full on risk or new/unresolved business behavior."
+triggers:
+  - "/full"
+  - "full lane"
+  - "làm full lane"
+  - "escalate to full lane"
 metadata:
-  stage: "BA Pipeline — Stage 1 of 8"
-  phase: "Phase 1: Business Analysis"
-  model_recommendation: "Extended thinking preferred (Claude Sonnet Thinking / Gemini Flash Thinking)"
-  next_skill: "elicitation-interview"
+  stage: "Pipeline — Lane selection"
+  phase: "Phase 1: Intake"
+  model_recommendation: "Any fast model; escalation is a rule lookup, not a judgement call"
+  next_skill: "none for Fast lane; elicitation-interview only after Full-lane escalation"
 ---
 
-# Intake Classifier
+# Intake Classifier — Lane Selector
 
-Stage 0 of the Universal Business Analysis Pipeline. This skill's only job is to
-answer two questions before anyone writes a single requirement or code file: **how big is
-this, really**, and **which protocol does that size call for**. Getting this
-wrong in either direction wastes effort — over-classifying turns a one-field
-tweak into days of ceremony; under-classifying lets a cross-cutting
-change sneak through without RBAC, migration, or contradiction review.
+Establish the implementation checkpoint, then select **Fast** for bounded,
+confirmed existing behavior or **Full** when a trigger applies. This is the
+lightweight BA entry point; it does not require loading the Full BA skills.
 
----
-
-## 1. Classify
-
-Ask yourself these measurable questions about the request. Don't classify on
-vibes — count.
-
-| Signal                                   | Tier 1: Fast-Track / Fix  | Spike          | Tier 2: Lean Task / US (Roadmap) | Tier 3: Full Feature / Epic |
-| :--------------------------------------- | :------------------------ | :------------- | :------------------------------- | :-------------------------- |
-| **New/changed domain entities**          | 0                         | 0              | 0–1 (additive field/query)       | 2+ (core structural change) |
-| **Existing DB schema change**            | No                        | No             | Minor additive (nullable/enum)   | Structural / breaking       |
-| **Screens/flows touched**                | 0–1 (minor tweak/fix)     | 0 (research)   | 1 existing flow                  | 2+ new flows                |
-| **User roles affected**                  | 0–1                       | N/A            | 1                                | 2+ (cross-cutting RBAC)     |
-| **Cross-cutting impact (auth, billing)** | No                        | No             | No                               | Often                       |
-| **Estimated code lines changed**         | < 80 lines                | 0 (pure notes) | 80–250 lines                     | 250+ lines                  |
-| **Acceptance Criteria status**           | Pre-defined in issue/chat | N/A            | Documented in Roadmap / Backlog  | Undefined / Exploratory     |
-| **Reversible without user impact**       | Yes                       | N/A            | Yes                              | Complex migration needed    |
-
-### Definitions:
-
-- **Tier 1: Fast-Track / Micro-Task**: Surgical bug fixes, UI styling adjustments, single config tweaks, or simple utilities under 80 lines with zero domain ambiguity.
-- **Spike / Feasibility**: Technical exploration or "is this feasible" research question. No permanent product code.
-- **Tier 2: Lean Task / Standard User Story**: Well-scoped User Story from `PRODUCT_BACKLOG_ROADMAP.md` or a standard feature task (80–250 lines) with defined Acceptance Criteria. **Bypasses the full BA ceremony to save ~75% tokens.**
-- **Tier 3: Full Feature / Epic**: Brand-new system domain, complex multi-entity relationships, cross-cutting auth/billing architecture, or undefined product initiatives (> 250 lines).
+Canonical rules live in [AGENTS.md](../../../../AGENTS.md) §2. This skill applies them.
 
 ---
 
-## 2. Select the Protocol (3-Tier Speed Lanes)
+## 1. Default: Fast lane
 
-| Classification                      | Required Protocol & Execution Flow                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Token & Speed Target              |
-| :---------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------- |
-| **Tier 1: Fast-Track / Micro-Task** | **Zero-Ceremony Direct TDD**:<br>1. Inspect code & write failing test.<br>2. Implement surgical fix.<br>3. Verify test passes.<br>4. Single Conventional Commit.<br>_(Bypasses `.specify/features/<slug>/` folder entirely)._                                                                                                                                                                                                                                                                              | ⏱️ 2–3 mins<br>💰 ~15k tokens     |
-| **Spike**                           | Short technical summary + trade-off note. Pipeline stops here — do not create a feature folder, do not proceed to spec or coding.                                                                                                                                                                                                                                                                                                                                                                          | ⏱️ 3–5 mins<br>💰 ~20k tokens     |
-| **Tier 2: Lean Task / Roadmap US**  | **Roadmap-Driven Lean Flow (Zero BA Duplication)**:<br>1. Read existing AC directly from `PRODUCT_BACKLOG_ROADMAP.md`.<br>2. Generate lightweight `test-plan.md` (map AC to test cases) + optional 1-page `implementation-plan.md` if DB/API changes.<br>3. Jump straight to **Phase 5 (TDD Implementation)**.<br>4. Run single-pass `code-reviewer` (governed by 4 stopping rules).<br>5. Mark US as `[x]` in roadmap.<br>_(Bypasses all 8 BA markdown files `00` through `07` and Speckit duplication)._ | ⏱️ 5–8 mins<br>💰 ~50k–70k tokens |
-| **Tier 3: Full Feature / Epic**     | **Full Enterprise BA & Architecture Pipeline**:<br>1. 8-Stage BA Pipeline (`00` to `07` files + `baseline.md`).<br>2. Speckit Technical Planning (`spec.md`, `plan.md`, `tasks.md`).<br>3. Full implementation orchestrator with vertical slices.<br>4. Adversarial reviews + technical docs + user guide.                                                                                                                                                                                                 | ⏱️ 20+ mins<br>💰 ~200k+ tokens   |
+Before implementation, state in chat: outcome, affected behavior, scope, known
+evidence, material unknowns and observable acceptance expectations. Read the
+request, relevant existing code/tests and confirmed AC first. Reuse answers; ask
+only material gaps and record unknowns as ASM- IDs. New or unresolved business
+behavior triggers T7; do not silently choose defaults. Resolved minor technical
+questions alone do not trigger Full. Read-only research is answered directly.
 
-> **🛑 ROADMAP-DRIVEN EXECUTION BYPASS RULE (MANDATORY):**
-> When working on a User Story from `docs/PRODUCT_BACKLOG_ROADMAP.md` that is NOT marked with `[!]` (Blocked):
->
-> - If `Effort` is `S` $\rightarrow$ ALWAYS route to **Tier 1: Fast-Track**.
-> - If `Effort` is `M` $\rightarrow$ ALWAYS route to **Tier 2: Lean Task**.
-> - NEVER force an already-defined roadmap User Story through the full BA ceremony unless the user explicitly requests an enterprise re-elicitation.
+Fast is the default only when this checkpoint confirms bounded existing behavior
+and no trigger in §2 applies.
 
-State the classification and protocol out loud to the user before proceeding:
-
-> This looks like a **[Tier 1 Fast-Track | Tier 2 Lean Task | Tier 3 Full Feature]**. Executing the optimized protocol to ensure maximum speed and token efficiency.
-
-If the user disagrees with the classification, defer to them but log the override in `00-intake.md`.
-
----
-
-## 3. Initialize the Feature Folder (Bounded Task and Full Feature only)
-
-Pick a short kebab-case `<feature-slug>` from the request (e.g. `user-avatar-upload`). Create:
+Fast lane = one context, no feature folder, no subagents:
 
 ```
-.specify/features/<feature-slug>/
-├── 00-intake.md
-├── baseline.md
-└── CHANGELOG.md
+read target + AC → 5-line plan → failing test → code → verify → self-check → done
 ```
 
-**`00-intake.md` template:**
+Write `test-plan.md` only when the task needs more than three test cases.
+
+## 2. Escalation triggers — any one is enough
+
+| # | Trigger | Why Full |
+| --- | --- | --- |
+| T1 | Expected diff > 250 lines or > 8 files | one context will drift |
+| T2 | Breaking/structural DB schema change, or migration with data-loss risk | rollback plan needed |
+| T3 | Auth, permissions/RBAC, billing/payments, or PII | adversarial review required |
+| T4 | New core domain entity, service, or public API contract | decisions must be recorded |
+| T5 | Story marked `[!]` in the roadmap | unresolved business decisions |
+| T6 | User asks for `/full`, enterprise re-elicitation, or audit-grade artifacts | explicit request |
+| T7 | New or unresolved business behavior, rules, defaults or material acceptance decisions | business decisions require baseline |
+
+If no trigger applies, the answer is Fast. Do not escalate "for safety" — that is
+the exact behaviour this lane split exists to remove.
+
+## 3. Sizing labels (informative only)
+
+Sizing never selects the lane. It only sets expectations for the plan and the test
+count.
+
+| Label | Typical shape | Default lane |
+| --- | --- | --- |
+| Spike | research question, no product code | none — answer in chat, no folder |
+| S | < 80 lines, bug fix, typo, single config | Fast |
+| M | 80–250 lines, roadmap story with AC | Fast |
+| L / XL | > 250 lines, multi-entity, cross-cutting | Full (T1/T4 usually fires anyway) |
+
+Roadmap effort labels do not bypass triggers. Reuse confirmed AC and check
+dependencies; an unblocked S/M story touching auth is Full (T3).
+
+## 4. Escalation procedure
+
+When a trigger fires mid-task, escalate **once** and stay escalated:
+
+1. Announce: `Escalating to Full lane: <T#> <reason>`.
+2. Create `.specify/features/<slug>/` with `00-intake.md`, `baseline.md`,
+   `CHANGELOG.md`.
+3. Record the lane and the trigger in `00-intake.md`.
+4. Continue from Step 2 of the pipeline (domain baseline), not from the beginning.
+
+Never downgrade a task back to Fast after escalation.
+
+### `00-intake.md` template (Full lane only)
 
 ```markdown
 # Intake: <Feature Title>
 
 - **Date**: <date>
 - **Requested by**: <persona/stakeholder if known>
-- **Classification**: Micro-Task | Spike | Bounded Task | Full Feature
-- **Classification signals**: <counts from the table above>
-- **Protocol selected**: <stage list this feature will run>
-- **Override**: <none | user overrode classification from X to Y, reason: ...>
+- **Lane**: Full
+- **Escalation trigger**: <T#> <reason>
+- **Override**: <none | explicit user direction and reason; retain safety gates>
 
 ## One-line problem statement
 
-<one sentence — expanded properly in elicitation-interview Stage 1>
+<one sentence — expanded in elicitation-interview>
 ```
 
-**`baseline.md` template:**
+## 5. Hand-off
 
-```markdown
-# Domain Decision Baseline: <Feature Title>
+- **Fast lane** → reproduce/read, write the failing test, implement, verify, self-check.
+- **Spike** → answer directly in this turn. No folder, no code.
+- **Full lane** → announce the trigger and proceed to `elicitation-interview`.
 
-**Status**: DRAFT
-**Version**: 0.1-draft
+## Exit checklist
 
-This document is compiled incrementally by every stage of the Universal BA
-Pipeline. Do not hand-edit sections owned by another skill.
-
-## Stage 0 — Intake
-
-See `00-intake.md`.
-```
-
-**`CHANGELOG.md` template:**
-
-```markdown
-# Changelog: <Feature Title>
-
-- v0.1-draft — <date> — Feature folder created by intake-classifier. Classified as <X>.
-```
-
----
-
-## 4. Hand off
-
-- **Micro-Task / Fast-Fix** → proceed directly to reproduction, test, and surgical fix.
-- **Spike** → answer directly in this turn.
-- **Bounded Task / Full Feature** → inform the user and proceed to `elicitation-interview`.
-
----
-
-## Exit Checklist
-
-- [ ] Classification stated out loud with supporting signals
-- [ ] Protocol selected and stage list is unambiguous
-- [ ] For Micro-Task & Spike: no feature folder created, zero ceremonial overhead
-- [ ] For Bounded/Full: feature folder created with `00-intake.md`, `baseline.md`, `CHANGELOG.md`
+- [ ] Checkpoint established with evidence and no invented business decisions
+- [ ] Lane announced out loud, with the trigger named (or "no trigger")
+- [ ] Fast lane: no feature folder created, no subagent dispatched
+- [ ] Full lane: folder created and trigger recorded in `00-intake.md`
+- [ ] User override (if any) recorded, not silently applied

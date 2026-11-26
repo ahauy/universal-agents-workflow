@@ -112,9 +112,9 @@ async function main() {
     stackDetails.length > 0 ? `- **Stack**: ${stackDetails.join(" | ")}` : null,
     `- **Shared language & ADR**: CONTEXT.md (${hasContextMd ? "active" : "missing"}), adr/ (${hasAdr ? "active" : "missing"})`,
     "- **Workflow** (from `AGENTS.md`):",
-    "  - Pipeline: Intake → Domain Baseline (Tier 3) → Plan → TDD → Review → Docs → Ship.",
+    "  - Pipeline: Intake BA checkpoint before implementation: outcome, behavior, scope, evidence, unknowns, acceptance. Fast: one context; Full on T1–T7: baseline → native plan → slices → review → docs.",
     "  - Read skills on demand only; step detail in `.agents/docs/pipeline-detail.md`.",
-    "  - Invariants: no autonomous git, no code before signed-off baseline, zero Critical bugs, zero silent assumptions.",
+    "  - Invariants: no autonomous git, Full requires signed-off baseline and approved plan/tasks; zero Critical bugs, zero silent assumptions.",
   ]
     .filter(Boolean)
     .join("\n");

@@ -1,0 +1,462 @@
+{
+  "files": [
+    {
+      "path": ".agents/skill-library/engineering/archify/LICENSE",
+      "bytes": 1102
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/skill-release.json",
+      "bytes": 260
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/THIRD_PARTY_NOTICES.md",
+      "bytes": 5248
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/package.json",
+      "bytes": 349
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/SKILL.md",
+      "bytes": 14025
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/delta/architecture-delta.mjs",
+      "bytes": 78582
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/migrations/workflow-v2.mjs",
+      "bytes": 9204
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/bin/delivery-update.mjs",
+      "bytes": 3702
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/bin/open-artifact.mjs",
+      "bytes": 4144
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/bin/recover-output.mjs",
+      "bytes": 1367
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/bin/preview.mjs",
+      "bytes": 36517
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/bin/archify.mjs",
+      "bytes": 267055
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/bin/finalize.mjs",
+      "bytes": 40375
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/bin/visual-check.mjs",
+      "bytes": 112914
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/references/authoring-contract.md",
+      "bytes": 27105
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/references/authoring-defaults.md",
+      "bytes": 7827
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/references/cli-usage.md",
+      "bytes": 7437
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/references/architecture-layout-repair.md",
+      "bytes": 4449
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/references/update-awareness.md",
+      "bytes": 1358
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/references/brand-marks.md",
+      "bytes": 3345
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/references/delivery-contract.md",
+      "bytes": 42416
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/references/json-schemas.md",
+      "bytes": 9684
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/references/repository-authoring.md",
+      "bytes": 6578
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/references/viewer-runtime.md",
+      "bytes": 3235
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/schemas/common.schema.json",
+      "bytes": 5755
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/schemas/README.md",
+      "bytes": 14723
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/schemas/sequence.schema.json",
+      "bytes": 6055
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/schemas/workflow.schema.json",
+      "bytes": 10165
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/schemas/architecture.schema.json",
+      "bytes": 6024
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/schemas/dataflow.schema.json",
+      "bytes": 6320
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/schemas/lifecycle.schema.json",
+      "bytes": 7038
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/recipes/scenarios.mjs",
+      "bytes": 38167
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/async-job-roundtrip.sequence.json",
+      "bytes": 3766
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/checkout-platform.head.architecture.json",
+      "bytes": 2413
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/sequence.example.json",
+      "bytes": 6288
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/web-app.architecture.json",
+      "bytes": 3197
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/checkout-platform.base.architecture.json",
+      "bytes": 2279
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/agent-tool-call.workflow.json",
+      "bytes": 4939
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/lifecycle.example.json",
+      "bytes": 6545
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/architecture.example.json",
+      "bytes": 4972
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/deployment-release.lifecycle.json",
+      "bytes": 3507
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/incident-response.workflow.json",
+      "bytes": 4723
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/cache-miss-request.sequence.json",
+      "bytes": 3805
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/event-stream.dataflow.json",
+      "bytes": 4769
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/brand-aware-delivery.architecture.json",
+      "bytes": 2789
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/dataflow.example.json",
+      "bytes": 6155
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/workflow.example.json",
+      "bytes": 7006
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/holiday-planning.workflow.json",
+      "bytes": 3019
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/agent-run.lifecycle.json",
+      "bytes": 3405
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/production-deployment.architecture.json",
+      "bytes": 4734
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/product-analytics.dataflow.json",
+      "bytes": 5035
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/release-delivery.workflow.json",
+      "bytes": 4510
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/brand-marks/README.md",
+      "bytes": 1449
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/brand-marks/catalog.json",
+      "bytes": 14162
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/scripts/render-examples.mjs",
+      "bytes": 1158
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/scripts/check-update.mjs",
+      "bytes": 58935
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/scripts/update-contract.mjs",
+      "bytes": 6750
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/scripts/delivery-update-child.mjs",
+      "bytes": 1101
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/scripts/check-render-output.mjs",
+      "bytes": 61661
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/assets/template.html",
+      "bytes": 727976
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/assets/JetBrainsMono-OFL.txt",
+      "bytes": 4398
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/locales/ja.json",
+      "bytes": 30557
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/locales/de.json",
+      "bytes": 26529
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/locales/ru.json",
+      "bytes": 34542
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/locales/pt.json",
+      "bytes": 26556
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/locales/it.json",
+      "bytes": 26907
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/locales/fr.json",
+      "bytes": 27334
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/locales/ko.json",
+      "bytes": 28552
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/locales/fr.partial.json",
+      "bytes": 959
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/examples/locales/es.json",
+      "bytes": 27199
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/dataflow/render-dataflow.mjs",
+      "bytes": 24550
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/dataflow/README.md",
+      "bytes": 4204
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/lifecycle/grid-routing.mjs",
+      "bytes": 20516
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/lifecycle/README.md",
+      "bytes": 8760
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/lifecycle/render-lifecycle.mjs",
+      "bytes": 43122
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/generated-validators.mjs",
+      "bytes": 530554
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/brand-marks.mjs",
+      "bytes": 27274
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/diagnostics.mjs",
+      "bytes": 6828
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/route-quality.mjs",
+      "bytes": 23585
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/i18n.mjs",
+      "bytes": 43162
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/path-semantics.mjs",
+      "bytes": 32406
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/spatial-grid.mjs",
+      "bytes": 2440
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/utils.mjs",
+      "bytes": 12556
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/geometry.mjs",
+      "bytes": 83595
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/repository-evidence.mjs",
+      "bytes": 17545
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/validator.mjs",
+      "bytes": 3508
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/engineering-profiles.mjs",
+      "bytes": 6936
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/layout-report.mjs",
+      "bytes": 1130
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/portable-path.mjs",
+      "bytes": 12543
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/legend.mjs",
+      "bytes": 8669
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/output-path.mjs",
+      "bytes": 19029
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/text-fit.mjs",
+      "bytes": 5195
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/desktop-readability.mjs",
+      "bytes": 6873
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/generated-brand-marks.mjs",
+      "bytes": 163612
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/sidecar-path.mjs",
+      "bytes": 1269
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/cli.mjs",
+      "bytes": 20881
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/atomic-output.mjs",
+      "bytes": 70372
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/shared/repository-location.mjs",
+      "bytes": 3552
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/architecture/routing.mjs",
+      "bytes": 54784
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/architecture/render-architecture.mjs",
+      "bytes": 47714
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/architecture/labels.mjs",
+      "bytes": 10645
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/architecture/grid.mjs",
+      "bytes": 2071
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/workflow/workflow-migration-geometry.mjs",
+      "bytes": 5299
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/workflow/README.md",
+      "bytes": 15260
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/workflow/render-workflow.mjs",
+      "bytes": 1207
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/workflow/workflow-compiler.mjs",
+      "bytes": 195655
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/sequence/render-sequence.mjs",
+      "bytes": 25503
+    },
+    {
+      "path": ".agents/skill-library/engineering/archify/renderers/sequence/README.md",
+      "bytes": 5911
+    },
+    {
+      "path": "optional-stack-skills/tools/archify/SKILL.md",
+      "bytes": 727
+    },
+    {
+      "path": ".agents/.cache/session-context 2.json",
+      "bytes": 135
+    },
+    {
+      "path": ".agents/.cache/session-context.json",
+      "bytes": 136
+    },
+    {
+      "path": ".agents/handoffs/2026-11-25-fast-lane-default.md",
+      "bytes": 7268
+    },
+    {
+      "path": ".specify/metrics/active 2.json",
+      "bytes": 177
+    },
+    {
+      "path": ".agents/scripts/sync-antigravity-global.sh",
+      "bytes": 6267
+    }
+  ],
+  "count": 114,
+  "bytes": 3560531
+}

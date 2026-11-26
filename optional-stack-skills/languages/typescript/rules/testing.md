@@ -7,7 +7,7 @@ paths:
 ---
 # TypeScript/JavaScript Testing
 
-> This file extends [common/testing.md](../common/testing.md) with TypeScript/JavaScript specific content.
+> These TypeScript/JavaScript rules are self-contained; no unshipped common rule pack is required.
 
 ## E2E Testing
 

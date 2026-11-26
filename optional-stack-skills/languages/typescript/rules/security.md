@@ -7,7 +7,7 @@ paths:
 ---
 # TypeScript/JavaScript Security
 
-> This file extends [common/security.md](../common/security.md) with TypeScript/JavaScript specific content.
+> These TypeScript/JavaScript rules are self-contained; no unshipped common rule pack is required.
 
 ## Secret Management
 

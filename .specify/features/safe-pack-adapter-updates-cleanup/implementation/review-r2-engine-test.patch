@@ -1,0 +1,31 @@
+--- a/.agents/scripts/test/test-update-integration.py
++++ b/.agents/scripts/test/test-update-integration.py
+@@ -13,6 +13,28 @@
+ 
+ 
+ class FullUpdateIntegration(unittest.TestCase):
++    def test_adapter_escape_rejected_before_any_engine_write(self):
++        with tempfile.TemporaryDirectory(prefix='uaw-engine-preflight-') as tmp:
++            source, target, outside = [Path(tmp) / name for name in ('source', 'target', 'outside')]
++            (source / '.agents/scripts').mkdir(parents=True)
++            target.mkdir()
++            outside.mkdir()
++            scripts = ['update-engine.py', 'update-state.py', 'derived-state.cjs',
++                       'build-skill-index.mjs', 'sync-harnesses.mjs', 'install-hooks.js']
++            for name in scripts:
++                shutil.copy2(ROOT / '.agents/scripts' / name, source / '.agents/scripts' / name)
++            (source / 'AGENTS.md').write_text('new source instructions')
++            (target / 'sentinel.txt').write_text('unchanged')
++            (target / '.cursor').symlink_to(outside, target_is_directory=True)
++            result = subprocess.run([sys.executable, str(source / '.agents/scripts/update-engine.py'),
++                                     '--sync', '--source', str(source), '--target', str(target), '--yes'],
++                                    capture_output=True, text=True, timeout=60)
++            self.assertNotEqual(0, result.returncode)
++            self.assertIn('Symlink path rejected', result.stdout + result.stderr)
++            self.assertEqual({'.cursor', 'sentinel.txt'}, {p.name for p in target.iterdir()})
++            self.assertEqual('unchanged', (target / 'sentinel.txt').read_text())
++            self.assertEqual([], list(outside.iterdir()))
++
+     def test_repeated_local_updates_preserve_custom_data_and_ship_only_framework(self):
+         with tempfile.TemporaryDirectory(prefix='uaw-full-update-') as tmp:
+             source, target = Path(tmp) / 'source', Path(tmp) / 'target'

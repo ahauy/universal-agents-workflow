@@ -14,181 +14,68 @@ triggers:
 
 # Command: Generate Product Backlog (/generate-backlog)
 
-## Purpose
+Render `docs/PRODUCT_BACKLOG_ROADMAP.md` (schema-version 1.2) from confirmed
+business evidence. Read the existing roadmap, relevant domain terms and user
+answers first; never invent stories, rules, defaults, edge behavior or scope.
+Template: [PRODUCT_BACKLOG_ROADMAP-template.md](../../../../.specify/templates/PRODUCT_BACKLOG_ROADMAP-template.md).
 
-Prevents **hallucinated scope**: AI must NEVER invent User Stories, Acceptance Criteria,
-or Won't-Have boundaries from a vague idea. This skill forces a structured grilling
-interview first, then renders the canonical `docs/PRODUCT_BACKLOG_ROADMAP.md` (schema-version 1.2)
-from confirmed answers only.
+## 1. Establish the business checkpoint
 
-See template: [PRODUCT_BACKLOG_ROADMAP-template.md](../../.specify/templates/PRODUCT_BACKLOG_ROADMAP-template.md)
+Restate the desired outcome and affected behavior. Reuse confirmed evidence and
+identify material unknowns as `ASM-BACKLOG-NN`. Establish:
 
----
+- Goals, users/actors and observable success expectations.
+- Current workflow and intended journey, rules/formulas and lifecycle transitions.
+- Edge cases, failures, data boundaries, dependencies and affected existing behavior.
+- In-scope and Won't-Have boundaries and acceptance expectations.
 
-## Protocol
+Batch only unanswered relevant questions, normally 2–3 per turn, with choices
+and recommendations when useful. There is no fixed total question count. Wait
+for answers to material business questions; repeat only to resolve conflicting
+or changed evidence. Platform, auth, monetization and stack questions apply only
+when relevant to this product. A generic platform interview is not a substitute
+for understanding the domain.
 
-### Step 0: Frame & Echo
+## 2. Confirm the decision summary
 
-Restate the user's raw idea in one sentence and confirm understanding before questioning:
+Present confirmed goals, actors, journeys/rules, edge behavior, scope and
+acceptance evidence, plus remaining ASM- items. Obtain user confirmation before
+writing the roadmap. A decision already explicitly approved needs no repeated
+approval. Keep material unanswered decisions unresolved; never turn "unknown"
+into a recommended default or committed story. Mark affected stories `[!]`.
 
-> 🎯 **Ý tưởng tôi hiểu:** `<restatement>`. Để tạo roadmap chính xác, tôi cần hỏi bạn
-> **6 câu** chia làm 2 lượt (3 câu/lượt). Sẵn sàng chưa?
+## 3. Render the roadmap
 
-### Step 1: Grilling Batch 1 — Product & Platform (3 câu)
+Use the template and confirmed decisions only:
 
-Ask exactly these 3 questions in one message. Do NOT ask more or fewer:
+1. Preserve schema-version and tech-stack frontmatter. Record confirmed stack
+   choices or explicitly unresolved/not applicable entries; no mandatory stack.
+2. Slice epics/stories by observable user outcome, using only applicable layers.
+   Do not force every story through UI + API + database.
+3. Give each story Slug, Effort, Context-budget, Priority, Depends-on, Blocks,
+   business-level AC and relevant implementation Tasks. Tasks are preliminary
+   scope notes and do not approve contracts or missing business decisions.
+4. Include MoSCoW, dependency chain, roadmap tree and RICE using evidenced inputs.
+   Label unavailable estimates; do not invent scores, metrics or commitments.
+5. Effort S/M/L/XL describes scope, not lane permission. Apply `AGENTS.md` T1–T7
+   on continuation, including small auth/PII stories and new business behavior.
+6. Keep deferred ideas `[~]`, blocked decisions `[!]`, and never mark new work
+   `[x]`. Scope sprints and release checks to confirmed priorities and risk;
+   include only applicable security, migration, routing and smoke checks.
+7. Record Won't-Have as confirmed boundaries or explicitly unresolved. Do not
+   derive exclusions from a vague idea. Preserve existing completed stories.
 
-```
-**Lượt 1/2 — Product & Platform:**
+## 4. Close
 
-Q1. 🖥️ **Platform**: Ứng dụng sẽ chạy trên nền tảng nào?
-    → Chỉ Web (Browser) / Mobile-first (PWA) / Native iOS+Android / Cross-platform (tất cả)
+Report the output path, committed/blocked/deferred scope and `/continue` as the
+next action. Roadmap confirmation does not approve future Full baselines or
+technical plans. This command creates no feature folder and implements no story.
 
-Q2. 🔐 **Authentication**: Người dùng cần đăng ký tài khoản không?
-    → Không (anonymous/guest) / Có (Email+Password) / Có + OAuth (Google/GitHub...) / Cả hai
+## Exit checklist
 
-Q3. 📦 **Content Source**: Nội dung/dữ liệu chính đến từ đâu?
-    → Người dùng tự nhập / Import file (CSV, JSON...) / Kéo từ API bên ngoài / AI tự sinh
-```
-
-**STOP. Wait for user answers.** Do NOT proceed to Batch 2 without answers.
-
-### Step 2: Grilling Batch 2 — Scale & Scope (3 câu)
-
-After receiving Batch 1 answers, ask Batch 2:
-
-```
-**Lượt 2/2 — Scale & Scope:**
-
-Q4. 👥 **Multi-user/Team**: Có nhiều người dùng chia sẻ dữ liệu chung không?
-    → Không (mỗi user là một "đảo" độc lập) / Có (shared workspace / team) / Chưa rõ
-
-Q5. 💰 **Monetization**: MVP có tính phí không?
-    → Không (free MVP, billing sau) / Có (cần billing/Stripe ngay) / Freemium (plan free + paid)
-
-Q6. 🚫 **Won't-Have**: Có tính năng nào bạn CHẮC CHẮN KHÔNG làm trong MVP?
-    → (VD: Không app mobile, không email notification, không export PDF, không admin panel...)
-    → Gõ "không biết" nếu chưa có ý kiến.
-```
-
-**STOP. Wait for user answers.** Do NOT generate the roadmap without answers.
-
-### Step 3: Tech Stack Elicitation (Optional, 1 câu)
-
-After Batch 2, ask one final optional question:
-
-```
-**Câu tùy chọn — Tech Stack:**
-
-Q7. 🛠️ **Tech Stack** (nếu bạn đã có ý định): Bạn muốn dùng ngôn ngữ/framework nào?
-    → Gõ "tùy AI quyết" nếu chưa có preference — tôi sẽ đề xuất stack phù hợp.
-```
-
-### Step 4: Confirm Before Generating
-
-Present a compact decision summary for user sign-off BEFORE writing any file:
-
-```markdown
-✅ **Xác nhận trước khi sinh file:**
-
-| Câu hỏi        | Câu trả lời đã xác nhận       |
-| :------------- | :---------------------------- |
-| Platform       | <answer>                      |
-| Auth           | <answer>                      |
-| Content Source | <answer>                      |
-| Multi-user     | <answer>                      |
-| Monetization   | <answer>                      |
-| Won't-Have     | <list>                        |
-| Tech Stack     | <answer or AI recommendation> |
-
-**Tôi sẽ sinh `docs/PRODUCT_BACKLOG_ROADMAP.md` với khoảng `<N>` User Stories chia thành `<M>` Sprint.**
-Bạn xác nhận chưa? (Gõ "ok" hoặc sửa lại điểm nào sai)
-```
-
-**STOP. Do NOT write the file until user confirms.**
-
-### Step 5: Generate `docs/PRODUCT_BACKLOG_ROADMAP.md`
-
-Only after explicit user confirmation ("ok", "đúng", "proceed", "generate", etc.):
-
-1. **Xác định Tech Stack** từ Q7:
-   - Nếu user chưa chọn: đề xuất stack mặc định phù hợp (TypeScript + NestJS + Next.js + PostgreSQL).
-   - Ghi vào YAML frontmatter.
-
-2. **Phân rã Epics theo Vertical Slicing**:
-   - Không chia theo Layer (Database, Backend, Frontend).
-   - Chia theo **User Journey End-to-End**: mỗi story đều chạm UI + API + DB.
-   - Xác định tối đa 3–4 Epics/Module từ domain của ý tưởng.
-   - Lập **Bảng Ma Trận MoSCoW & RICE Score** sơ bộ cho các Epic.
-
-3. **Gán Effort & Context-budget**:
-   - `S` (< 200 LOC, 1 entity, 1 screen) → `single-session`
-   - `M` (200–500 LOC, 1–2 entities, 2 screens) → `single-session`
-   - `L` (500–1000 LOC, 3+ entities, 3+ screens) → `multi-session`
-   - `XL` (cross-cutting, new infra) → `multi-session`
-
-4. **Gán Dependency chain**: Mỗi story phải khai báo `Depends-on` và `Blocks` chính xác.
-   Không có circular dependency. Auth thường là story đầu tiên, không có dependency.
-
-5. **Phân rã Tasks kỹ thuật sơ bộ (schema 1.2+)**:
-   - Dưới mỗi User Story, đính kèm mục `Tasks:` với 2 gạch đầu dòng:
-     - `Backend:` Endpoint, DTO, Service logic, DB schema.
-     - `Frontend:` UI Component, Page, Store/State, Form validation.
-
-6. **Sprint Priority & Go-Live Roadmap**:
-   - Vẽ **Sơ đồ tiến độ ASCII Roadmap Tree** bao quát các Sprint.
-   - Sprint 1 (MVP): `Must-Have (P0)` chỉ. Max 5 stories.
-   - Sprint 2: `Should-Have (P1)` trước, `Could-Have (P2)` sau. Max 5 stories.
-   - Future Horizons: Mọi ý tưởng chưa cam kết đánh dấu `[~]`.
-   - **Sprint Go-Live & Pre-Deploy Hardening**: Luôn đính kèm checklist bảo mật (Critical SEC-01 → SEC-03), DB migration, SPA routing, và smoke test.
-
-7. **Viết file** theo cấu trúc chuẩn từ template:
-   [PRODUCT_BACKLOG_ROADMAP-template.md](../../.specify/templates/PRODUCT_BACKLOG_ROADMAP-template.md)
-
-8. **Ghi ra** `docs/PRODUCT_BACKLOG_ROADMAP.md` (tạo thư mục `docs/` nếu chưa có).
-
-### Step 6: Activation Message
-
-Sau khi file được tạo, thông báo:
-
-```markdown
-✅ **File `docs/PRODUCT_BACKLOG_ROADMAP.md` đã sẵn sàng (Schema v1.2)!**
-
-📊 **Tổng quan:**
-
-- Sprint 1 (MVP): `<N>` User Stories — ước tính `<X>` sessions
-- Sprint 2: `<N>` User Stories
-- Future Horizons: `<N>` ý tưởng
-- Go-Live Sprint: Đã tích hợp sẵn Pre-Deploy Hardening & Security Checklist
-
-🚀 **Bước tiếp theo:**
-Gõ `/continue` (hoặc `/command-continue-project`) để AI tự động bắt đầu làm
-User Story đầu tiên (`<US-ID>: <Title>`) theo đúng pipeline BA → Spec → TDD → Docs.
-```
-
----
-
-## Boundaries & Non-Goals
-
-- ❌ **NEVER** generate the roadmap file before user confirms the decision summary (Step 4).
-- ❌ **NEVER** invent Acceptance Criteria not derived from user answers.
-- ❌ **NEVER** set `[x]` on any story — only `/command-continue-project` can do that.
-- ❌ **NEVER** create `.specify/features/<slug>/` folders — that is `/command-continue-project`'s job.
-- ❌ **NEVER** write tech-specific implementation details inside AC — keep them business-level (kỹ thuật để ở mục Tasks).
-- ✅ Always record any remaining ambiguity as `ASM-BACKLOG-NN` in a comment within the file.
-- ✅ Always use the YAML frontmatter tech-stack block even if user says "tùy AI" (fill with recommended stack).
-- ✅ Won't-Have section is MANDATORY. If user says "không biết", derive sensible defaults from the domain and list them for confirmation.
-
----
-
-## Exit Checklist
-
-- [ ] Grilling Batch 1 answered (Platform, Auth, Content Source)
-- [ ] Grilling Batch 2 answered (Multi-user, Monetization, Won't-Have)
-- [ ] Tech Stack confirmed (Q7) or AI recommendation stated
-- [ ] Decision summary presented and user confirmed
-- [ ] `docs/PRODUCT_BACKLOG_ROADMAP.md` written with valid YAML frontmatter (schema-version: "1.2")
-- [ ] Every story has: Slug, Effort, Context-budget, Priority, Depends-on, Blocks, AC, and Tasks (Backend/Frontend)
-- [ ] MoSCoW & RICE matrix, ASCII roadmap tree, and Pre-Deploy Hardening checklist included
-- [ ] Won't-Have section is non-empty
-- [ ] Activation message with `/continue` call-to-action displayed
+- [ ] Goals, actors, journeys/rules, edge cases, scope and AC traced to evidence
+- [ ] Only unanswered relevant questions asked; material gaps remain ASM-/[!]
+- [ ] Decision summary confirmed before writing
+- [ ] Valid schema, story fields, dependencies and applicable tasks/checks
+- [ ] No invented stories, defaults, stack or Won't-Have boundaries
+- [ ] Continuation applies the same BA checkpoint and T1–T7

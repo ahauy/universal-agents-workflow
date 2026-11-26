@@ -2,30 +2,36 @@
 invocation: model
 name: domain-modeling
 description: >
-  Use for Bounded Task or Full Feature work, after elicitation (and
-  gap-analysis, if run) to turn interview answers into concrete domain
+  Use for Full-lane work, after elicitation (and gap-analysis, if run) to turn
+  interview answers into concrete domain
   artifacts — RBAC matrix, entity state machines, business rules/algorithms
   with assigned IDs, ERD, non-functional requirements, inline `CONTEXT.md`
   shared language updates, and ADR proposals. Trigger this whenever a feature
   needs its access rules, entity lifecycle, core formulas, or data model made
   explicit and unambiguous before writing a spec.
 metadata:
-  stage: "BA Pipeline — Stage 4 of 8"
+  stage: "Full lane — baseline stage 2b of 6"
   phase: "Phase 1: Business Analysis"
   plane: "data / control bridge"
   model_recommendation: "Extended thinking preferred — complex state machine and business rule formalization"
-  prev_skill: "gap-analysis (Full Feature) or elicitation-interview (Bounded Task)"
+  prev_skill: "gap-analysis (when a delta exists) or elicitation-interview"
   next_skill: "risk-contradiction-scanner"
 ---
 
 # Domain Modeling
+
+Reuse confirmed answers, existing requirements and signed-off evidence within the
+current scope. Ask only material gaps; no fixed total interview count and no
+invented business defaults. Fast uses the checkpoint in AGENTS.md in one context;
+these Full-lane artifacts do not exempt any request from understanding behavior.
+
 
 Phase 1, Stage 4. Converts elicitation answers (and gap analysis, if
 present) into structured, checkable models. This is where ambiguity dies —
 if a rule can't be stated precisely enough to put in this document, it isn't
 ready for a spec yet; go back to `elicitation-interview` for that piece.
 
-For Bounded Task protocol, only build the sub-sections that are actually
+For a narrow Full-lane scope, only build the sub-sections that are actually
 relevant to the change (check `00-intake.md`); skip the rest rather than
 padding them out.
 
@@ -38,8 +44,7 @@ Explicitly state resource ownership boundaries (can users access or mutate resou
 ## 2. State machine & entity lifecycle
 
 For every entity whose lifecycle changes or is introduced, draw the finite
-state machine as a Mermaid `stateDiagram-v2` block or compile an interactive
-lifecycle map using [`archify`](.agents/skill-library/engineering/archify/SKILL.md) (`diagram_type: "lifecycle"`), including:
+state machine as a Mermaid `stateDiagram-v2` block, including:
 
 - Every named state and its exact transition triggers (user action,
   scheduled job, webhook, etc.)

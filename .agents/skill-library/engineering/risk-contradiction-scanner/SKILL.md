@@ -2,7 +2,7 @@
 invocation: model
 name: risk-contradiction-scanner
 description: >
-  Use for Lean Task or Full Feature work, after domain-modeling,
+  Use for Full-lane work, after domain-modeling,
   to scan the accumulated business rules and state machines for logic
   contradictions, unreachable states, and backward-compatibility breaks; to
   build a risk register (technical, operational, legal); to consolidate the
@@ -21,6 +21,12 @@ metadata:
 ---
 
 # Risk & Contradiction Scanner
+
+Reuse confirmed answers, existing requirements and signed-off evidence within the
+current scope. Ask only material gaps; no fixed total interview count and no
+invented business defaults. Fast uses the checkpoint in AGENTS.md in one context;
+these Full-lane artifacts do not exempt any request from understanding behavior.
+
 
 Phase 1, Stage 5 — the last stage before specification, and the pipeline's
 main quality gate. Nothing here should require new information from the
@@ -132,3 +138,6 @@ register. Append one line to `CHANGELOG.md`.
 - [ ] All `ASM-` entries consolidated here; constraints added
 - [ ] MoSCoW table complete, including an explicit Won't-Have list
 - [ ] `04-risk-register.md`, `baseline.md`, `CHANGELOG.md` updated
+
+Business consistency only: do not require spec.md, plan.md or tasks.md here.
+Use technical-consistency-review after those downstream artifacts exist.

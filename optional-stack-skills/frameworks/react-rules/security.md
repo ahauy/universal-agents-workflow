@@ -8,7 +8,7 @@ paths:
 ---
 # React Security
 
-> This file extends [typescript/security.md](../typescript/security.md) and [common/security.md](../common/security.md) with React specific content.
+> These React rules are self-contained. If TypeScript rules are also selected, resolve their catalog target through `.agents/catalog.json`; no common rule pack is required.
 
 ## XSS via `dangerouslySetInnerHTML`
 

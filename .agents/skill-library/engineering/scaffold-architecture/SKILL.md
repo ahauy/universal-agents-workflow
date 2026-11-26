@@ -4,8 +4,8 @@ name: scaffold-architecture
 description: >
   Generates the initial project/feature folder structure, seeds base files (shared types,
   error constants, DTO scaffolds), writes ADR-ARCH-001, and updates CONTEXT.md module map.
-  Runs AFTER speckit-plan (plan.md + data-model.md ready) and BEFORE implementation-orchestrator.
-  Always asks user to confirm the architecture blueprint — never silently defaults.
+  Runs in Full AFTER Gate 2 approval of plan.md + tasks.md and BEFORE implementation-orchestrator.
+  Reuses an approved architecture blueprint; asks only if no confirmed choice exists.
   Polyglot: TypeScript, Go, Python, Flutter/Dart, Swift, Rust.
 triggers:
   - "scaffold architecture"
@@ -24,7 +24,8 @@ Generate the **initial directory skeleton, seeded base files, and architectural 
 
 ## When to Activate
 
-- `plan.md`, `data-model.md`, and `contracts/` are all ready (speckit-plan complete).
+- Full-lane baseline is SIGNED-OFF and plan.md + tasks.md have Gate 2 approval.
+- Read data-model.md and contracts/ only when the approved plan needs them.
 - No consistent folder structure exists yet for this feature or new project.
 - You are onboarding a new language pack into an existing project.
 - The user asks to "set up the project structure" or "scaffold the feature".
@@ -40,7 +41,7 @@ Before scaffolding:
 1. **Read `CONTEXT.md`** — extract `tech-stack`, `module-map` (if any), and domain terminology.
 2. **Read `PRODUCT_BACKLOG_ROADMAP.md` YAML frontmatter** — confirm active tech stack (language, backend, frontend, infra).
 3. **Read `.specify/features/<slug>/plan.md`** — extract: modules list, layer responsibilities, key entities, API endpoints.
-4. **Read `.specify/features/<slug>/data-model.md`** — extract entities and relationships.
+4. **Read `.specify/features/<slug>/data-model.md` if applicable** — extract approved entities and relationships; its absence does not require inventing a data model.
 5. **Check `adr/`** — if `ADR-ARCH-001` already exists, skip Step 4 (ADR creation). If a different architecture pattern was previously decided, respect it.
 
 ---
@@ -51,7 +52,7 @@ Before scaffolding:
 flowchart TD
     A["📋 Pre-flight\nRead plan.md + data-model.md\n+ CONTEXT.md stack"] --> B
 
-    B["🛑 Step 1: Interactive Blueprint Gate\n(ALWAYS ask — no silent default)"] --> |"C4 Layered"| C1
+    B["🛑 Step 1: Interactive Blueprint Gate\n(reuse confirmed choice; otherwise ask)"] --> |"C4 Layered"| C1
     B --> |"Hexagonal / Ports & Adapters"| C2
     B --> |"Feature-Based Modules"| C3
 
@@ -67,7 +68,7 @@ flowchart TD
 
 ---
 
-## Step 1: Interactive Blueprint Gate (MANDATORY — Always Ask)
+## Step 1: Confirmed blueprint
 
 Present the user with the three blueprint options using the **Mandatory Recommendation & Trade-off Format**:
 
@@ -85,7 +86,7 @@ Present the user with the three blueprint options using the **Mandatory Recommen
 Reply with **A**, **B**, or **C** to confirm the blueprint.
 ```
 
-**Wait for user reply.** Do NOT proceed until confirmed. Do NOT assume a default.
+**Reuse an existing confirmed blueprint from the approved plan or ADR.** If none exists, present these options and wait for the user reply. Do not assume a default or repeat a settled question.
 
 ---
 
@@ -312,7 +313,7 @@ Run `implementation-orchestrator` (or dispatch `code-explorer` → `backend-deve
 
 ## Done When
 
-- [ ] Blueprint confirmed interactively by user
+- [ ] Blueprint confirmed by the user in this session or existing approved evidence
 - [ ] Folder structure generated (language-appropriate)
 - [ ] Base files seeded (shared types, domain errors)
 - [ ] ADR-ARCH-001 created or confirmed existing

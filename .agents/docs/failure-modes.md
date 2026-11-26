@@ -20,8 +20,9 @@
 | _"Starting a new repo or onboarding project from scratch"_         | Manual configuration burden     | `/command-skill-setup` (`engineering/command-skill-setup`)             |
 | _"Upgrading framework or syncing upstream changes safely"_         | Framework evolution & drift     | `/command-update` (`engineering/command-update`)                       |
 | _"Reviewing code or catching regressions before merge"_            | Unstructured code review        | `code-reviewer` agent (dual pass: Standards + Spec)                    |
-| _"Need interactive architecture maps, lifecycle FSMs, share cards"_| Visual architecture clarity     | `archify` (`engineering/archify`)                                      |
+| _"Need architecture or lifecycle diagrams"_ | Visual architecture clarity | Mermaid with `technical-documentation` |
 | _"AI is adding flatpickr/moment/wrapper class for a date input"_   | Over-engineering / bloat        | `ponytail` (`engineering/ponytail`) — The Ladder                       |
 | _"Agent generated 200+ lines for a task stdlib covers in 5"_       | Unnecessary complexity          | `ponytail-review` (`engineering/ponytail-review`)                      |
 | _"Want to audit the whole codebase for bloat and deletable code"_  | Structural over-engineering     | `ponytail-audit` (`engineering/ponytail-audit`)                        |
 | _"Need to track deliberate shortcuts before they silently rot"_    | Unmanaged technical debt        | `ponytail-debt` (`engineering/ponytail-debt`)                          |
+| _"Every task feels slow; too much ceremony before code"_            | Wrong lane / no escalation rule | `intake-classifier` (`engineering/intake-classifier`) — Fast by default |

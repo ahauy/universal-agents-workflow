@@ -2,22 +2,28 @@
 invocation: user
 name: elicitation-interview
 description: >
-  Use after intake-classifier has classified a request as a Bounded Task or Full Feature.
+  Use after a request escalates to the Full lane (see AGENTS.md §2).
   Orchestrates the structured, batched elicitation interview (BABOK/IREB style),
   delegating the deep questioning mechanics to the `grilling` primitive (`.agents/skill-library/productivity/grilling`).
   Surfaces business value, personas, and the 6 domain pillars (RBAC, state machine,
   business rules, workflows/edge cases, data/privacy, UX/NFR). Never assume a business rule,
   default value, or edge case silently — ask.
 metadata:
-  stage: "BA Pipeline — Stage 2 of 8"
+  stage: "Full lane — baseline stage 2a of 6"
   phase: "Phase 1: Business Analysis"
   plane: "control (delegates to productivity/grilling)"
   model_recommendation: "Extended thinking preferred — needs multi-turn interview and nuanced judgment"
   prev_skill: "intake-classifier"
-  next_skill: "gap-analysis (Full Feature) or domain-modeling (Bounded Task)"
+  next_skill: "gap-analysis (when a delta exists) or domain-modeling"
 ---
 
 # Elicitation Interview
+
+Reuse confirmed answers, existing requirements and signed-off evidence within the
+current scope. Ask only material gaps; no fixed total interview count and no
+invented business defaults. Fast uses the checkpoint in AGENTS.md in one context;
+these Full-lane artifacts do not exempt any request from understanding behavior.
+
 
 Phase 1, Stage 2. This is the main information-gathering skill in the
 pipeline. It reads `00-intake.md` for the protocol depth, then interviews the
@@ -28,12 +34,12 @@ asking first.
 
 ## 1. Read the protocol depth
 
-Open `00-intake.md`. If `Protocol selected` is:
+Open `00-intake.md`. Scale the interview to the recorded scope:
 
-- **Bounded Task** → run only §2 (Business Value, abbreviated) and a targeted
-  2–3 question pass on whichever pillars are actually touched. Skip pillars
-  that are clearly irrelevant (e.g. no RBAC questions for a copy change).
-- **Full Feature** → run §2 in full, then all 6 pillars in §3.
+- **Narrow Full-lane scope** → run only §2 (Business Value, abbreviated) and a
+  targeted question pass on the pillars actually touched. Skip pillars that are
+  clearly irrelevant (e.g. no RBAC questions for a copy change).
+- **Broad Full-lane scope** → run §2 in full, then the relevant pillars in §3.
 
 ## 2. Stage 1 — Business value (always, but depth varies)
 
@@ -44,7 +50,7 @@ Batch these into one turn (2–3 questions at a time, never more):
 2. **Target personas & users** — End users, paying customers, admins, or internal operators — who is this for?
 3. **Success metrics** — a primary metric (e.g. "+15% retention", "P95 latency < 150ms") and operational constraints.
 
-## 3. Stage 3 — The 6-Pillar interview (Full Feature only)
+## 3. Stage 3 — The 6-Pillar interview (Full lane, when relevant)
 
 > [!TIP]
 > **Delegation to `grilling` Primitive:**
@@ -103,15 +109,15 @@ don't wait until the interview is "done." Use this structure:
 
 ## 5. Hand off
 
-When all required pillars for this protocol have answers with no blocking
-open questions, tell the user you're proceeding to `gap-analysis` (Full
-Feature) or directly to `domain-modeling` (Bounded Task, since Stage 3/gap
-analysis is skipped). Append one line to `CHANGELOG.md`.
+When all required pillars for this scope have answers with no blocking
+open questions, tell the user you're proceeding to `gap-analysis` when a real
+AS-IS/TO-BE delta exists, otherwise directly to `domain-modeling`. Append one line
+to `CHANGELOG.md`.
 
 ## Exit checklist
 
 - [ ] Stage 1 business value answered (problem, personas, success metric)
-- [ ] For Full Feature: all 6 pillars covered with no silent defaults
+- [ ] For a broad scope: all 6 pillars covered with no silent defaults
 - [ ] Every assumption the user confirmed has an `ASM-` entry, not just a note in conversation
 - [ ] Any new domain terminology synced to `CONTEXT.md`
 - [ ] No open question remains that blocks the next stage

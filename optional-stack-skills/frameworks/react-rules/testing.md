@@ -9,7 +9,7 @@ paths:
 ---
 # React Testing
 
-> This file extends [typescript/testing.md](../typescript/testing.md) and [common/testing.md](../common/testing.md) with React specific content.
+> These React rules are self-contained. If TypeScript rules are also selected, resolve their catalog target through `.agents/catalog.json`; no common rule pack is required.
 
 ## Library Choice
 
@@ -183,7 +183,7 @@ Component test with RTL + JSDOM cannot:
 - Test browser-native animation, CSS transitions
 - Test cross-frame interactions (iframes, popups)
 
-For those, use Playwright Component Testing or end-to-end Playwright/Cypress runs. See [e2e-testing skill](../../skills/e2e-testing/SKILL.md).
+For those, use Playwright Component Testing or end-to-end Playwright/Cypress runs. For the `e2e-testing` skill, resolve its cold path through the project-root `.agents/SKILLS.md` catalog and read it on demand.
 
 ## Coverage Targets
 

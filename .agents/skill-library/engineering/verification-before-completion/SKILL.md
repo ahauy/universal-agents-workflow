@@ -2,224 +2,92 @@
 invocation: model
 name: verification-before-completion
 description: >
-  Use at the end of Phase 5 (Implementation) and Phase 6 (Quality Review)
-  to verify that a feature is fully complete and safe to close.
-  Enforces two hard documentation gates: spec docs must exist BEFORE tests
-  run, and technical docs plus user guide must be completed AFTER tests pass.
-  Runs all automated test suites, checks zero Critical bugs, validates
-  schema changes and rollback readiness. Trigger this whenever the user says
-  "we are done", "mark this complete", "ready to merge", or "close this
-  story". Do not mark a user story as [x] in PRODUCT_BACKLOG_ROADMAP.md
-  without a passing run of this skill.
+  Verify completion against the selected Fast or Full lane, acceptance criteria,
+  relevant automated checks and zero Critical findings. Full additionally checks
+  signed requirements, approved plans, traceability and feature documentation.
+  Use before marking a story done or reporting ready to merge.
 metadata:
-  stage: "Phase 6 — Verification Gate"
-  phase: "Phase 6: Quality Verification & Delivery"
+  stage: "Verification Gate"
   model_recommendation: "Standard thinking sufficient — gate verification and report"
-  prev_skill: "ui-design-review / requesting-code-review"
-  next_skill: "technical-documentation (tech-doc-writer)"
 ---
 
 # Verification Before Completion
 
-This skill enforces a three-part rule grounded in TDD and SDD:
+Read the selected lane and confirmed acceptance expectations from the current
+checkpoint or feature context pack. Reuse evidence already established; do not
+create Full artifacts for bounded Fast work. Escalate on any AGENTS.md T1–T7
+trigger. A failing check blocks completion; it does not prohibit diagnostic tests.
 
-1. **Documentation before tests** — spec docs drive what tests exist.
-2. **Tests before code is declared done** — automated suites must pass.
-3. **Documentation after tests** — results and usage must be recorded.
+## Fast lane
 
-No step can be skipped. Each is a hard gate.
+1. Confirm the **chat checkpoint** states the outcome, scope, existing evidence,
+   material unknowns and observable acceptance expectations. Resolve material
+   business decisions before implementation; an unresolved one triggers Full.
+2. Verify the change against those expectations with the project's relevant
+   tests/checks. Use the existing manifest/config and actual runner. Record the
+   commands, exit status and meaningful results; report skips and limitations.
+3. Perform a **self-check** for security, spec fidelity and reliability. Zero
+   unresolved Critical findings; resolve other blocking findings before closing.
+4. Fast requires **no feature folder**, signed baseline, traceability matrix,
+   feature README or separate reviewer context. Write `test-plan.md` only for
+   more than three test cases. No subagents in Fast.
+5. Report the outcome and evidence in chat. Mark the requested roadmap story
+   complete only after its acceptance criteria and applicable checks pass.
 
----
+## Full lane
 
-## Gate 0 (PRE-TEST): Spec Documentation Must Exist
+Use the existing `.specify/features/<slug>/` context pack and scoped sections;
+never rewrite signed artifacts in place or repeat an answered interview.
 
-Before running any test suite, confirm the following documents exist and
-are complete for `.specify/features/<slug>/`:
+### 1. Confirm implementation gates
 
-- [ ] `requirements.md` §4 — acceptance criteria source of truth
-- [ ] `test-plan.md` — maps every `US-<SLUG>-###` scenario to a `TC-###`
-- [ ] `traceability-matrix.md` — `REQ-` → `US-` chain is recorded
-- [ ] `baseline.md` is marked `SIGNED-OFF` (not DRAFT)
+- `baseline.md` reads `SIGNED-OFF v1.0` (or the signed superseding version).
+- `requirements.md` §4 provides the confirmed acceptance criteria.
+- `plan.md` and `tasks.md` have user approval.
+- `test-plan.md` covers applicable scenarios and `traceability-matrix.md` records
+  the requirement → story → test chain as required by the approved plan.
 
-**Gate:** If any of the above is missing or `baseline.md` is still DRAFT,
-**STOP immediately**. Tests run without spec documentation cannot be
-verified against agreed requirements — the feature is not ready to verify.
-Return: "BLOCKED — spec documentation incomplete. Complete Gate 0 first."
+Missing approvals block implementation/delivery. Tests may still be run to
+investigate failures; do not claim those tests establish missing sign-off.
 
----
+### 2. Run applicable automated checks
 
-## 1. Run Automated Test Suites
+Derive commands from this project's manifests, runner configuration and approved
+plan, rather than assuming a frontend/backend monorepo or Prisma. Run required
+unit, integration and end-to-end checks for affected behavior. Record pass/fail
+counts and commands; a nonzero exit or required unrun check blocks completion.
+Never claim an unexecuted check passed. Run broader checks when changes or failures
+justify them.
 
-Execute all test layers in order. Record pass / fail counts and failure
-messages.
+### 3. Review fidelity and reliability
 
-```bash
-# Unit + Component tests (frontend)
-pnpm --filter web test --run
+- Complete Full dual-pass review: standards/security and spec fidelity; the lean
+  pass applies to diffs over 300 lines. Include UI review when applicable.
+- Zero unresolved Critical findings. Fix High findings or record explicit owner
+  acceptance of each risk; do not silently downgrade them.
+- Confirm each applicable acceptance scenario maps to an actual test/check;
+  explain skips and uncovered cases. Spot-check requirement → story → test links.
+- If schema/migrations changed, verify the actual stack's migration on a clean
+  database and document rollback/recovery. Do not invent Prisma commands.
+- Document rollback/feature flags only where the actual change needs them;
+  report non-applicable checks as N/A.
 
-# Unit + Integration tests (backend)
-pnpm --filter api test
+### 4. Complete Full documentation
 
-# End-to-end tests
-npx playwright test
-```
+- `docs/features/<slug>/README.md` exists and is indexed in
+  `docs/features/README.md` (Gate 4).
+- Update affected architecture/algorithm documents only when those behaviors
+  changed; preserve accepted ADRs and signed requirements.
+- For UI, reuse existing authorization and confirmed screen evidence. If a guide
+  is required by the approved scope, invoke `user-guide-with-screenshots` through
+  `.agents/SKILLS.md` with real screenshots. Ask only for a still-missing material
+  decision or required authorization; do not repeat an answered confirmation.
+- Append completion evidence to the feature `CHANGELOG.md`; update the requested
+  roadmap story only after all applicable gates pass.
 
-> If the project uses a different runner, adapt and note the deviation
-> in the verification report.
+## Completion report (both lanes)
 
-**Gate:** All suites must pass (exit code 0). On failure, stop and return a
-failure report — do not proceed to the next step.
-
----
-
-## 2. Check Bug Severity Gate
-
-Review open bugs from code review or QA. Classify each:
-
-| Severity     | Definition                                                     | Gate                  |
-| ------------ | -------------------------------------------------------------- | --------------------- |
-| **Critical** | System crash, data loss, security hole, broken core study flow | **BLOCKS completion** |
-| **High**     | Major malfunction without workaround                           | Must fix before done  |
-| **Medium**   | Minor edge-case glitch, workaround available                   | Log, may defer        |
-| **Low**      | Cosmetic / polish                                              | Log, may defer        |
-
-**Gate:** Zero `Critical` bugs. Zero unresolved `High` bugs unless the user
-explicitly accepts each as a logged risk in `CHANGELOG.md`.
-
----
-
-## 3. Validate Database Schema Changes
-
-If the feature touched `prisma/schema.prisma` or added migration files:
-
-- [ ] Migration file exists in `prisma/migrations/`
-- [ ] Migration has been tested against a clean database
-- [ ] Migration is reversible OR manual rollback is documented
-- [ ] Prisma client regenerated (`pnpm --filter api prisma generate`)
-- [ ] Seed data updated in `prisma/seed.ts` if applicable
-
----
-
-## 4. Confirm test-plan.md Coverage
-
-Open `.specify/features/<slug>/test-plan.md` and verify:
-
-- [ ] Every `US-<SLUG>-###` happy-path scenario has a `TC-###`
-- [ ] Every edge-case scenario in `requirements.md` §4 has a `TC-###`
-- [ ] Every `TC-###` maps to an actual test file and test name
-- [ ] No `TC-###` is "skipped" or "TODO" without an accepted-risk note
-
----
-
-## 5. Traceability Spot-Check
-
-Open `traceability-matrix.md` and verify the full chain:
-
-```
-Business Goal → REQ-<SLUG>-### → US-<SLUG>-### → TC-### (test file)
-```
-
-Flag any `US-` without a `TC-`, or any `REQ-` without a traceable `US-`.
-
----
-
-## 6. Rollback Readiness
-
-Confirm documented (in `handover-brief.md` or `CHANGELOG.md`):
-
-- [ ] Rollback plan for schema changes
-- [ ] Feature flag or toggle if the rollout is risky
-- [ ] No hard-coded environment-specific values committed
-
----
-
-## 7. Produce Verification Report
-
-Write a concise summary inline in the response (not a new file):
-
-```
-## Verification Report — <feature-slug>
-
-Date: <date>
-Branch: <branch-name>
-
-Gate 0 (Pre-test docs): PASS / BLOCKED
-Test Results
-  - Frontend unit/component: X passed, 0 failed
-  - Backend unit/integration: X passed, 0 failed
-  - E2E: X passed, 0 failed
-Bug Gate: Critical 0 / High 0 (or N accepted risks in CHANGELOG.md)
-Schema Changes: Applied / N-A
-test-plan.md Coverage: All TC covered / Missing: TC-XXX
-Traceability: Chain intact / Gaps: ...
-Rollback: Documented / N-A
-
-Verdict: READY FOR POST-TEST DOCS  |  BLOCKED — <reason>
-```
-
----
-
-## Gate 8 (POST-TEST): Documentation Must Be Completed After Tests Pass
-
-**This gate is MANDATORY. A story is NOT done until both documents below exist.**
-
-### 8a. Technical Documentation (always required)
-
-Delegate to `technical-documentation` skill (tech-doc-writer subagent):
-
-- [ ] `docs/features/<slug>/README.md` created using the template at
-      `docs/features/README.md`
-- [ ] Feature entry added to the index table in `docs/features/README.md`
-- [ ] If a new entity, service, or API contract was added: relevant file
-      in `docs/architecture/` updated
-- [ ] If an algorithm changed (SuperMemo-2, Streak, XP): `docs/algorithms/`
-      updated
-
-**Gate:** `docs/features/<slug>/README.md` must exist before story is [x].
-
-### 8b. User Guide (required if the feature has any UI — user confirmation required first)
-
-This step requires an explicit confirmation from the user before writing
-any documentation. The reason: UI may still receive feedback or minor
-adjustments after review, and writing the guide before the UI is final
-creates rework.
-
-**Protocol:**
-
-1. **Present the UI for review.** Show the user the implemented screens
-   (live app, screenshots, or recording). Do NOT start writing the guide yet.
-2. **Ask explicitly:** _"The UI is ready for the user guide. Please confirm
-   the screens are final and I should proceed to write `docs/user-guides/<slug>.md`."
-3. **Wait for user confirmation.** Do not proceed until the user says yes.
-4. **Only after confirmation**, invoke `user-guide-with-screenshots` skill:
-   - [ ] `docs/user-guides/<slug>.md` created or updated with real screenshots
-   - [ ] Language is non-technical and action-oriented (end-user readable)
-   - [ ] Every changed screen or flow is covered
-
-**Gate:** If the feature touches any UI screen, `docs/user-guides/<slug>.md`
-must exist before story is [x] — but it is written only after user confirms
-the UI is final. The story stays open until both confirmation and guide exist.
-
----
-
-## On ALL GATES PASSED
-
-1. Append a completion entry to `.specify/features/<slug>/CHANGELOG.md`
-2. Mark the User Story `[x]` in `docs/PRODUCT_BACKLOG_ROADMAP.md`
-
----
-
-## Exit Checklist
-
-- [ ] **Gate 0**: `requirements.md` §4, `test-plan.md`, `traceability-matrix.md` exist; `baseline.md` is SIGNED-OFF
-- [ ] All automated test suites pass (exit 0)
-- [ ] Zero Critical bugs, zero unaccepted High bugs
-- [ ] Schema change validated (or marked N/A)
-- [ ] test-plan.md coverage confirmed — no uncovered TC-###
-- [ ] Traceability chain intact
-- [ ] Rollback plan documented
-- [ ] Verification report produced
-- [ ] **Gate 8a**: `docs/features/<slug>/README.md` created/updated
-- [ ] **Gate 8b**: User confirmed UI is final → `docs/user-guides/<slug>.md` created/updated (if UI)
-- [ ] CHANGELOG.md updated with completion entry
-- [ ] PRODUCT_BACKLOG_ROADMAP.md story marked [x]
+Report the selected lane, acceptance outcome, executed checks/results, review
+findings and material limitations. Full also reports approval, traceability and
+documentation gates. Verdict: COMPLETE or INCOMPLETE with the concrete reason.
+Do not commit, push or merge without explicit user authorization.
